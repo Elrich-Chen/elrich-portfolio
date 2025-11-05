@@ -1,0 +1,48 @@
+---
+const { text = 'Elrich Chen' } = Astro.props;
+---
+
+<div class="relative inline-block">
+  <span class="signature-text signature-mask block">
+    {text}
+  </span>
+</div>
+
+<style>
+  .signature-text {
+    font-family: 'Reenie Beanie', cursive;
+    font-size: 2.5rem;
+    line-height: 1;
+    font-weight: 400;
+  }
+  .signature-mask {
+    --d: 1600ms;
+    -webkit-mask: linear-gradient(90deg, #000 0 0) text; /* Safari fallback */
+    mask: linear-gradient(90deg, #000 0 0) text;
+    display: inline-block;
+    overflow: hidden;
+    background: none;
+    animation: reveal var(--d) ease forwards;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .signature-mask { animation: none; }
+  }
+  @keyframes reveal {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+  }
+</style>
+
+<script>
+  const KEY = 'seenSignature';
+  try {
+    if (localStorage.getItem(KEY)) {
+      const el = document.currentScript?.previousElementSibling?.previousElementSibling as HTMLElement | null;
+      if (el) el.style.animation = 'none';
+    } else {
+      localStorage.setItem(KEY, '1');
+    }
+  } catch {}
+</script>
+
+

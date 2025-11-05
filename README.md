@@ -1,4 +1,4 @@
-# Astro Starter Kit: Minimal
+# elrichchen.com – Developer Portfolio (Astro)
 
 ```sh
 npm create astro@latest -- --template minimal
@@ -38,6 +38,14 @@ All commands are run from the root of the project, from a terminal:
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
 
-## 👀 Want to learn more?
+## ✍️ Editing content
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- Bio: `src/content/bio/bio.md`
+- Experiences: `src/content/experiences/*.md`
+  - Fields: `role`, `company`, `url` (optional), `logo` (optional path in `/public`), `start`, `end` (optional), `bullets` (3–5 concise metrics)
+- Projects: `src/content/projects/*.md`
+  - Fields: `name`, `href` (optional), `logo` (optional), `year` (optional), `tags`, body text
+- Hobbies: `src/content/hobbies/*.md` (title, date, tags, summary, body)
+- Home highlights: `src/content/highlights/home.md` with two arrays: `what_makes_me_different`, `building`
+
+Logos: place small PNG/SVGs in `public/logos/` and reference via `/logos/name.png`.

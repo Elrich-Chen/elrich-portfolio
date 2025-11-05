@@ -1,0 +1,185 @@
+---
+// Pixel Trail Component - Vanilla JS/Canvas implementation with proper pixelated grid effect
+---
+
+<!-- SVG Filter for Gooey Effect -->
+<svg class="pixel-trail-filter">
+  <defs>
+    <filter id="pixel-goo-filter" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur" />
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8" result="goo" />
+      <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+    </filter>
+  </defs>
+</svg>
+
+<!-- Canvas for Pixel Trail -->
+<canvas id="pixel-trail-canvas" class="pixel-trail-canvas"></canvas>
+
+<style>
+  .pixel-trail-filter {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .pixel-trail-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    filter: url(#pixel-goo-filter);
+  }
+</style>
+
+<script is:inline>
+  (function() {
+    function initPixelTrail() {
+      // Check for reduced motion preferences
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const isTouch = window.matchMedia('(hover: none)').matches;
+      
+      if (reducedMotion || isTouch) {
+        return;
+      }
+
+      // Configuration
+      const config = {
+        gridSize: 50, // Number of pixels across the shorter dimension
+        trailFadeTime: 250, // milliseconds
+        pixelColor: '#ffffff', // White pixels that will be visible on dark background
+        minPixelSize: 8, // Minimum pixel size in pixels
+        maxPixelSize: 20, // Maximum pixel size in pixels
+        interpolationSteps: 5 // Points to add between mouse positions
+      };
+
+      // Initialize canvas
+      const canvas = document.getElementById('pixel-trail-canvas');
+      if (!canvas) {
+        console.warn('Pixel Trail: Canvas not found');
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d', { alpha: true });
+      if (!ctx) {
+        console.warn('Pixel Trail: Could not get canvas context');
+        return;
+      }
+
+      console.log('✨ Pixel Trail initialized');
+
+      // Set canvas size
+      let pixelSize;
+      const resizeCanvas = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Calculate pixel size based on screen dimensions
+        const minDim = Math.min(window.innerWidth, window.innerHeight);
+        pixelSize = Math.max(config.minPixelSize, Math.min(config.maxPixelSize, minDim / config.gridSize));
+      };
+
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      // Trail data structure - store grid cells that are active
+      const trailMap = new Map();
+      let mouseX = -100;
+      let mouseY = -100;
+      let lastMouseX = mouseX;
+      let lastMouseY = mouseY;
+
+      // Mouse tracking with interpolation
+      const handleMouseMove = (e) => {
+        lastMouseX = mouseX;
+        lastMouseY = mouseY;
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+
+        // Interpolate between last and current position for smooth trail
+        const dx = mouseX - lastMouseX;
+        const dy = mouseY - lastMouseY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const steps = Math.max(1, Math.ceil(distance / config.interpolationSteps));
+
+        for (let i = 0; i <= steps; i++) {
+          const t = i / steps;
+          const x = lastMouseX + dx * t;
+          const y = lastMouseY + dy * t;
+          
+          // Convert to grid coordinates
+          const gridX = Math.floor(x / pixelSize);
+          const gridY = Math.floor(y / pixelSize);
+          const key = `${gridX},${gridY}`;
+          
+          // Add to trail map with timestamp
+          trailMap.set(key, Date.now());
+        }
+      };
+
+      document.addEventListener('mousemove', handleMouseMove);
+
+      // Render function
+      const render = () => {
+        const now = Date.now();
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Render each active grid cell as a square
+        trailMap.forEach((timestamp, key) => {
+          const age = now - timestamp;
+          
+          // Remove old trail points
+          if (age > config.trailFadeTime) {
+            trailMap.delete(key);
+            return;
+          }
+          
+          const [gridX, gridY] = key.split(',').map(Number);
+          const x = gridX * pixelSize;
+          const y = gridY * pixelSize;
+          
+          // Calculate opacity based on age (fade out)
+          const opacity = 1 - (age / config.trailFadeTime);
+          
+          // Draw pixel as a rounded square for better gooey effect
+          ctx.globalAlpha = opacity;
+          ctx.fillStyle = config.pixelColor;
+          
+          // Draw circle instead of square for better blending with goo filter
+          ctx.beginPath();
+          ctx.arc(x + pixelSize / 2, y + pixelSize / 2, pixelSize / 2, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(render);
+      };
+
+      // Start animation loop
+      render();
+
+      // Cleanup
+      const cleanup = () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('resize', resizeCanvas);
+      };
+
+      window.addEventListener('beforeunload', cleanup);
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPixelTrail);
+    } else {
+      initPixelTrail();
+    }
+  })();
+</script>
+

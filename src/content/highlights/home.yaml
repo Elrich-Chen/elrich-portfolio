@@ -1,0 +1,32 @@
+what_makes_me_different:
+
+  - point: "Software Developer at Ontario Legal Tech | Personal Injury Law Startup"
+    details:
+      - "Enabled lawyers to process cases efficiently using TypeScript, Next.js to engineer legal software tools"
+
+  - point: "Frontend Developer at [LOGO:compsa] Queen's COMPSA | Queen's Computing Student Association"
+    details:
+      - "Improved access to governance resources for 2000+ members using Figma and TailwindCSS to build a governance portal with CMS"
+
+  - point: "Secured 3rd place by implementing data analysis with Pandas/NumPy for NBA teams through [LOGO:qsao] Queen's Sports Analytics Organization"
+    details:
+      - "Developed business case study among 20+ teams through a Miami Heat case pitch competition"
+
+  - "Stanford Code in Place [LOGO:stanford] Section Leader - mentored 10+ learners globally in Python fundamentals"
+
+  - point: "Residence Counsellor at [LOGO:UofT2] University of Toronto Engineering Outreach"
+    details:
+      - "Enhanced camp experience by mentoring 200+ students through daily programming and on-call support"
+
+  - point: "Led a group for Hakka-Chinese culture preservation in India for 200+ people"
+    details:
+      - "Hakka is a dying culture and we chose to celebrate it by learning Chinese Lion Dancing"
+
+building:
+  - "AI automations for [LOGO:zivko] DoneMaker using Make, Notion and Gmail to streamline client conversion process"
+
+  - "Jupyter docs tool: in-place AI-assisted documentation, reducing context-switching for data scientists"
+
+  - "[LOGO:techplusuw] Tech Plus UW Logistics Organizer - building internal tools and application processing systems"
+
+  - "[LOGO:fintech] UW FinTech Outreach Associate - creating marketing campaigns and coordinating event outreach"

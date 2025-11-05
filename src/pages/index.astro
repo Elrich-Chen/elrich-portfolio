@@ -1,16 +1,297 @@
 ---
+import Base from '../layouts/Base.astro';
+import Signature from '../components/Signature.astro';
+import HeroLoom from '../components/HeroLoom.astro';
+import { getEntry } from 'astro:content';
+const highlights = await getEntry('highlights', 'home');
 
+// Company data with URLs and logos
+const companyData: Record<string, { url: string; logo?: string }> = {
+  'Ontario Legal Tech': { url: 'https://ontariomandatorymediation.my.canva.site/ontario-court-helper'},
+  "Queen's COMPSA": { url: 'https://compsa.queensu.ca', logo: 'compsa' },
+  'DoneMaker': { url: 'https://donemaker.com', logo: 'zivko' },
+  'UWaterloo': { url: 'https://uwaterloo.ca', logo: 'uwaterloo' },
+  'University of Toronto Engineering Outreach': { url: 'https://outreach.engineering.utoronto.ca', logo: 'uoft2' },
+  'TypeScript': { url: 'https://www.typescriptlang.org' },
+  'Next.js': { url: 'https://nextjs.org' },
+  'React': { url: 'https://react.dev' },
+  'Flask': { url: 'https://flask.palletsprojects.com' },
+  'TailwindCSS': { url: 'https://tailwindcss.com' },
+  'Figma': { url: 'https://www.figma.com' },
+  'Python': { url: 'https://www.python.org' },
+  'PyTorch': { url: 'https://pytorch.org' },
+  'NumPy': { url: 'https://numpy.org' },
+  'Pandas': { url: 'https://pandas.pydata.org' },
+  'Jupyter docs tool': { url: 'https://github.com/Elrich-Chen/jupyterlab_docs_helper' },
+  'MongoDB': { url: 'https://www.mongodb.com' },
+  'JavaScript': { url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript' },
+  'Stanford Code In Place' : { url: 'https://codeinplace.stanford.edu', logo: 'stanford'},
+  "Queen's Sports Analytics Organization" : { url: 'https://www.instagram.com/p/DH4J-30SmkA/?img_index=6', logo: 'qsao'},
+  'Chinese Lion Dancing' : {url : 'https://www.chinadailyhk.com/hk/article/603804'},
+  'Tech Plus UW' : {url : 'https://www.techplusuw.com', logo: 'techplusuw'},
+  'UW FinTech' : {url : 'https://www.instagram.com/uwfintech/?hl=en', logo: 'fintech'}
+};
+
+// Function to bold+italicize stats and make companies clickable with bold+italic
+function formatStatsAndCompanies(text: string) {
+  // Match numbers with optional +, K, M, %, and common stat patterns, plus ordinals (1st, 2nd, 3rd, etc.)
+  const statPattern = /(\d+(?:\.\d+)?(?:st|nd|rd|th|[KMB%+]\+?))/gi;
+
+  // Bold and italicize stats
+  let result = text.replace(statPattern, '<strong><em>$1</em></strong>');
+
+  // Support custom project links: [LINK:url]text[/LINK] - MUST come before "View project →" replacement
+  result = result.replace(/\[LINK:([^\]]+)\](.+?)\[\/LINK\]/gi, '<a href="$1" class="view-project-link">$2</a>');
+
+  // Process company names
+  Object.keys(companyData).forEach(company => {
+    const escapedCompany = company.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const companyRegex = new RegExp(`(${escapedCompany})`, 'gi');
+    const data = companyData[company];
+    result = result.replace(companyRegex, `<a href="${data.url}" target="_blank" rel="noopener" class="company-link"><strong><em>$1</em></strong></a>`);
+  });
+
+  // Convert "View project →" into a link to /projects (fallback) - comes LAST
+  result = result.replace(/View project\s*→/gi, '<a href="/projects" class="view-project-link">View project →</a>');
+
+  return result;
+}
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Base title="Elrich Chen" description="CS @ UWaterloo | AI automations for DoneMaker | Aspiring Backend Engineer" showSignature={true} showContactForm={true}>
+
+  <!-- Video signpost - sticky on right side for desktop -->
+  <a href="#intro-video" class="video-signpost hidden lg:block">
+    <div class="signpost-content">
+      <span class="signpost-text">Watch me!</span>
+      <svg class="arrow-bounce" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <polyline points="19 12 12 19 5 12"></polyline>
+      </svg>
+    </div>
+  </a>
+
+  {highlights?.data?.what_makes_me_different?.length > 0 && (
+    <section class="mb-12 mt-8">
+      <h2 class="section-header mt-2">◆ How I've Grown Through My Work:</h2>
+      <ul class="highlight-list">
+        {highlights.data.what_makes_me_different.map((item: any) => {
+          // Support both string (old format) and object (new format with sub-points)
+          let mainPoint: string;
+          let subPoints: string[] = [];
+          
+          if (typeof item === 'string') {
+            mainPoint = item;
+          } else {
+            mainPoint = item.point || '';
+            subPoints = item.details || [];
+          }
+          
+          // Extract company names and add logo placeholders
+          const parts = mainPoint.split(/\[LOGO:([^\]]+)\]/g);
+          
+          return (
+            <li class="highlight-item-group">
+              <div class="flex items-start">
+                <span class="bullet-point"></span>
+                <div class="flex-1">
+                  <div class="highlight-main-point">
+                    {parts.map((part, i) => {
+                      if (i % 2 === 1) {
+                        const companyName = part.toLowerCase().replace(/\s+/g, '-');
+                        return (
+                          <img
+                            src={`/logos/${companyName}.png`}
+                            alt={part}
+                            width="20"
+                            height="20"
+                            loading="lazy"
+                            class="inline-block align-middle mx-1 logo-placeholder"
+                            onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                        );
+                      }
+                      return <span set:html={formatStatsAndCompanies(part)}></span>;
+                    })}
+                  </div>
+                  {subPoints.length > 0 && (
+                    <ul class="highlight-sub-points">
+                      {subPoints.map((sub: string) => {
+                        // Process the sub-point text first to handle LINK tags
+                        const processedSub = formatStatsAndCompanies(sub);
+                        return (
+                          <li class="highlight-sub-item" set:html={processedSub}></li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  )}
+
+  {highlights?.data?.building?.length > 0 && (
+    <section class="mb-12">
+      <h2 class="section-header">◆ Currently Building:</h2>
+      <ul class="highlight-list">
+        {highlights.data.building.map((item: any) => {
+          let mainPoint: string;
+          let subPoints: string[] = [];
+          
+          if (typeof item === 'string') {
+            mainPoint = item;
+          } else {
+            mainPoint = item.point || '';
+            subPoints = item.details || [];
+          }
+          
+          const parts = mainPoint.split(/\[LOGO:([^\]]+)\]/g);
+          
+          return (
+            <li class="highlight-item-group">
+              <div class="flex items-start">
+                <span class="bullet-point"></span>
+                <div class="flex-1">
+                  <div class="highlight-main-point">
+                    {parts.map((part, i) => {
+                      if (i % 2 === 1) {
+                        const companyName = part.toLowerCase().replace(/\s+/g, '-');
+                        return (
+                          <img
+                            src={`/logos/${companyName}.png`}
+                            alt={part}
+                            width="20"
+                            height="20"
+                            loading="lazy"
+                            class="inline-block align-middle mx-1 logo-placeholder"
+                            onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                        );
+                      }
+                      return <span set:html={formatStatsAndCompanies(part)}></span>;
+                    })}
+                  </div>
+                  {subPoints.length > 0 && (
+                    <ul class="highlight-sub-points">
+                      {subPoints.map((sub: string) => {
+                        // Process the sub-point text first to handle LINK tags
+                        const processedSub = formatStatsAndCompanies(sub);
+                        return (
+                          <li class="highlight-sub-item" set:html={processedSub}></li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  )}
+
+  <div class="mb-12" id="intro-video">
+    <HeroLoom id="ed3b3c692e9d49e59ef4229617141ea1" title="Elrich Chen - Intro" />
+  </div>
+</Base>
+
+<style>
+  .video-signpost {
+    position: fixed;
+    right: 10rem;
+    top: 40%;
+    z-index: 40;
+    transform: rotate(-3deg);
+    transition: all 0.3s ease;
+  }
+
+  .signpost-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: rgba(255, 255, 255, 0.98);
+    border: 2px dashed rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    backdrop-filter: blur(10px);
+  }
+
+  .signpost-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #333;
+    letter-spacing: 0.02em;
+  }
+
+  .video-signpost:hover {
+    transform: rotate(-3deg) scale(1.05);
+  }
+
+  .video-signpost:hover .signpost-content {
+    background: rgba(255, 255, 255, 1);
+    border-color: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .video-signpost:hover .signpost-text {
+    color: #000;
+  }
+
+  .arrow-bounce {
+    animation: bounce 1.5s ease-in-out infinite;
+    color: #666;
+  }
+
+  .video-signpost:hover .arrow-bounce {
+    color: #000;
+    animation: bounce 0.8s ease-in-out infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(8px);
+    }
+  }
+
+  /* Hide when video is in viewport */
+  @media (min-width: 1024px) {
+    .video-signpost.hidden-when-visible {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+</style>
+
+<script>
+  // Hide signpost when video is visible
+  const signpost = document.querySelector('.video-signpost');
+  const videoSection = document.querySelector('#intro-video');
+
+  if (signpost && videoSection) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            signpost.classList.add('hidden-when-visible');
+          } else {
+            signpost.classList.remove('hidden-when-visible');
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(videoSection);
+  }
+</script>

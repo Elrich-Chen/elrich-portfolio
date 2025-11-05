@@ -1,0 +1,247 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const projects = await getCollection('projects');
+const rendered = await Promise.all(
+  projects.map(async (p) => {
+    const { Content } = await p.render();
+    return { entry: p, Content };
+  })
+);
+
+// Group projects by category
+const groupedProjects = rendered.reduce((acc, proj) => {
+  const category = proj.entry.data.category || 'Other';
+  if (!acc[category]) {
+    acc[category] = [];
+  }
+  acc[category].push(proj);
+  return acc;
+}, {} as Record<string, typeof rendered>);
+
+const categories = Object.keys(groupedProjects).sort();
+---
+
+<Base title="Projects – Elrich Chen">
+  <div class="mb-6">
+    <a href="/" class="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">← Back to home</a>
+  </div>
+  <h1 class="text-xl font-semibold mb-8">Projects</h1>
+
+  <div class="projects-container pb-24">
+    {categories.map((category) => (
+      <section class="category-section">
+        <h2 class="category-title">{category}</h2>
+        <div class="projects-grid">
+          {groupedProjects[category].map(({ entry: p, Content }) => (
+            <article class={`project-card ${p.data.featured ? 'featured' : ''}`}>
+              <div class="card-content">
+                {/* Tech Tags - Most prominent at top */}
+                {p.data.tags && p.data.tags.length > 0 && (
+                  <div class="card-tags">
+                    {p.data.tags.map((tag: string) => (
+                      <span class="tag-pill">{tag}</span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Category badge in corner */}
+                <span class="category-badge">{p.data.category}</span>
+
+                {/* Project name + link */}
+                <h3 class="card-title">
+                  {p.data.href ? (
+                    <a href={p.data.href} target="_blank" rel="noopener noreferrer" class="card-link">
+                      {p.data.name}
+                      <svg class="external-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
+                      </svg>
+                    </a>
+                  ) : (
+                    <span>{p.data.name}</span>
+                  )}
+                </h3>
+
+                {/* Project description - concise */}
+                <div class="card-description">
+                  <Content />
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+    ))}
+  </div>
+</Base>
+
+<style>
+  .category-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .category-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.25rem;
+  }
+
+  @media (max-width: 768px) {
+    .projects-grid {
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .projects-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .project-card {
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    overflow: visible;
+    transition: all 0.25s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    position: relative;
+  }
+
+  .project-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.12);
+  }
+
+  .project-card.featured {
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+  }
+
+  .project-card.featured:hover {
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.15);
+  }
+
+  .card-content {
+    padding: 1rem;
+    position: relative;
+  }
+
+  /* Category badge - top right corner */
+  .category-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    background: rgba(0, 0, 0, 0.04);
+    color: #888;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  /* Tech tags - MOST PROMINENT at top */
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-right: 5rem; /* Space for category badge */
+  }
+
+  .tag-pill {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(59, 130, 246, 0.3);
+  }
+
+  .tag-pill:nth-child(even) {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    box-shadow: 0 1px 3px rgba(139, 92, 246, 0.3);
+  }
+
+  .tag-pill:nth-child(3n) {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+  }
+
+  .project-card:hover .tag-pill {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
+  }
+
+  /* Project title */
+  .card-title {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #0a0a0a;
+    margin-bottom: 0.625rem;
+  }
+
+  .card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.2s ease;
+  }
+
+  .card-link:hover {
+    color: #3b82f6;
+  }
+
+  .external-icon {
+    opacity: 0.35;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .card-link:hover .external-icon {
+    opacity: 1;
+    transform: translate(2px, -2px);
+  }
+
+  /* Description - concise and scannable */
+  .card-description {
+    font-size: 0.8125rem;
+    color: #404040;
+    line-height: 1.6;
+    flex: 1;
+  }
+
+  .card-description :global(p) {
+    margin: 0;
+  }
+
+  .card-description :global(strong) {
+    color: #0a0a0a;
+    font-weight: 700;
+  }
+</style>
+
+

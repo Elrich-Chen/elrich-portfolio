@@ -1,0 +1,49 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+const posts = await getCollection('hobbies');
+const allTags = Array.from(new Set(posts.flatMap(p => p.data.tags || []))).sort();
+---
+
+<Base title="Hobbies – Elrich Chen">
+  <div class="mb-6">
+    <a href="/" class="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">← Back to home</a>
+  </div>
+  <h1 class="text-xl font-semibold mb-4">Hobbies</h1>
+  {allTags.length > 0 && (
+    <p class="mb-6 text-sm text-neutral-600">
+      Tags:
+      {allTags.map(t => (
+        <a href={`/hobbies/tags/${t}`} class="ml-2 underline">{t}</a>
+      ))}
+    </p>
+  )}
+
+  <ul class="space-y-4">
+    {posts
+      .sort((a,b)=> a.data.date.localeCompare(b.data.date) * -1)
+      .map((p) => (
+      <li>
+        <a href={`/hobbies/${p.slug}`} class="hobby-link font-medium">{p.data.title}</a>
+        <span class="text-neutral-500 ml-2">{p.data.date}</span>
+        {p.data.summary && <p class="text-neutral-600">{p.data.summary}</p>}
+      </li>
+    ))}
+  </ul>
+</Base>
+
+<style>
+  .hobby-link {
+    text-decoration: underline;
+    text-decoration-color: rgba(0, 0, 0, 0.2);
+    text-underline-offset: 2px;
+    transition: all 0.2s ease;
+  }
+
+  .hobby-link:hover {
+    text-decoration-color: rgba(0, 0, 0, 0.6);
+    color: #000;
+  }
+</style>
+
+

@@ -1,0 +1,78 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+  rotation?: number; // degrees to rotate the polaroid
+}
+
+const { src, alt, caption, rotation = -2 } = Astro.props;
+---
+
+<div 
+  class="polaroid" 
+  style={`transform: rotate(${rotation}deg);`}
+>
+  <div class="polaroid-inner">
+    <div class="polaroid-photo">
+      <img src={src} alt={alt} />
+    </div>
+    {caption && (
+      <div class="polaroid-caption">
+        {caption}
+      </div>
+    )}
+  </div>
+</div>
+
+<style>
+  .polaroid {
+    display: inline-block;
+    background: white;
+    padding: 12px 12px 45px 12px;
+    margin-top: 1rem; /* Moves the polaroid down - adjust this value as needed */
+    box-shadow: 
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06),
+      0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    max-width: 280px;
+  }
+
+  .polaroid:hover {
+    transform: rotate(0deg) scale(1.05) !important;
+    box-shadow: 
+      0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05),
+      0 20px 40px -10px rgba(0, 0, 0, 0.2);
+  }
+
+  .polaroid-inner {
+    position: relative;
+  }
+
+  .polaroid-photo {
+    width: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: #f5f5f5;
+    margin-top: 10px;
+  }
+
+  .polaroid-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .polaroid-caption {
+    margin-top: 12px;
+    font-family: 'Reenie Beanie', cursive;
+    font-size: 1.25rem;
+    text-align: center;
+    color: #333;
+    line-height: 1.2;
+  }
+</style>
+

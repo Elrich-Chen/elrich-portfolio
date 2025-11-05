@@ -1,0 +1,127 @@
+---
+const { title = 'Elrich Chen', description = 'Builder. Engineer. Founder.', meta = [], showSignature = false, showContactForm = false } = Astro.props;
+import Nav from '../components/Nav.astro';
+import Signature from '../components/Signature.astro';
+import SideContact from '../components/SideContact.astro';
+import PixelTrail from '../components/PixelTrail.astro';
+import '../styles/global.css';
+---
+
+<html lang="en" class="bg-[rgb(var(--bg))] text-[rgb(var(--fg))]">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {meta}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Performance: DNS prefetch and preconnect for fonts -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Performance: Preload critical Rubik font with async loading -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" />
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet" /></noscript>
+
+    <!-- Performance: Async load signature font (non-critical) -->
+    <link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap" rel="stylesheet" /></noscript>
+    
+  </head>
+  <body>
+    <div id="loading" class="fixed inset-0 bg-[rgb(var(--bg))] flex items-center justify-center z-50 transition-opacity duration-300">
+      <span class="text-sm text-neutral-500">Loading</span>
+    </div>
+    <PixelTrail />
+    <SideContact />
+    <div class="prose-measure">
+      <header class="py-6 border-b border-neutral-200 relative">
+        <div class="flex items-center justify-between">
+          {showSignature && (
+            <div>
+              <Signature />
+            </div>
+          )}
+          <Nav />
+        </div>
+      </header>
+      <main class="pb-8">
+        <slot />
+      </main>
+    </div>
+    {showContactForm && (
+      <footer class="prose-measure pb-32" id="contact-form">
+        <div class="border-t border-neutral-200 pt-8">
+          <h2 class="text-xl font-semibold mb-3 tracking-tight">◆ Get in Touch:</h2>
+          <p class="text-base text-neutral-700 mb-6 leading-relaxed">
+            Have a project idea or want to chat? Fill out the form below or reach out directly at <a href="mailto:elrichchen123@gmail.com" class="font-medium text-neutral-900 underline hover:text-black transition-colors">elrichchen123@gmail.com</a>
+          </p>
+          <form class="contact-form space-y-4 mb-6" action="https://formspree.io/f/mvgvdayo" method="POST">
+            <div class="flex flex-col gap-2">
+              <label for="name" class="text-sm text-neutral-700">Name</label>
+              <input 
+                type="text" 
+                id="name" 
+                name="name" 
+                required
+                class="contact-input px-3 py-2 border border-neutral-300 rounded-sm bg-transparent text-sm focus:outline-none focus:border-neutral-500 transition-colors"
+              />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="email" class="text-sm text-neutral-700">Email</label>
+              <input 
+                type="email" 
+                id="email" 
+                name="email" 
+                required
+                class="contact-input px-3 py-2 border border-neutral-300 rounded-sm bg-transparent text-sm focus:outline-none focus:border-neutral-500 transition-colors"
+              />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="message" class="text-sm text-neutral-700">Message</label>
+              <textarea 
+                id="message" 
+                name="message" 
+                rows="4"
+                required
+                class="contact-input px-3 py-2 border border-neutral-300 rounded-sm bg-transparent text-sm focus:outline-none focus:border-neutral-500 transition-colors resize-none"
+              ></textarea>
+            </div>
+            <button 
+              type="submit"
+              class="contact-submit px-4 py-2 bg-neutral-900 text-white rounded-sm text-sm hover:bg-neutral-800 transition-colors mt-2"
+            >
+              Send Message
+            </button>
+          </form>
+        </div>
+      </footer>
+    )}
+    <script is:inline>
+      // Hide loading state once page is loaded
+      function hideLoading() {
+        const loading = document.getElementById('loading');
+        if (loading) {
+          loading.style.opacity = '0';
+          setTimeout(() => {
+            loading.style.display = 'none';
+          }, 300);
+        }
+      }
+
+      // Try multiple events to ensure loading screen is removed
+      if (document.readyState === 'complete') {
+        hideLoading();
+      } else {
+        window.addEventListener('load', hideLoading);
+        // Fallback: remove after 3 seconds even if load event doesn't fire
+        setTimeout(hideLoading, 3000);
+      }
+    </script>
+  </body>
+</html>

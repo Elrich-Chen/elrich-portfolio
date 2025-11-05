@@ -1,0 +1,18 @@
+---
+const { pathname } = Astro.url;
+const isActive = (href: string) => pathname === href;
+---
+
+<nav class="flex items-center justify-end text-sm">
+  <span class="flex items-center gap-1">
+    <a href="/projects" aria-current={isActive('/projects') ? 'page' : undefined} class="nav-link {isActive('/projects') ? 'nav-active' : ''}">Projects</a>
+    <span class="mx-1 text-neutral-300">|</span>
+    <a href="/about" aria-current={isActive('/about') ? 'page' : undefined} class="nav-link {isActive('/about') ? 'nav-active' : ''}">About me</a>
+    <span class="mx-1 text-neutral-300">|</span>
+    <a href="/photos" aria-current={isActive('/photos') ? 'page' : undefined} class="nav-link {isActive('/photos') ? 'nav-active' : ''}">Photos</a>
+    <span class="mx-1 text-neutral-300">|</span>
+    <a href="/hobbies" aria-current={isActive('/hobbies') ? 'page' : undefined} class="nav-link {isActive('/hobbies') ? 'nav-active' : ''}">Hobbies</a>
+  </span>
+</nav>
+
+
