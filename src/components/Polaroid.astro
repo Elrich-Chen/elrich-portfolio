@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+
 interface Props {
   src: string;
   alt: string;
@@ -9,13 +11,22 @@ interface Props {
 const { src, alt, caption, rotation = -2 } = Astro.props;
 ---
 
-<div 
-  class="polaroid" 
+<div
+  class="polaroid"
   style={`transform: rotate(${rotation}deg);`}
 >
   <div class="polaroid-inner">
     <div class="polaroid-photo">
-      <img src={src} alt={alt} />
+      <Image
+        src={src}
+        alt={alt}
+        width={280}
+        height={280}
+        format="webp"
+        quality={80}
+        loading="lazy"
+        decoding="async"
+      />
     </div>
     {caption && (
       <div class="polaroid-caption">

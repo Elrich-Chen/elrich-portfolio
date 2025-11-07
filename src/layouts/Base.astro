@@ -34,7 +34,7 @@ import '../styles/global.css';
     
   </head>
   <body>
-    <div id="loading" class="fixed inset-0 bg-[rgb(var(--bg))] flex items-center justify-center z-50 transition-opacity duration-300">
+    <div id="loading" class="fixed inset-0 bg-[rgb(var(--bg))] flex items-center justify-center z-50 transition-opacity duration-200">
       <span class="text-sm text-neutral-500">Loading</span>
     </div>
     <PixelTrail />
@@ -103,24 +103,24 @@ import '../styles/global.css';
       </footer>
     )}
     <script is:inline>
-      // Hide loading state once page is loaded
+      // Optimized loading state - hide faster for better perceived performance
       function hideLoading() {
         const loading = document.getElementById('loading');
         if (loading) {
           loading.style.opacity = '0';
           setTimeout(() => {
             loading.style.display = 'none';
-          }, 300);
+          }, 200);
         }
       }
 
-      // Try multiple events to ensure loading screen is removed
+      // Improved loading detection
       if (document.readyState === 'complete') {
         hideLoading();
       } else {
         window.addEventListener('load', hideLoading);
-        // Fallback: remove after 3 seconds even if load event doesn't fire
-        setTimeout(hideLoading, 3000);
+        // Reduced fallback timeout from 3s to 1s for better UX
+        setTimeout(hideLoading, 1000);
       }
     </script>
   </body>

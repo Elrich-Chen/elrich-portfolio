@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 
 const allPhotos = await getCollection('photos');
@@ -19,11 +20,16 @@ const allPhotos = await getCollection('photos');
         <div class="polaroid-card group" data-tilt-index={index}>
           <div class="polaroid-frame">
             <div class="polaroid-image-container">
-              <img
+              <Image
                 src={photo.data.image}
                 alt={photo.data.caption}
                 class="polaroid-image"
+                width={400}
+                height={400}
+                format="webp"
+                quality={80}
                 loading="lazy"
+                decoding="async"
               />
             </div>
             <div class="polaroid-caption-area">
@@ -152,6 +158,18 @@ const allPhotos = await getCollection('photos');
 </style>
 
 <script>
+  // Throttle utility function
+  function throttle<T extends (...args: any[]) => any>(func: T, delay: number) {
+    let lastCall = 0;
+    return function (this: any, ...args: Parameters<T>) {
+      const now = Date.now();
+      if (now - lastCall >= delay) {
+        lastCall = now;
+        func.apply(this, args);
+      }
+    };
+  }
+
   // Add 3D tilt effect to polaroid cards on desktop only
   if (window.innerWidth >= 1024) {
     const cards = document.querySelectorAll('.polaroid-card');
@@ -160,8 +178,8 @@ const allPhotos = await getCollection('photos');
       const frame = card.querySelector('.polaroid-frame');
       if (!frame) return;
 
-      card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
+      const handleMouseMove = (e: MouseEvent) => {
+        const rect = (card as HTMLElement).getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
 
@@ -171,22 +189,25 @@ const allPhotos = await getCollection('photos');
         const rotateX = ((y - centerY) / centerY) * -12;
         const rotateY = ((x - centerX) / centerX) * 12;
 
-        frame.style.transform = `
+        (frame as HTMLElement).style.transform = `
           perspective(1000px)
           rotateX(${rotateX}deg)
           rotateY(${rotateY}deg)
           translateZ(10px)
           scale(1.02)
         `;
-      });
+      };
+
+      // Throttle mousemove to run max once per 16ms (~60fps)
+      card.addEventListener('mousemove', throttle(handleMouseMove, 16) as EventListener, { passive: true });
 
       card.addEventListener('mouseleave', () => {
         // Get the original rotation for this card
         const index = card.getAttribute('data-tilt-index');
         const rotations = ['-1deg', '1deg', '-0.5deg'];
-        const originalRotate = rotations[index % 3];
+        const originalRotate = rotations[Number(index) % 3];
 
-        frame.style.transform = `rotate(${originalRotate})`;
+        (frame as HTMLElement).style.transform = `rotate(${originalRotate})`;
       });
     });
   }
