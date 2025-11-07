@@ -1,7 +1,7 @@
 ---
 name: Jupyter Notebook Documentation Tool
 category: "Open Source"
-href: https://github.com/elrich
+href: https://github.com/Elrich-Chen/jupyterlab_docs_helper
 year: "2025"
 tags: [typescript, jupyter, ai]
 tagline: AI-assisted documentation directly in Jupyter notebooks - no context switching required

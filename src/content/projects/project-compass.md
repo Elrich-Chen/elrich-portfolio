@@ -1,7 +1,7 @@
 ---
 name: "Landlord Negotiation Simulator"
 category: "Hackathons"
-href: "https://projectcompass.us"
+href: "https://www.projectcompass.us"
 year: "2025"
 tags: ["react", "nextjs", "flask", "tailwindcss", "figma", "hackathon"]
 tagline: Interactive AI-powered negotiation practice for first-time renters

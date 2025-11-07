@@ -1,7 +1,7 @@
 ---
 name: Neural Network – BlackJack
 category: "AI/ML"
-href: https://github.com/elrich
+href: https://github.com/Elrich-Chen/BlackJack
 year: "2025"
 tags: [python, rl, machine-learning]
 tagline: Q-Learning agent achieving 43% win rate through 2M+ simulated games
