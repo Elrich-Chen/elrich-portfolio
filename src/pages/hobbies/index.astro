@@ -11,7 +11,7 @@ const allTags = Array.from(new Set(posts.flatMap(p => p.data.tags || []))).sort(
   </div>
   <h1 class="text-xl font-semibold mb-4">Hobbies</h1>
   {allTags.length > 0 && (
-    <p class="mb-6 text-sm text-neutral-600">
+    <p class="mb-6 text-sm hobby-tags-text">
       Tags:
       {allTags.map(t => (
         <a href={`/hobbies/tags/${t}`} class="ml-2 underline">{t}</a>
@@ -25,8 +25,8 @@ const allTags = Array.from(new Set(posts.flatMap(p => p.data.tags || []))).sort(
       .map((p) => (
       <li>
         <a href={`/hobbies/${p.slug}`} class="hobby-link font-medium">{p.data.title}</a>
-        <span class="text-neutral-500 ml-2">{p.data.date}</span>
-        {p.data.summary && <p class="text-neutral-600">{p.data.summary}</p>}
+        <span class="hobby-date ml-2">{p.data.date}</span>
+        {p.data.summary && <p class="hobby-summary">{p.data.summary}</p>}
       </li>
     ))}
   </ul>
@@ -35,14 +35,30 @@ const allTags = Array.from(new Set(posts.flatMap(p => p.data.tags || []))).sort(
 <style>
   .hobby-link {
     text-decoration: underline;
-    text-decoration-color: rgba(0, 0, 0, 0.2);
+    text-decoration-color: rgba(var(--border), 0.3);
     text-underline-offset: 2px;
     transition: all 0.2s ease;
+    color: rgb(var(--fg));
   }
 
   .hobby-link:hover {
-    text-decoration-color: rgba(0, 0, 0, 0.6);
-    color: #000;
+    text-decoration-color: rgba(var(--border), 0.6);
+    color: rgb(var(--fg));
+  }
+
+  .hobby-date {
+    color: rgb(var(--fg));
+    opacity: 0.85;
+  }
+
+  .hobby-summary {
+    color: rgb(var(--fg));
+    opacity: 0.9;
+  }
+
+  .hobby-tags-text {
+    color: rgb(var(--fg));
+    opacity: 0.9;
   }
 </style>
 

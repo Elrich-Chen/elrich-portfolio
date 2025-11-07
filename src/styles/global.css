@@ -4,26 +4,81 @@
 
 /* Base theme tokens */
 :root {
+  color-scheme: light dark;
+
+  /* Light theme (default) */
+  --bg: 250 250 250;
+  --fg: 20 20 20;
+  --muted: 112 112 112;
+  --border: 0 0 0;
+  --border-opacity: 0.06;
+}
+
+/* Dark theme via system preference */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: 20 20 20;
+    --fg: 250 250 250;
+    --muted: 140 140 140;
+    --border: 255 255 255;
+    --border-opacity: 0.1;
+  }
+}
+
+/* Manual dark mode override */
+html.dark {
+  color-scheme: dark;
+  --bg: 20 20 20;
+  --fg: 250 250 250;
+  --muted: 140 140 140;
+  --border: 255 255 255;
+  --border-opacity: 0.1;
+}
+
+/* Manual light mode override */
+html.light {
   color-scheme: light;
   --bg: 250 250 250;
   --fg: 20 20 20;
   --muted: 112 112 112;
+  --border: 0 0 0;
+  --border-opacity: 0.06;
 }
 
-html { @apply scroll-smooth; }
+html {
+  @apply scroll-smooth;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
 
-/* Optimized gradient background - removed fixed attachment for better scroll performance */
+/* Text cursor (caret) color based on theme */
+* {
+  caret-color: rgb(var(--fg));
+}
+
+/* Optimized gradient background with dark mode support */
 body {
-  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 50%, #fafafa 100%);
+  background: linear-gradient(135deg, rgb(var(--bg)) 0%, rgba(var(--bg), 0.95) 50%, rgb(var(--bg)) 100%);
   /* background-attachment: fixed; - REMOVED: causes scroll jank in Safari */
   color: rgb(var(--fg));
-  @apply antialiased selection:bg-black selection:text-white;
+  @apply antialiased;
   font-family: 'Rubik', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   position: relative;
   min-height: 100vh;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* Simplified dotted pattern - optimized for performance */
+/* Selection colors - adapt to theme */
+::selection {
+  background-color: #000;
+  color: #fff;
+}
+
+html.dark ::selection {
+  background-color: #fff;
+  color: #000;
+}
+
+/* Simplified dotted pattern - optimized for performance and dark mode */
 body::before {
   content: '';
   position: absolute;
@@ -40,13 +95,44 @@ body::before {
   opacity: 0.35;
   /* Changed from fixed to absolute for better scroll performance */
   will-change: auto;
+  transition: opacity 0.3s ease, background-image 0.3s ease;
+}
+
+/* Dark mode dotted pattern */
+html.dark body::before {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.12) 1.5px, transparent 1.5px);
 }
 
 .prose-measure {
   @apply max-w-2xl mx-auto px-6 sm:px-8 relative z-10;
 }
 
-a { @apply transition-all duration-200; }
+a {
+  transition: all 0.2s ease;
+}
+
+/* Fix hardcoded text colors in Tailwind classes */
+.text-neutral-500 {
+  color: rgb(var(--muted)) !important;
+}
+
+.hover\:text-neutral-900:hover {
+  color: rgb(var(--fg)) !important;
+}
+
+.text-neutral-700 {
+  color: rgb(var(--muted)) !important;
+}
+
+.text-neutral-900 {
+  color: rgb(var(--fg)) !important;
+}
+
+.text-neutral-600 {
+  color: rgb(var(--muted)) !important;
+  opacity: 0.9;
+}
 
 /* Navbar link styling with interactive effects */
 .nav-link {
@@ -68,8 +154,8 @@ a { @apply transition-all duration-200; }
 }
 
 .nav-link:hover {
-  @apply text-neutral-900 scale-105;
-  transform: translateY(-1px);
+  color: rgb(var(--fg));
+  transform: translateY(-1px) scale(1.05);
 }
 
 .nav-link:hover::before {
@@ -81,7 +167,8 @@ a { @apply transition-all duration-200; }
 }
 
 .nav-active {
-  @apply font-semibold text-neutral-900;
+  font-weight: 600;
+  color: rgb(var(--fg));
 }
 
 .nav-active::before {
@@ -98,7 +185,7 @@ h2 { @apply text-lg font-medium leading-tight mb-2; }
   font-family: 'Rubik', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   letter-spacing: -0.01em;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(var(--border), var(--border-opacity));
 }
 
 
@@ -118,6 +205,7 @@ h2 { @apply text-lg font-medium leading-tight mb-2; }
 
 .highlight-main-point {
   @apply leading-relaxed;
+  color: rgb(var(--fg));
 }
 
 .highlight-sub-points {
@@ -126,7 +214,10 @@ h2 { @apply text-lg font-medium leading-tight mb-2; }
 }
 
 .highlight-sub-item {
-  @apply text-sm text-neutral-700 leading-relaxed;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: rgb(var(--fg));
+  opacity: 0.9;
   position: relative;
   padding-left: 1.25rem;
 }
@@ -135,12 +226,15 @@ h2 { @apply text-lg font-medium leading-tight mb-2; }
   content: '↳';
   position: absolute;
   left: 0;
-  @apply text-neutral-500;
+  color: rgb(var(--muted));
   font-size: 0.9rem;
 }
 
 .bullet-point {
-  @apply mr-2.5 text-neutral-600 flex-shrink-0 mt-0.5;
+  margin-right: 0.625rem;
+  color: rgb(var(--muted));
+  flex-shrink: 0;
+  margin-top: 0.125rem;
   font-size: 0.875em;
   font-weight: 500;
   transition: color 0.2s ease;
@@ -151,35 +245,40 @@ h2 { @apply text-lg font-medium leading-tight mb-2; }
 }
 
 .highlight-item-group:hover .bullet-point {
-  @apply text-neutral-900;
+  color: rgb(var(--fg));
 }
 
 .highlight-item-group em {
-  @apply italic text-neutral-900;
   font-style: italic;
+  color: rgb(var(--fg));
 }
 
 .highlight-item-group strong {
-  @apply font-semibold text-neutral-900;
+  font-weight: 600;
+  color: rgb(var(--fg));
 }
 
 .company-link {
-  @apply no-underline hover:underline transition-colors duration-200;
+  text-decoration: none;
   color: inherit;
+  transition: all 0.2s ease;
 }
 
 .company-link:hover {
-  @apply text-neutral-700;
+  text-decoration: underline;
+  color: rgb(var(--muted));
 }
 
 .view-project-link {
-  @apply inline-flex items-center gap-1 text-sm font-medium text-neutral-700 hover:text-black transition-colors duration-200;
+  @apply inline-flex items-center gap-1 text-sm font-medium transition-colors duration-200;
+  color: rgb(var(--muted));
   text-decoration: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(var(--border), 0.2);
 }
 
 .view-project-link:hover {
-  border-bottom-color: rgba(0, 0, 0, 0.6);
+  color: rgb(var(--fg));
+  border-bottom-color: rgba(var(--border), 0.6);
 }
 
 /* Contact hook styling */
@@ -226,7 +325,9 @@ h2 { @apply text-lg font-medium leading-tight mb-2; }
 }
 
 .hook-text {
-  @apply text-base font-medium text-neutral-700;
+  font-size: 1rem;
+  font-weight: 500;
+  color: rgb(var(--muted));
 }
 
 .logo-placeholder {
@@ -255,7 +356,7 @@ h2 { @apply text-lg font-medium leading-tight mb-2; }
 }
 
 .experience-item:hover {
-  background-color: rgba(0, 0, 0, 0.02);
+  background-color: rgba(var(--border), 0.03);
 }
 
 .experience-logo {
@@ -274,13 +375,14 @@ h2 { @apply text-lg font-medium leading-tight mb-2; }
 }
 
 .company-link {
-  @apply font-medium text-neutral-900 hover:text-black transition-colors duration-200;
+  font-weight: 500;
+  color: rgb(var(--fg));
   text-decoration: none;
   background: linear-gradient(to right, currentColor, currentColor);
   background-size: 0% 1px;
   background-position: 0% 100%;
   background-repeat: no-repeat;
-  transition: background-size 0.3s ease;
+  transition: background-size 0.3s ease, color 0.2s ease;
 }
 
 .company-link:hover {
@@ -288,7 +390,9 @@ h2 { @apply text-lg font-medium leading-tight mb-2; }
 }
 
 .experience-date {
-  @apply text-neutral-500 text-xs ml-auto;
+  color: rgb(var(--muted));
+  font-size: 0.75rem;
+  margin-left: auto;
 }
 
 .bullet-list {
@@ -296,27 +400,42 @@ h2 { @apply text-lg font-medium leading-tight mb-2; }
 }
 
 .bullet-item {
-  @apply text-sm text-neutral-700 leading-relaxed;
+  font-size: 0.875rem;
+  color: rgb(var(--muted));
+  line-height: 1.6;
   position: relative;
   padding-left: 1rem;
+  transition: color 0.2s ease;
 }
 
 .bullet-item::before {
   content: '•';
   position: absolute;
   left: 0;
-  @apply text-neutral-400;
+  color: rgb(var(--muted));
   font-weight: 300;
+  opacity: 0.6;
 }
 
 .bullet-item:hover {
-  @apply text-neutral-900;
+  color: rgb(var(--fg));
 }
 
 ul { @apply space-y-1; }
-li > ul { @apply mt-1 ml-4 space-y-0.5 text-sm text-neutral-700; }
-p { @apply leading-relaxed text-sm; }
-hr { @apply border-neutral-200; }
+li > ul {
+  margin-top: 0.25rem;
+  margin-left: 1rem;
+  font-size: 0.875rem;
+  color: rgb(var(--muted));
+}
+p {
+  line-height: 1.6;
+  font-size: 0.875rem;
+  color: rgb(var(--fg));
+}
+hr {
+  border-color: rgba(var(--border), var(--border-opacity));
+}
 
 /* Accessible focus */
 a:focus-visible, button:focus-visible { @apply outline-none ring-2 ring-neutral-400 rounded-sm; }

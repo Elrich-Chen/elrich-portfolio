@@ -4,6 +4,7 @@ export default {
     './src/**/*.{astro,html,md,mdx,js,jsx,ts,tsx}',
     './public/**/*.html',
   ],
+  darkMode: 'class', // Enable dark mode with class strategy
   theme: {
     extend: {
       colors: {

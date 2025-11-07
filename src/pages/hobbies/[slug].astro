@@ -20,13 +20,13 @@ const { Content } = entry ? await entry.render() : { Content: null };
   {entry && Content && (
     <article class="hobby-content">
       <h1 class="text-xl font-semibold mb-2">{entry.data.title}</h1>
-      <p class="text-sm text-neutral-500 mb-8">{entry.data.date}</p>
+      <p class="text-sm hobby-date mb-8">{entry.data.date}</p>
       <div class="hobby-body">
         <Content />
       </div>
     </article>
   )}
-  {!entry && <p class="text-neutral-600">Post not found.</p>}
+  {!entry && <p class="hobby-not-found">Post not found.</p>}
 </Base>
 
 <style>
@@ -35,23 +35,50 @@ const { Content } = entry ? await entry.render() : { Content: null };
     margin: 0 auto;
   }
 
+  .hobby-date {
+    color: rgb(var(--fg));
+    opacity: 0.85;
+  }
+
+  .hobby-not-found {
+    color: rgb(var(--fg));
+    opacity: 0.9;
+  }
+
   .hobby-body :global(p) {
     margin-bottom: 1.5rem;
     line-height: 1.8;
     font-size: 0.9375rem;
-    color: #333;
+    color: rgb(var(--fg));
   }
 
   .hobby-body :global(hr) {
     margin: 2rem 0;
     border: none;
-    border-top: 1px solid #e5e5e5;
+    border-top: 1px solid rgba(var(--border), var(--border-opacity));
   }
 
   .hobby-body :global(br) {
     display: block;
     content: "";
     margin: 1rem 0;
+  }
+
+  .hobby-body :global(h1),
+  .hobby-body :global(h2),
+  .hobby-body :global(h3),
+  .hobby-body :global(h4),
+  .hobby-body :global(h5),
+  .hobby-body :global(h6) {
+    color: rgb(var(--fg));
+  }
+
+  .hobby-body :global(li) {
+    color: rgb(var(--fg));
+  }
+
+  .hobby-body :global(a) {
+    color: rgb(var(--fg));
   }
 </style>
 

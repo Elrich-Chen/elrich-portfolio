@@ -30,11 +30,15 @@
         return;
       }
 
+      // Detect theme and set pixel color
+      const isDark = document.documentElement.classList.contains('dark');
+      const pixelColor = isDark ? '#ffffff' : '#6e44ff'; // Soft blue for light mode
+
       // Configuration - optimized for performance
       const config = {
         gridSize: 60, // Fewer pixels = better performance
         trailFadeTime: 200, // Shorter fade for less particles
-        pixelColor: '#ffffff',
+        pixelColor: pixelColor,
         minPixelSize: 10,
         maxPixelSize: 16,
         interpolationSteps: 3, // Reduced from 5 for better performance
@@ -80,6 +84,22 @@
       let lastMoveTime = Date.now();
       let isIdle = false;
       let animationId = null;
+
+      // Update pixel color when theme changes
+      const updatePixelColor = () => {
+        const isDark = document.documentElement.classList.contains('dark');
+        config.pixelColor = isDark ? '#ffffff' : '#6e44ff'; // Soft blue for light mode
+      };
+
+      // Listen for theme changes
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'class') {
+            updatePixelColor();
+          }
+        });
+      });
+      observer.observe(document.documentElement, { attributes: true });
 
       // Mouse tracking with interpolation
       const handleMouseMove = (e) => {
@@ -185,6 +205,7 @@
         }
         document.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('resize', resizeCanvas);
+        observer.disconnect();
         trailMap.clear();
       };
 

@@ -1,9 +1,11 @@
 ---
+import ThemeToggle from './ThemeToggle.astro';
+
 const { pathname } = Astro.url;
 const isActive = (href: string) => pathname === href;
 ---
 
-<nav class="flex items-center justify-end text-sm">
+<nav class="flex items-center justify-end text-sm gap-4">
   <span class="flex items-center gap-1">
     <a href="/projects" aria-current={isActive('/projects') ? 'page' : undefined} class="nav-link {isActive('/projects') ? 'nav-active' : ''}">Projects</a>
     <span class="mx-1 text-neutral-300">|</span>
@@ -13,6 +15,7 @@ const isActive = (href: string) => pathname === href;
     <span class="mx-1 text-neutral-300">|</span>
     <a href="/hobbies" aria-current={isActive('/hobbies') ? 'page' : undefined} class="nav-link {isActive('/hobbies') ? 'nav-active' : ''}">Hobbies</a>
   </span>
+  <ThemeToggle />
 </nav>
 
 
