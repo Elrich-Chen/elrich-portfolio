@@ -1,17 +1,19 @@
 ---
-name: "Landlord Negotiation Simulator"
+name: "Project Compass"
 category: "Hackathons"
 href: "https://www.projectcompass.us"
 year: "2025"
-tags: ["react", "nextjs", "flask", "tailwindcss", "figma", "hackathon"]
-tagline: Interactive AI-powered negotiation practice for first-time renters
-image: /photos/elrich_photos/IMG_7704.jpeg
+tags: ["nextjs", "react", "typescript", "gemini ai", "auth0", "supabase", "leaflet", "p5.js", "hackathon"]
+tagline: Comprehensive accessibility platform supporting neurodivergent individuals
+image: /photos/elrich_photos/HTV.jpeg
 highlights:
-  - Designed complete user flow and UI in Figma
-  - Integrated Flask backend with OpenAI API for realistic conversations
-  - Built responsive Next.js frontend with TailwindCSS
-role: Full-Stack Developer & Designer
-duration: 36 hours
+  - Built a comprehensive accessibility platform supporting neurodivergent individuals
+  - Designed a multimodal model with text-to-speech, interactive visualizations, and real-time crowd-density mapping
+  - Conducted structured QA testing of audio, visual, and interactive modules to validate semantic clarity and accessibility compliance
+role: Full-Stack Developer & Accessibility Engineer
+duration: 36 hours (HTV 2025)
+featured: true
+deployed: true
 ---
 
-Built interactive simulator at Hack the Valley helping first-time renters practice lease negotiations with real-time AI landlord responses. Designed user flows in Figma and integrated Flask backend with third-party API to orchestrate conversations.
+Built a comprehensive accessibility platform at Hack the Valley supporting neurodivergent individuals with multimodal features including text-to-speech, interactive visualizations, and real-time crowd-density mapping. Deployed to production and conducted extensive QA testing to ensure accessibility compliance.

@@ -77,13 +77,14 @@
 
       // Trail data structure - store grid cells that are active
       const trailMap = new Map();
-      let mouseX = -100;
-      let mouseY = -100;
+      let mouseX = window.innerWidth / 2; // Start at center instead of off-screen
+      let mouseY = window.innerHeight / 2;
       let lastMouseX = mouseX;
       let lastMouseY = mouseY;
       let lastMoveTime = Date.now();
       let isIdle = false;
       let animationId = null;
+      let hasFirstMove = false; // Track if we've had first mouse movement
 
       // Update pixel color when theme changes
       const updatePixelColor = () => {
@@ -103,6 +104,23 @@
 
       // Mouse tracking with interpolation
       const handleMouseMove = (e) => {
+        // On first move, don't interpolate from center - just set position
+        if (!hasFirstMove) {
+          mouseX = e.clientX;
+          mouseY = e.clientY;
+          lastMouseX = mouseX;
+          lastMouseY = mouseY;
+          hasFirstMove = true;
+          lastMoveTime = Date.now();
+
+          // Resume animation if idle
+          if (isIdle) {
+            isIdle = false;
+            render();
+          }
+          return;
+        }
+
         lastMouseX = mouseX;
         lastMouseY = mouseY;
         mouseX = e.clientX;
@@ -136,7 +154,50 @@
         }
       };
 
-      document.addEventListener('mousemove', handleMouseMove, { passive: true });
+      // Listen to mousemove on window to catch all mouse movements, including over iframes
+      window.addEventListener('mousemove', handleMouseMove, { passive: true });
+
+      // Handle iframe hover issue - when mouse enters iframe, we lose mousemove events
+      // Create a transparent overlay that appears when we detect cursor is near/over an iframe
+      let iframeOverlay = null;
+      let iframeCheckInterval = null;
+
+      const createIframeOverlay = () => {
+        iframeOverlay = document.createElement('div');
+        iframeOverlay.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 9998;
+          display: none;
+        `;
+        document.body.appendChild(iframeOverlay);
+      };
+
+      const checkIframeHover = () => {
+        const iframes = document.querySelectorAll('iframe');
+        let isOverIframe = false;
+
+        iframes.forEach(iframe => {
+          const rect = iframe.getBoundingClientRect();
+          // Check if mouse is within iframe bounds
+          if (mouseX >= rect.left && mouseX <= rect.right &&
+              mouseY >= rect.top && mouseY <= rect.bottom) {
+            isOverIframe = true;
+          }
+        });
+
+        if (iframeOverlay) {
+          iframeOverlay.style.display = isOverIframe ? 'block' : 'none';
+        }
+      };
+
+      createIframeOverlay();
+      // Check every 100ms if mouse might be over an iframe
+      iframeCheckInterval = setInterval(checkIframeHover, 100);
 
       // Render function with FPS throttling and idle detection
       let lastFrameTime = Date.now();
@@ -203,7 +264,13 @@
         if (animationId) {
           cancelAnimationFrame(animationId);
         }
-        document.removeEventListener('mousemove', handleMouseMove);
+        if (iframeCheckInterval) {
+          clearInterval(iframeCheckInterval);
+        }
+        if (iframeOverlay) {
+          iframeOverlay.remove();
+        }
+        window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('resize', resizeCanvas);
         observer.disconnect();
         trailMap.clear();

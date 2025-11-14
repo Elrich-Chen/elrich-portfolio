@@ -1,5 +1,5 @@
 ---
-name: "Legal Tech Software Tools"
+name: "Ontario Legal Tech (Law Firm Startup)"
 category: "Work Experience"
 href: "https://ontariomandatorymediation.my.canva.site/ontario-court-helper"
 year: "2025"

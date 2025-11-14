@@ -38,6 +38,7 @@ const project = defineCollection({
     duration: z.string().optional(), // e.g., "3 months", "Ongoing"
     role: z.string().optional(), // e.g., "Lead Developer", "Full Stack Engineer"
     featured: z.boolean().optional(), // Highlight important projects
+    deployed: z.boolean().optional(), // Show "Deployed to Production" badge
   }),
 });
 
