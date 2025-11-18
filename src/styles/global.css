@@ -231,21 +231,22 @@ h2 { @apply text-lg font-medium leading-tight mb-2; }
 }
 
 .bullet-point {
-  margin-right: 0.625rem;
-  color: rgb(var(--muted));
+  margin-right: 0.75rem;
+  color: #3b82f6;
   flex-shrink: 0;
-  margin-top: 0.125rem;
-  font-size: 0.875em;
-  font-weight: 500;
-  transition: color 0.2s ease;
+  margin-top: 0.25rem;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
 }
 
 .bullet-point::before {
-  content: '↳';
+  content: '•';
 }
 
 .highlight-item-group:hover .bullet-point {
-  color: rgb(var(--fg));
+  color: #2563eb;
+  transform: scale(1.2);
 }
 
 .highlight-item-group em {
