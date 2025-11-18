@@ -14,6 +14,8 @@ const isActive = (href: string) => pathname === href;
     <a href="/photos" aria-current={isActive('/photos') ? 'page' : undefined} class="nav-link {isActive('/photos') ? 'nav-active' : ''}">Photos</a>
     <span class="mx-1 text-neutral-300">|</span>
     <a href="/hobbies" aria-current={isActive('/hobbies') ? 'page' : undefined} class="nav-link {isActive('/hobbies') ? 'nav-active' : ''}">Hobbies</a>
+    <span class="mx-1 text-neutral-300">|</span>
+    <a href="https://drive.google.com/drive/folders/1JB5jWDtohn4ddSp5ro-jeZshZw2Q-5lc?usp=share_link" target="_blank" rel="noopener noreferrer" class="nav-link">Resume</a>
   </span>
   <ThemeToggle />
 </nav>

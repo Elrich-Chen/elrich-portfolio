@@ -32,7 +32,7 @@
 
       // Detect theme and set pixel color
       const isDark = document.documentElement.classList.contains('dark');
-      const pixelColor = isDark ? '#ffffff' : '#6e44ff'; // Soft blue for light mode
+      const pixelColor = isDark ? '#a78bfa' : '#6e44ff'; // Purple for both modes
 
       // Configuration - optimized for performance
       const config = {
@@ -89,7 +89,7 @@
       // Update pixel color when theme changes
       const updatePixelColor = () => {
         const isDark = document.documentElement.classList.contains('dark');
-        config.pixelColor = isDark ? '#ffffff' : '#6e44ff'; // Soft blue for light mode
+        config.pixelColor = isDark ? '#a78bfa' : '#6e44ff'; // Purple for both modes
       };
 
       // Listen for theme changes
