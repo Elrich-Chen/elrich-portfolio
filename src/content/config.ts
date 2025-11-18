@@ -86,6 +86,20 @@ const photos = defineCollection({
   }),
 });
 
-export const collections = { bio, experiences: experience, projects: project, hobbies: hobby, highlights, photos };
+const testimonials = defineCollection({
+  type: 'data',
+  schema: z.object({
+    author: z.string(),
+    title: z.string(),
+    company: z.string(),
+    companyLogo: z.string().optional(), // logo filename in /public/logos/
+    text: z.string(),
+    date: z.string(),
+    rating: z.number().min(1).max(5),
+    project: z.string().optional(),
+  }),
+});
+
+export const collections = { bio, experiences: experience, projects: project, hobbies: hobby, highlights, photos, testimonials };
 
 
