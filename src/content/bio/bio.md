@@ -10,7 +10,7 @@ When I'm not coding, you'll find me in positions to connect and strengthen the d
 ## Education
 
 **University of Waterloo** | Bachelor of Computer Science  
-*2024 - 2029*
+*Expected 2029*
 
 Relevant Coursework:
 - CS 135: Designing Functional Programs
@@ -19,7 +19,7 @@ Relevant Coursework:
 - COMMST 223: Public Speaking
 - MGMT 171: Personal Finance (Investing, Law, Saving)
 
-**Queen's University** | Pre-University Studies
+**Queen's University** | Bachelor of Computer Science
 *2023 - 2024*
 
 Clubs & Societies:
