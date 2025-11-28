@@ -21,9 +21,14 @@ const groupedProjects = rendered.reduce((acc, proj) => {
   return acc;
 }, {} as Record<string, typeof rendered>);
 
-// Sort projects within each category: featured first, then by year (newest first)
+// Sort projects within each category: order first, then featured, then by year (newest first)
 Object.keys(groupedProjects).forEach(category => {
   groupedProjects[category].sort((a, b) => {
+    // Custom order first (lower numbers first)
+    const orderA = a.entry.data.order ?? 999;
+    const orderB = b.entry.data.order ?? 999;
+    if (orderA !== orderB) return orderA - orderB;
+
     // Featured projects first
     if (a.entry.data.featured && !b.entry.data.featured) return -1;
     if (!a.entry.data.featured && b.entry.data.featured) return 1;
@@ -35,8 +40,10 @@ Object.keys(groupedProjects).forEach(category => {
   });
 });
 
-// Sort categories: Hackathons first, then alphabetically
+// Sort categories: Active Projects first, then Hackathons, then alphabetically
 const categories = Object.keys(groupedProjects).sort((a, b) => {
+  if (a === 'Active Projects') return -1;
+  if (b === 'Active Projects') return 1;
   if (a === 'Hackathons') return -1;
   if (b === 'Hackathons') return 1;
   return a.localeCompare(b);

@@ -15,6 +15,8 @@ what_makes_me_different:
 building:
   - "AI automations for [LOGO:zivko] DoneMaker: Streamlining client conversion with Make, Notion, and Gmail integrations"
 
+  - "[LINK:https://accessibility-quick-scan.vercel.app]Accessibility QuickScan[/LINK]: Web tool helping websites verify WCAG compliance through HTML analysis (TypeScript, React, Next.js)"
+
   - "Jupyter docs tool: AI-assisted in-place documentation reducing context-switching for data scientists"
 
   - "[LOGO:techplusuw] Tech Plus UW: Internal tools and application processing systems as Logistics Organizer"
