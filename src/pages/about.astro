@@ -13,16 +13,42 @@ const { Content } = await bio.render();
   <h1 class="text-xl font-semibold mb-6">About</h1>
   
   <div class="about-container">
-    <!-- Polaroid Photo -->
-    <div class="polaroid-wrapper">
-      <Polaroid 
-        src="/photos/elrich_photos/gym.jpeg" 
-        alt="Elrich Chen" 
-        caption="Building things & breaking code"
-        rotation={-3}
-      />
+    <!-- Stacked Polaroid Photos - Interactive with Hover Indicator -->
+    <div class="polaroid-wrapper" id="polaroid-stack">
+      <div class="polaroid-item" data-index="0">
+        <Polaroid
+          src="/photos/elrich_photos/gym.jpeg"
+          alt="Elrich at the gym"
+          caption="Staying active"
+          rotation={-3}
+        />
+      </div>
+      <div class="polaroid-item" data-index="1">
+        <Polaroid
+          src="/photos/elrich_photos/IMG_7489.jpeg"
+          alt="Elrich"
+          caption="Making memories"
+          rotation={2}
+        />
+      </div>
+      <div class="polaroid-item" data-index="2">
+        <Polaroid
+          src="/photos/elrich_photos/IMG_8352.jpeg"
+          alt="Elrich"
+          caption="Exploring new hobbies"
+          rotation={-2}
+        />
+      </div>
+      <!-- Click indicator -->
+      <div class="click-indicator">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+        <span>Click to cycle</span>
+      </div>
     </div>
-    
+
     <!-- Bio Content -->
     <article class="prose prose-neutral max-w-none space-y-4 text-sm leading-relaxed bio-content">
       <Content />
@@ -33,13 +59,65 @@ const { Content } = await bio.render();
 <style>
   .about-container {
     display: flex;
-    gap: 2rem;
+    flex-direction: row;
+    gap: 3rem;
     align-items: start;
   }
 
   .polaroid-wrapper {
     flex-shrink: 0;
-    margin-top: 0.5rem;
+    width: 220px;
+    position: relative;
+    min-height: 280px;
+  }
+
+  .click-indicator {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.6rem;
+    background: rgba(var(--bg-rgb), 0.8);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(var(--border), 0.1);
+    border-radius: 6px;
+    font-size: 0.7rem;
+    color: rgb(var(--muted));
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+
+  .polaroid-item {
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .polaroid-item:hover {
+    transform: scale(1.05);
+  }
+
+  .polaroid-wrapper:hover .click-indicator {
+    opacity: 1;
+    bottom: 5px;
+  }
+
+  /* Stack all photos on top of each other, only z-index changes */
+  .polaroid-item[data-index="0"] {
+    z-index: 1;
+  }
+
+  .polaroid-item[data-index="1"] {
+    z-index: 2;
+  }
+
+  .polaroid-item[data-index="2"] {
+    z-index: 3;
   }
 
   .bio-content {
@@ -52,11 +130,83 @@ const { Content } = await bio.render();
       flex-direction: column;
       align-items: center;
     }
-    
+
     .polaroid-wrapper {
+      width: auto;
       margin-bottom: 1.5rem;
     }
   }
+
+  /* Apply underlined list styling to ALL lists (coursework and clubs) */
+  .bio-content :global(ul) {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    margin-top: 0.5rem;
+    margin-left: 1.5rem;
+    padding-left: 1rem;
+    border-left: 2px solid rgba(167, 139, 250, 0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .bio-content :global(ul li) {
+    display: block;
+    padding: 0.5rem 0;
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: rgb(var(--fg));
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+  }
+
+  .bio-content :global(ul li:last-child) {
+    border-bottom: none;
+  }
+
+  /* Support for links in lists */
+  .bio-content :global(ul li a) {
+    color: inherit;
+    text-decoration: none;
+    display: block;
+    transition: color 0.2s ease;
+  }
+
+  .bio-content :global(ul li:hover),
+  .bio-content :global(ul li a:hover) {
+    color: #6e44ff;
+  }
+
+  /* Dark mode adjustments */
+  :global(.dark) .bio-content :global(ul) {
+    border-left-color: rgba(167, 139, 250, 0.4);
+  }
+
+  :global(.dark) .bio-content :global(ul li) {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+
+  :global(.dark) .bio-content :global(ul li:hover),
+  :global(.dark) .bio-content :global(ul li a:hover) {
+    color: #a78bfa;
+  }
 </style>
 
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const polaroidItems = document.querySelectorAll('.polaroid-item');
+    const totalItems = polaroidItems.length;
 
+    polaroidItems.forEach((item) => {
+      item.addEventListener('click', () => {
+        // Cycle all items: increment each index, wrap around to 0 after reaching max
+        polaroidItems.forEach((polaroid) => {
+          const currentIndex = parseInt(polaroid.getAttribute('data-index') || '0');
+          const nextIndex = (currentIndex + 1) % totalItems;
+          polaroid.setAttribute('data-index', nextIndex.toString());
+        });
+      });
+    });
+  });
+</script>

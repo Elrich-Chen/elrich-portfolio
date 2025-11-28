@@ -3,21 +3,31 @@ import ThemeToggle from './ThemeToggle.astro';
 
 const { pathname } = Astro.url;
 const isActive = (href: string) => pathname === href;
+
+const navLinks = [
+  { href: '/projects', text: 'Projects' },
+  { href: '/about', text: 'About' },
+  { href: '/photos', text: 'Photos' },
+  { href: '/hobbies', text: 'Hobbies' },
+  {
+    href: 'https://drive.google.com/drive/folders/1JB5jWDtohn4ddSp5ro-jeZshZw2Q-5lc?usp=share_link',
+    text: 'Resume',
+    isExternal: true,
+  },
+];
 ---
 
 <nav class="flex items-center justify-end text-sm gap-4">
-  <span class="flex items-center gap-1">
-    <a href="/projects" aria-current={isActive('/projects') ? 'page' : undefined} class="nav-link {isActive('/projects') ? 'nav-active' : ''}">Projects</a>
-    <span class="mx-1 text-neutral-300">|</span>
-    <a href="/about" aria-current={isActive('/about') ? 'page' : undefined} class="nav-link {isActive('/about') ? 'nav-active' : ''}">About me</a>
-    <span class="mx-1 text-neutral-300">|</span>
-    <a href="/photos" aria-current={isActive('/photos') ? 'page' : undefined} class="nav-link {isActive('/photos') ? 'nav-active' : ''}">Photos</a>
-    <span class="mx-1 text-neutral-300">|</span>
-    <a href="/hobbies" aria-current={isActive('/hobbies') ? 'page' : undefined} class="nav-link {isActive('/hobbies') ? 'nav-active' : ''}">Hobbies</a>
-    <span class="mx-1 text-neutral-300">|</span>
-    <a href="https://drive.google.com/drive/folders/1JB5jWDtohn4ddSp5ro-jeZshZw2Q-5lc?usp=share_link" target="_blank" rel="noopener noreferrer" class="nav-link">Resume</a>
-  </span>
+  <div class="flex items-center gap-4">
+    {navLinks.map((link) => (
+      <a
+        href={link.href}
+        aria-current={!link.isExternal && isActive(link.href) ? 'page' : undefined}
+        class:list={['nav-link', { 'nav-active': !link.isExternal && isActive(link.href) }]}
+        target={link.isExternal ? '_blank' : undefined}
+        rel={link.isExternal ? 'noopener noreferrer' : undefined}
+      >{link.text}</a>
+    ))}
+  </div>
   <ThemeToggle />
 </nav>
-
-

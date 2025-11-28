@@ -17,9 +17,17 @@ Relevant Coursework:
 - CS 136: Elementary Algorithm Design and Data Abstraction
 - STAT 230: Introductory Statistics
 - COMMST 223: Public Speaking
+- MGMT 171: Personal Finance (Investing, Law, Saving)
 
-**Queen's University** | Pre-University Studies  
+**Queen's University** | Pre-University Studies
 *2023 - 2024*
+
+Clubs & Societies:
+- Queen's Orientation Leader
+- Synapsis Biotech Club
+- COMPSA Queens
+- Queen's UX (Hackathon Lead)
+- QTMA (Product Developer)
 
 Relevant Coursework:
 - CISC 121: Programming in Python

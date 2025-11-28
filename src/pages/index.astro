@@ -149,6 +149,12 @@ function formatStatsAndCompanies(text: string) {
             mainPoint = item.point || '';
             subPoints = item.details || [];
           }
+
+          // Inject the new sub-bullet point for TechPlus UW
+          if (mainPoint.includes('TechPlus UW')) {
+            const newSubPoint = "Organised mentorship & dinner for <strong><em>200+</em></strong> members for the F25 term.";
+            subPoints.unshift(newSubPoint); // Add to the beginning of the list
+          }
           
           const parts = mainPoint.split(/\[LOGO:([^\]]+)\]/g);
           
@@ -250,14 +256,14 @@ function formatStatsAndCompanies(text: string) {
     position: fixed;
     right: 10rem;
     top: 40%;
-    z-index: 40;
-    transform: rotate(-3deg);
+    z-index: 50;
+    transform: rotate(-4deg);
     transition: all 0.3s ease;
   }
 
   .signpost-content {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     gap: 0.75rem;
     padding: 1rem 1.25rem;
@@ -267,13 +273,13 @@ function formatStatsAndCompanies(text: string) {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     text-decoration: none;
     backdrop-filter: blur(10px);
+    font-family: 'Inter', sans-serif; /* Or your preferred modern font */
   }
 
   .signpost-text {
     font-size: 0.95rem;
     font-weight: 600;
     color: #333;
-    letter-spacing: 0.02em;
   }
 
   .video-signpost:hover {
@@ -282,7 +288,6 @@ function formatStatsAndCompanies(text: string) {
 
   .video-signpost:hover .signpost-content {
     background: rgba(255, 255, 255, 1);
-    border-color: rgba(0, 0, 0, 0.3);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   }
 
@@ -291,12 +296,12 @@ function formatStatsAndCompanies(text: string) {
   }
 
   .arrow-bounce {
-    animation: bounce 1.5s ease-in-out infinite;
+    animation: bounce-horizontal 1.5s ease-in-out infinite;
     color: #666;
   }
 
   .video-signpost:hover .arrow-bounce {
-    color: #000;
+    color: #333;
     animation: bounce 0.8s ease-in-out infinite;
   }
 
@@ -306,6 +311,15 @@ function formatStatsAndCompanies(text: string) {
     }
     50% {
       transform: translateY(8px);
+    }
+  }
+
+  @keyframes bounce-horizontal {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(4px);
     }
   }
 
