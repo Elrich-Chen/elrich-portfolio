@@ -12,8 +12,8 @@ highlights:
   - Built scalable OOP architecture for multiple game scenarios
 role: Machine Learning Engineer
 duration: 2 months
+order: 1
 ---
 
 Built Q-Learning reinforcement learning agent trained over 2M+ simulated games achieving 43% win rate. Designed with OOP architecture for scaling to multiple game scenarios.
-
 

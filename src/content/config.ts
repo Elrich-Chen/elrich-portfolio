@@ -39,6 +39,7 @@ const project = defineCollection({
     role: z.string().optional(), // e.g., "Lead Developer", "Full Stack Engineer"
     featured: z.boolean().optional(), // Highlight important projects
     deployed: z.boolean().optional(), // Show "Deployed to Production" badge
+    order: z.number().optional(), // Custom sort order
   }),
 });
 
@@ -102,4 +103,3 @@ const testimonials = defineCollection({
 });
 
 export const collections = { bio, experiences: experience, projects: project, hobbies: hobby, highlights, photos, testimonials };
-
