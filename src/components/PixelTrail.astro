@@ -85,6 +85,7 @@
       let isIdle = false;
       let animationId = null;
       let hasFirstMove = false; // Track if we've had first mouse movement
+      let isPointerOutside = false;
 
       // Update pixel color when theme changes
       const updatePixelColor = () => {
@@ -102,8 +103,34 @@
       });
       observer.observe(document.documentElement, { attributes: true });
 
+      const handleWindowLeave = (event) => {
+        if (event && event.type === 'mouseout') {
+          const related = event.relatedTarget || event.toElement;
+          if (related) return;
+        }
+        isPointerOutside = true;
+        hasFirstMove = false;
+      };
+
+      const handleWindowEnter = (event) => {
+        isPointerOutside = false;
+        hasFirstMove = false;
+        if (event && typeof event.clientX === 'number' && typeof event.clientY === 'number') {
+          mouseX = event.clientX;
+          mouseY = event.clientY;
+          lastMouseX = mouseX;
+          lastMouseY = mouseY;
+          lastMoveTime = Date.now();
+        }
+      };
+
       // Mouse tracking with interpolation
       const handleMouseMove = (e) => {
+        if (isPointerOutside) {
+          isPointerOutside = false;
+          hasFirstMove = false;
+        }
+
         // On first move, don't interpolate from center - just set position
         if (!hasFirstMove) {
           mouseX = e.clientX;
@@ -156,6 +183,9 @@
 
       // Listen to mousemove on window to catch all mouse movements, including over iframes
       window.addEventListener('mousemove', handleMouseMove, { passive: true });
+      window.addEventListener('mouseout', handleWindowLeave);
+      window.addEventListener('mouseleave', handleWindowLeave);
+      window.addEventListener('mouseenter', handleWindowEnter);
 
       // Handle iframe hover issue - when mouse enters iframe, we lose mousemove events
       // Create a transparent overlay that appears when we detect cursor is near/over an iframe
@@ -271,6 +301,9 @@
           iframeOverlay.remove();
         }
         window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseout', handleWindowLeave);
+        window.removeEventListener('mouseleave', handleWindowLeave);
+        window.removeEventListener('mouseenter', handleWindowEnter);
         window.removeEventListener('resize', resizeCanvas);
         observer.disconnect();
         trailMap.clear();
@@ -287,4 +320,3 @@
     }
   })();
 </script>
-

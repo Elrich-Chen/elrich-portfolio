@@ -195,7 +195,8 @@ h2 { @apply text-lg font-medium leading-tight mb-2; }
 }
 
 .highlight-item-group {
-  @apply flex items-start text-sm;
+  @apply flex items-start;
+  font-size: 0.88rem;
   transition: transform 0.2s ease;
 }
 
@@ -206,15 +207,16 @@ h2 { @apply text-lg font-medium leading-tight mb-2; }
 .highlight-main-point {
   @apply leading-relaxed;
   color: rgb(var(--fg));
+  font-size: 0.92rem;
 }
 
 .highlight-sub-points {
-  @apply mt-1.5 ml-6 space-y-1;
+  @apply mt-1.5 ml-6 space-y-2.5;
   list-style: none;
 }
 
 .highlight-sub-item {
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   line-height: 1.6;
   color: rgb(var(--fg));
   opacity: 0.9;
@@ -255,7 +257,7 @@ h2 { @apply text-lg font-medium leading-tight mb-2; }
 }
 
 .highlight-item-group strong {
-  font-weight: 600;
+  font-weight: 500;
   color: rgb(var(--fg));
 }
 
@@ -336,6 +338,13 @@ h2 { @apply text-lg font-medium leading-tight mb-2; }
   transition: opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease;
   vertical-align: middle;
   filter: brightness(1.1) contrast(1.15);
+}
+
+.highlight-main-point .logo-placeholder,
+.highlight-sub-item .logo-placeholder {
+  width: 18px;
+  height: 18px;
+  vertical-align: -0.1em;
 }
 
 .highlight-item:hover .logo-placeholder {
@@ -450,5 +459,3 @@ a:focus-visible, button:focus-visible { @apply outline-none ring-2 ring-neutral-
     transition-duration: 0.01ms !important;
   }
 }
-
-

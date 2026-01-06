@@ -1,7 +1,6 @@
 ---
 title: Why chess? (Sorry Supercell)
 date: "2025-10-29"
-tags: [chess]
 summary: Practiced tactics; aiming for 1400 rapid.
 ---
 

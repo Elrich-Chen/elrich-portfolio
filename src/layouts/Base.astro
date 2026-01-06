@@ -2,9 +2,37 @@
 const { title = 'Elrich Chen', description = 'Builder. Engineer. Founder.', meta = [], showSignature = false, showContactForm = false } = Astro.props;
 import Nav from '../components/Nav.astro';
 import Signature from '../components/Signature.astro';
-import SideContact from '../components/SideContact.astro';
 import PixelTrail from '../components/PixelTrail.astro';
+import Polaroid from '../components/Polaroid.astro';
 import '../styles/global.css';
+
+const contactLinks = [
+  {
+    href: 'mailto:elrichchen123@gmail.com',
+    label: 'Email',
+    icon: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm0 2v.01L12 13l8-5.99V7H4z"/></svg>`,
+  },
+  {
+    href: 'https://github.com/Elrich-Chen',
+    label: 'GitHub',
+    icon: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>`,
+  },
+  {
+    href: 'https://linkedin.com/in/elrichchen',
+    label: 'LinkedIn',
+    icon: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>`,
+  },
+  {
+    href: 'https://x.com/ChenElrich_',
+    label: 'X',
+    icon: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,
+  },
+  {
+    href: 'https://drive.google.com/drive/folders/1JB5jWDtohn4ddSp5ro-jeZshZw2Q-5lc?usp=share_link',
+    label: 'Resume',
+    icon: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 15h8v2H8v-2zm0-4h8v2H8v-2zm0-4h5v2H8V7z"/></svg>`,
+  },
+];
 ---
 
 <html lang="en" class="bg-[rgb(var(--bg))] text-[rgb(var(--fg))]">
@@ -38,7 +66,6 @@ import '../styles/global.css';
       <span class="text-sm text-neutral-500">Loading</span>
     </div>
     <PixelTrail />
-    <SideContact />
     <div class="prose-measure">
       <header class="py-6 border-b border-neutral-200 relative">
         <div class="flex items-center justify-between">
@@ -55,50 +82,37 @@ import '../styles/global.css';
       </main>
     </div>
     {showContactForm && (
-      <footer class="prose-measure pb-32" id="contact-form">
-        <div class="border-t border-neutral-200 pt-8">
-          <h2 class="text-xl font-semibold mb-3 tracking-tight">◆ Get in Touch:</h2>
-          <p class="text-base text-neutral-700 mb-6 leading-relaxed">
-            Have a project idea or want to chat? Fill out the form below or reach out directly at <a href="mailto:elrichchen123@gmail.com" class="font-medium text-neutral-900 underline hover:text-black transition-colors">elrichchen123@gmail.com</a>
-          </p>
-          <form class="contact-form space-y-4 mb-6" action="https://formspree.io/f/mvgvdayo" method="POST">
-            <div class="flex flex-col gap-2">
-              <label for="name" class="text-sm text-neutral-700">Name</label>
-              <input 
-                type="text" 
-                id="name" 
-                name="name" 
-                required
-                class="contact-input px-3 py-2 border border-neutral-300 rounded-sm bg-transparent text-sm focus:outline-none focus:border-neutral-500 transition-colors"
-              />
+      <footer class="prose-measure pb-32" id="contact-card">
+        <div class="email-card">
+          <div class="email-card-copy">
+            <p class="email-card-eyebrow">◆ Email</p>
+            <h2 class="email-card-title">Let’s connect.</h2>
+            <p class="email-card-text">
+              Reach me directly at <a href="mailto:elrichchen123@gmail.com" class="email-card-inline">elrichchen123@gmail.com</a>.
+            </p>
+            <a href="mailto:elrichchen123@gmail.com" class="email-card-link">Send an email</a>
+          </div>
+          <div class="email-card-polaroid">
+            <Polaroid
+              src="/photos/elrich_photos/Elrich_Headshot.png"
+              alt="Elrich Chen"
+              caption="Say hi"
+              rotation={-2}
+            />
+            <div class="email-card-icons" aria-label="Social links">
+              {contactLinks.map((link) => (
+                <a
+                  href={link.href}
+                  aria-label={link.label}
+                  class="email-card-icon"
+                  target={link.href.startsWith('mailto:') ? undefined : '_blank'}
+                  rel={link.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+                >
+                  <span class="email-card-icon-svg" set:html={link.icon}></span>
+                </a>
+              ))}
             </div>
-            <div class="flex flex-col gap-2">
-              <label for="email" class="text-sm text-neutral-700">Email</label>
-              <input 
-                type="email" 
-                id="email" 
-                name="email" 
-                required
-                class="contact-input px-3 py-2 border border-neutral-300 rounded-sm bg-transparent text-sm focus:outline-none focus:border-neutral-500 transition-colors"
-              />
-            </div>
-            <div class="flex flex-col gap-2">
-              <label for="message" class="text-sm text-neutral-700">Message</label>
-              <textarea 
-                id="message" 
-                name="message" 
-                rows="4"
-                required
-                class="contact-input px-3 py-2 border border-neutral-300 rounded-sm bg-transparent text-sm focus:outline-none focus:border-neutral-500 transition-colors resize-none"
-              ></textarea>
-            </div>
-            <button 
-              type="submit"
-              class="contact-submit px-4 py-2 bg-neutral-900 text-white rounded-sm text-sm hover:bg-neutral-800 transition-colors mt-2"
-            >
-              Send Message
-            </button>
-          </form>
+          </div>
         </div>
       </footer>
     )}
@@ -123,5 +137,164 @@ import '../styles/global.css';
         setTimeout(hideLoading, 1000);
       }
     </script>
+    <style>
+      .email-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2.5rem;
+        padding: 2.5rem;
+        border: 1px solid rgba(var(--border), 0.2);
+        border-radius: 18px;
+        background: rgba(var(--bg), 0.6);
+        backdrop-filter: blur(8px);
+      }
+
+      .email-card-copy {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .email-card-eyebrow {
+        margin: 0 0 0.6rem;
+        font-size: 0.75rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgb(var(--muted));
+        font-weight: 600;
+      }
+
+      .email-card-title {
+        margin: 0 0 0.5rem;
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: rgb(var(--fg));
+      }
+
+      .email-card-text {
+        margin: 0 0 1.2rem;
+        color: rgb(var(--muted));
+        font-size: 0.98rem;
+        line-height: 1.6;
+      }
+
+      .email-card-inline {
+        color: rgb(var(--fg));
+        font-weight: 600;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(var(--border), 0.3);
+      }
+
+      .email-card-inline:hover {
+        color: rgb(var(--fg));
+        border-bottom-color: rgba(var(--border), 0.6);
+      }
+
+      .email-card-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.55rem 1.1rem;
+        border-radius: 999px;
+        border: 1px solid rgba(var(--border), 0.25);
+        color: rgb(var(--fg));
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.7);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      }
+
+      .email-card-link:hover {
+        transform: translateY(-1px);
+        border-color: rgba(var(--border), 0.5);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      }
+
+      .email-card-polaroid .polaroid {
+        margin-top: 0;
+      }
+
+      .email-card-polaroid :global(.polaroid-photo img) {
+        transform: scale(1.25);
+        transform-origin: 50% 30%;
+        filter: brightness(1.28) contrast(1.05) saturate(1.05);
+      }
+
+      .email-card-icons {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-top: 0.9rem;
+      }
+
+      .email-card-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: rgb(var(--fg));
+        border: 1px solid rgba(var(--border), 0.2);
+        text-decoration: none;
+        transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      }
+
+      .email-card-icon:hover {
+        transform: translateY(-2px);
+        border-color: rgba(var(--border), 0.5);
+        background: rgba(var(--border), 0.08);
+      }
+
+      .email-card-icon-svg {
+        display: inline-flex;
+        width: 16px;
+        height: 16px;
+      }
+
+      .email-card-icon svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      :global(html.dark) .email-card {
+        border-color: rgba(255, 255, 255, 0.12);
+        background: rgba(16, 16, 16, 0.7);
+      }
+
+      :global(html.dark) .email-card-link {
+        background: rgba(26, 26, 26, 0.8);
+        border-color: rgba(255, 255, 255, 0.15);
+      }
+
+      :global(html.dark) .email-card-icon {
+        border-color: rgba(255, 255, 255, 0.2);
+        background: rgba(12, 12, 12, 0.4);
+      }
+
+      :global(html.dark) .email-card-icon:hover {
+        border-color: rgba(255, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      :global(html.dark) .email-card-link:hover {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+      }
+
+      @media (max-width: 768px) {
+        .email-card {
+          flex-direction: column;
+          align-items: flex-start;
+          padding: 2rem;
+        }
+
+        .email-card-polaroid {
+          width: 100%;
+          display: flex;
+          justify-content: flex-start;
+        }
+      }
+    </style>
   </body>
 </html>

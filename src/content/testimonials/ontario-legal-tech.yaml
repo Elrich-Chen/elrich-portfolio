@@ -5,3 +5,7 @@ text: "Great work! You understood a complex task, and made it exactly as needed!
 date: "May 2025"
 rating: 5
 project: "Document Generation Website Enhancement"
+techStack:
+  - "Automation"
+  - "Typescript"
+  - "Next.js, React"

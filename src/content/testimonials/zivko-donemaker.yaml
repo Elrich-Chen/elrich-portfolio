@@ -6,3 +6,8 @@ text: "Elrich has strong knowledge of API calls, database automation, and LLMs. 
 date: "November 2024"
 rating: 5
 project: "AI Agents Development and n8n Workflows"
+techStack:
+  - "Notion API"
+  - "LLMs"
+  - "n8n"
+  - "Email Webhooks"

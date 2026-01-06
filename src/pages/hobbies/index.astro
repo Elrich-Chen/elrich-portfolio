@@ -2,7 +2,20 @@
 import Base from '../../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 const posts = await getCollection('hobbies');
-const allTags = Array.from(new Set(posts.flatMap(p => p.data.tags || []))).sort();
+const entries = await Promise.all(
+  posts.map(async (entry) => {
+    const { Content } = await entry.render();
+    return { entry, Content };
+  })
+);
+const sortedEntries = entries.sort((a, b) => {
+  const dateA = Date.parse(a.entry.data.date || '');
+  const dateB = Date.parse(b.entry.data.date || '');
+  if (Number.isNaN(dateA) || Number.isNaN(dateB)) {
+    return 0;
+  }
+  return dateB - dateA;
+});
 ---
 
 <Base title="Hobbies – Elrich Chen">
@@ -10,56 +23,180 @@ const allTags = Array.from(new Set(posts.flatMap(p => p.data.tags || []))).sort(
     <a href="/" class="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">← Back to home</a>
   </div>
   <h1 class="text-xl font-semibold mb-4">Hobbies</h1>
-  {allTags.length > 0 && (
-    <p class="mb-6 text-sm hobby-tags-text">
-      Tags:
-      {allTags.map(t => (
-        <a href={`/hobbies/tags/${t}`} class="ml-2 underline">{t}</a>
-      ))}
-    </p>
-  )}
 
-  <ul class="space-y-4">
-    {posts
-      .sort((a,b)=> a.data.date.localeCompare(b.data.date) * -1)
-      .map((p) => (
-      <li>
-        <a href={`/hobbies/${p.slug}`} class="hobby-link font-medium">{p.data.title}</a>
-        <span class="hobby-date ml-2">{p.data.date}</span>
-        {p.data.summary && <p class="hobby-summary">{p.data.summary}</p>}
-      </li>
+  <div class="hobby-grid">
+    {sortedEntries.map(({ entry, Content }) => (
+      <details class="hobby-card hobby-details">
+        <summary class="hobby-summary-toggle">
+          <div class="hobby-head">
+            <div>
+              <h2 class="hobby-title">{entry.data.title}</h2>
+              <p class="hobby-date">{entry.data.date}</p>
+            </div>
+          </div>
+          {entry.data.summary && <p class="hobby-summary">{entry.data.summary}</p>}
+          {entry.data.tags?.length > 0 && (
+            <div class="hobby-tags hobby-tags-bottom">
+              {entry.data.tags.map((tag: string) => (
+                <span class="hobby-tag">{tag}</span>
+              ))}
+            </div>
+          )}
+          <span class="hobby-toggle" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 8l4 4 4-4" />
+            </svg>
+          </span>
+        </summary>
+        <div class="hobby-body">
+          <Content />
+        </div>
+      </details>
     ))}
-  </ul>
+  </div>
 </Base>
 
 <style>
-  .hobby-link {
-    text-decoration: underline;
-    text-decoration-color: rgba(var(--border), 0.3);
-    text-underline-offset: 2px;
-    transition: all 0.2s ease;
-    color: rgb(var(--fg));
+  .hobby-grid {
+    display: grid;
+    gap: 1.2rem;
   }
 
-  .hobby-link:hover {
-    text-decoration-color: rgba(var(--border), 0.6);
+  .hobby-card {
+    border-radius: 16px;
+    border: 1px solid rgba(var(--border), 0.16);
+    padding: 1.2rem 1.4rem;
+    background: rgba(var(--bg), 0.75);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  :global(html.dark) .hobby-card {
+    background: rgba(var(--bg), 0.6);
+    border-color: rgba(var(--border), 0.3);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
+  }
+
+  .hobby-card[open] {
+    border-color: rgba(var(--border), 0.3);
+    box-shadow: 0 18px 34px rgba(15, 23, 42, 0.12);
+  }
+
+  .hobby-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.8rem;
+  }
+
+  .hobby-title {
+    margin: 0;
+    font-size: 1.05rem;
     color: rgb(var(--fg));
   }
 
   .hobby-date {
+    margin: 0.3rem 0 0;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgb(var(--muted));
+  }
+
+  .hobby-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .hobby-tags-bottom {
+    align-self: flex-start;
+    justify-content: flex-start;
+    margin-top: 0.6rem;
+  }
+
+  .hobby-tag {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(var(--border), 0.08);
     color: rgb(var(--fg));
-    opacity: 0.85;
+  }
+
+  .hobby-summary-toggle {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    color: inherit;
+    border: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    padding-right: 2.5rem;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .hobby-summary-toggle:hover {
+    color: rgb(var(--fg));
+  }
+
+  .hobby-summary-toggle::-webkit-details-marker {
+    display: none;
+  }
+
+  .hobby-summary-toggle::marker {
+    content: '';
   }
 
   .hobby-summary {
+    margin: 0.7rem 0 0;
+    font-size: 0.92rem;
+    line-height: 1.6;
     color: rgb(var(--fg));
-    opacity: 0.9;
   }
 
-  .hobby-tags-text {
+  .hobby-toggle {
+    position: absolute;
+    top: -0.2rem;
+    right: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--border), 0.08);
+    border: 1px solid rgba(var(--border), 0.2);
+    color: rgb(var(--muted));
+    transition: transform 0.2s ease, color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  }
+
+  .hobby-toggle svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .hobby-card[open] .hobby-toggle {
+    transform: rotate(180deg);
     color: rgb(var(--fg));
-    opacity: 0.9;
+    background: rgba(var(--border), 0.14);
+    border-color: rgba(var(--border), 0.3);
+  }
+
+  .hobby-body {
+    margin-top: 0.9rem;
+    font-size: 0.9rem;
+    color: rgb(var(--muted));
+    line-height: 1.65;
+  }
+
+  .hobby-body :global(p) {
+    margin: 0 0 0.9rem;
+  }
+
+  .hobby-body :global(p:last-child) {
+    margin-bottom: 0;
   }
 </style>
-
-

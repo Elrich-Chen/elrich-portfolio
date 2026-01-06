@@ -1,24 +1,28 @@
 what_makes_me_different:
+  - point: "Transferred from [LOGO:queensu] QueensU to [LOGO:uwaterloo] UWaterloo for Computer Science"
 
-  - "Built legal software tools at Ontario Legal Tech enabling lawyers to process Personal Injury cases efficiently (TypeScript, Next.js)"
+  - point: "Enganing in Client work with 2 early‑stage startups in 1 Year (2025)"
+    details:
+      - "Software tooling at Ontario Legal Tech: Enabled lawyers to efficiently process Personal Injury cases (TypeScript, Next.js)"
+      - "AI automations for [LOGO:zivko] DoneMaker: Streamlining client conversion, saving 5 hours/week with Make, Notion, and Gmail integrations"
 
-  - "Designed governance portal for 2000+ Queen's Computing students at [LOGO:compsa] COMPSA, improving access to resources (Figma, TailwindCSS)"
+  - point: "Designed governance portal for 2000+ Queen's University Computing students at [LOGO:compsa] Queen's COMPSA"
 
-  - "Secured 3rd place among 20+ teams in Miami Heat case competition through [LOGO:qsao] NBA data analysis (Pandas, NumPy)"
+  - point: "Secured 3rd place among 20+ teams in [LOGO:qsao] Queen's University NBA Data Analytics case competition"
 
-  - "Mentored 10+ global learners in Python fundamentals as [LOGO:stanford] Stanford Code in Place Section Leader"
+  - point: "Mentored 200+ students at [LOGO:UofT2] University of Toronto Engineering Outreach as Residence Counsellor for Engineering Outreach Team"
+  
 
-  - "Enhanced camp experience for 200+ students at [LOGO:UofT2] University of Toronto Engineering Outreach as Residence Counsellor"
-
-  - "Led Hakka-Chinese culture preservation initiative for 200+ people in India through Chinese Lion Dancing"
 
 building:
-  - "AI automations for [LOGO:zivko] DoneMaker: Streamlining client conversion with Make, Notion, and Gmail integrations"
+  - point: "[LINK:https://accessibility-quick-scan.vercel.app]Accessibility QuickScan[/LINK] : Web tool helping websites verify WCAG compliance through HTML analysis (TypeScript, React, Next.js)"
 
-  - "[LINK:https://accessibility-quick-scan.vercel.app]Accessibility QuickScan[/LINK]: Web tool helping websites verify WCAG compliance through HTML analysis (TypeScript, React, Next.js)"
+  - point: "[LINK: https://www.linkedin.com/feed/update/urn:li:activity:7377847789801590784/] Jupyter Notebook Documentation tool [/LINK]: AI-assisted in-place documentation reducing context-switching for data scientists (TypeScript, Ollama, JupyterAI)"
 
-  - "Jupyter docs tool: AI-assisted in-place documentation reducing context-switching for data scientists"
+  - point: "[LOGO:uw_dsc] UW Data Science Events Coordinator: Planning and executing networking and technical events to enrich the student community"
 
-  - "[LOGO:techplusuw] Tech Plus UW: Internal tools and application processing systems as Logistics Organizer"
+  - point: "[LOGO:techplusuw] Tech Plus UW: Product Manager"
+    details:
+      - "Spearheading the internal tooling system and the development of the club website."
 
-  - "[LOGO:fintech] UW FinTech: Marketing campaigns and event outreach as Outreach Associate"
+  - point: "[LOGO:fintech] UW FinTech: Marketing campaigns and event outreach as Outreach Associate"

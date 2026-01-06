@@ -97,9 +97,9 @@ const testimonials = defineCollection({
     date: z.string(),
     rating: z.number().min(1).max(5),
     project: z.string().optional(),
+    techStack: z.array(z.string()).optional(),
   }),
 });
 
 export const collections = { bio, experiences: experience, projects: project, hobbies: hobby, highlights, photos, testimonials };
-
 

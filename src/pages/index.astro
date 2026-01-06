@@ -5,13 +5,27 @@ import HeroLoom from '../components/HeroLoom.astro';
 import { getEntry, getCollection } from 'astro:content';
 const highlights = await getEntry('highlights', 'home');
 const testimonials = await getCollection('testimonials');
+const carouselItems = (() => {
+  if (testimonials.length === 0) {
+    return [];
+  }
+  if (testimonials.length >= 6) {
+    return testimonials;
+  }
+  const repeated: typeof testimonials = [];
+  while (repeated.length < 6) {
+    repeated.push(...testimonials);
+  }
+  return repeated.slice(0, 6);
+})();
 
 // Company data with URLs and logos
 const companyData: Record<string, { url: string; logo?: string }> = {
   'Ontario Legal Tech': { url: 'https://ontariomandatorymediation.my.canva.site/ontario-court-helper'},
-  "Queen's COMPSA": { url: 'https://compsa.queensu.ca', logo: 'compsa' },
+  "Queen's COMPSA": { url: 'https://compsa.ca/', logo: 'compsa' },
   'DoneMaker': { url: 'https://donemaker.com', logo: 'zivko' },
   'UWaterloo': { url: 'https://uwaterloo.ca', logo: 'uwaterloo' },
+  'QueensU': { url: 'http://queensu.ca/', logo: 'queenu' },
   'University of Toronto Engineering Outreach': { url: 'https://outreach.engineering.utoronto.ca', logo: 'uoft2' },
   'TypeScript': { url: 'https://www.typescriptlang.org' },
   'Next.js': { url: 'https://nextjs.org' },
@@ -30,7 +44,8 @@ const companyData: Record<string, { url: string; logo?: string }> = {
   "Queen's Sports Analytics Organization" : { url: 'https://www.instagram.com/p/DH4J-30SmkA/?img_index=6', logo: 'qsao'},
   'Chinese Lion Dancing' : {url : 'https://www.chinadailyhk.com/hk/article/603804'},
   'Tech Plus UW' : {url : 'https://www.techplusuw.com', logo: 'techplusuw'},
-  'UW FinTech' : {url : 'https://www.instagram.com/uwfintech/?hl=en', logo: 'fintech'}
+  'UW FinTech' : {url : 'https://www.instagram.com/uwfintech/?hl=en', logo: 'fintech'},
+  'UW Data Science' : {url: 'https://www.uwdatascience.ca/', logo: 'uw_dsc'}
 };
 
 // Function to bold+italicize stats and make companies clickable with bold+italic
@@ -42,15 +57,57 @@ function formatStatsAndCompanies(text: string) {
   let result = text.replace(statPattern, '<strong><em>$1</em></strong>');
 
   // Support custom project links: [LINK:url]text[/LINK] - MUST come before "View project →" replacement
-  result = result.replace(/\[LINK:([^\]]+)\](.+?)\[\/LINK\]/gi, '<a href="$1" class="view-project-link">$2</a>');
+  result = result.replace(
+    /\[LINK:\s*([^\]]+?)\s*\](.+?)\[\/LINK\]/gi,
+    '<a href="$1" class="company-link" target="_blank" rel="noopener noreferrer"><strong><em>$2</em></strong></a>'
+  );
 
-  // Process company names
-  Object.keys(companyData).forEach(company => {
-    const escapedCompany = company.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const companyRegex = new RegExp(`(${escapedCompany})`, 'gi');
-    const data = companyData[company];
-    result = result.replace(companyRegex, `<a href="${data.url}" target="_blank" rel="noopener" class="company-link"><strong><em>$1</em></strong></a>`);
+  // Render inline logos in sub-points
+  result = result.replace(/\[LOGO:([^\]]+)\]/gi, (_, logoName) => {
+    const safeName = String(logoName).trim();
+    const fileName = safeName.toLowerCase().replace(/\s+/g, '-');
+    return `<img src="/logos/${fileName}.png" alt="${safeName}" width="20" height="20" loading="lazy" class="inline-block align-middle mx-1 logo-placeholder" onerror="this.style.display='none'" />`;
   });
+
+  // Process company names without touching existing HTML or nested links
+  const companyKeys = Object.keys(companyData).sort((a, b) => b.length - a.length);
+  const companyMap = new Map(companyKeys.map((key) => [key.toLowerCase(), key]));
+  const companyPattern = new RegExp(
+    `(${companyKeys.map((key) => key.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')).join('|')})`,
+    'gi'
+  );
+  const tokens = result.split(/(<[^>]+>)/g);
+  let insideAnchor = false;
+  const rebuilt: string[] = [];
+
+  for (const token of tokens) {
+    if (/^<a\b/i.test(token)) {
+      insideAnchor = true;
+      rebuilt.push(token);
+      continue;
+    }
+    if (/^<\/a/i.test(token)) {
+      insideAnchor = false;
+      rebuilt.push(token);
+      continue;
+    }
+    if (token.startsWith('<') || insideAnchor) {
+      rebuilt.push(token);
+      continue;
+    }
+
+    const updated = token.replace(companyPattern, (match) => {
+      const key = companyMap.get(match.toLowerCase());
+      if (!key) {
+        return match;
+      }
+      const data = companyData[key];
+      return `<a href="${data.url}" target="_blank" rel="noopener" class="company-link"><strong><em>${match}</em></strong></a>`;
+    });
+    rebuilt.push(updated);
+  }
+
+  result = rebuilt.join('');
 
   // Convert "View project →" into a link to /projects (fallback) - comes LAST
   result = result.replace(/View project\s*→/gi, '<a href="/projects" class="view-project-link">View project →</a>');
@@ -61,8 +118,8 @@ function formatStatsAndCompanies(text: string) {
 
 <Base title="Elrich Chen" description="CS @ UWaterloo | AI automations for DoneMaker | Aspiring Backend Engineer" showSignature={true} showContactForm={true}>
 
-  <!-- Video signpost - sticky on right side for desktop -->
-  <a href="#intro-video" class="video-signpost hidden lg:block">
+  {/* Video signpost - sticky on right side for desktop */}
+  {/* <a href="#intro-video" class="video-signpost hidden lg:block">
     <div class="signpost-content">
       <span class="signpost-text">Watch me!</span>
       <svg class="arrow-bounce" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -70,11 +127,11 @@ function formatStatsAndCompanies(text: string) {
         <polyline points="19 12 12 19 5 12"></polyline>
       </svg>
     </div>
-  </a>
+  </a> */}
 
   {highlights?.data?.what_makes_me_different?.length > 0 && (
-    <section class="mb-12 mt-8">
-      <h2 class="section-header mt-2">◆ How I've Grown Through My Work:</h2>
+    <section class="mb-12 mt-8 compact-section">
+      <h2 class="section-header mt-2">◆ How I've Grown:</h2>
       <ul class="highlight-list">
         {highlights.data.what_makes_me_different.map((item: any) => {
           // Support both string (old format) and object (new format with sub-points)
@@ -136,7 +193,7 @@ function formatStatsAndCompanies(text: string) {
   )}
 
   {highlights?.data?.building?.length > 0 && (
-    <section class="mb-12">
+    <section class="mb-12 compact-section">
       <h2 class="section-header">◆ Currently Building:</h2>
       <ul class="highlight-list">
         {highlights.data.building.map((item: any) => {
@@ -202,50 +259,122 @@ function formatStatsAndCompanies(text: string) {
     </section>
   )}
 
-  <div class="mb-12" id="intro-video">
+  {/* <div class="mb-12" id="intro-video">
     <HeroLoom id="ed3b3c692e9d49e59ef4229617141ea1" title="Project Compass - Demo" />
-  </div>
+  </div> */}
 
   {/* Testimonials Section */}
   {testimonials.length > 0 && (
-    <section class="mb-12">
-      <h2 class="section-header">◆ What Clients Say:</h2>
-      <div class="testimonials-grid">
-        {testimonials.map((testimonial) => (
-          <div class="testimonial-card">
-            {/* Rating */}
-            <div class="testimonial-rating">
-              {Array.from({ length: testimonial.data.rating }).map(() => (
-                <span class="star">⭐</span>
-              ))}
-            </div>
-
-            {/* Quote */}
-            <p class="testimonial-text">"{testimonial.data.text}"</p>
-
-            {/* Author Info */}
-            <div class="testimonial-author">
-              {testimonial.data.companyLogo && (
-                <img
-                  src={`/logos/${testimonial.data.companyLogo}.png`}
-                  alt={testimonial.data.company}
-                  class="company-logo"
-                  width="32"
-                  height="32"
-                  loading="lazy"
-                  onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-              )}
-              <div class="author-details">
-                <div class="author-name">{testimonial.data.author}</div>
-                <div class="author-title">{testimonial.data.title}, {testimonial.data.company}</div>
-                {testimonial.data.project && (
-                  <div class="author-project">{testimonial.data.project}</div>
-                )}
+    <section class="mb-12 testimonials-carousel">
+      <div class="testimonials-header">
+        <p class="testimonials-heading">Client References</p>
+        <p class="testimonials-note">Highlights from early-stage startups I've partnered with.</p>
+      </div>
+      <div class="carousel-viewport" role="region" aria-label="Client testimonials carousel">
+        <div class="carousel-track">
+          <div class="carousel-group">
+            {carouselItems.map((testimonial) => (
+              <div class="testimonial-card flip-card" data-flip-card>
+                <button class="flip-trigger" type="button" aria-pressed="false" aria-label="Flip testimonial"></button>
+                <div class="flip-inner">
+                  <div class="flip-face flip-front">
+                    <span class="flip-hint" aria-hidden="true">Flip to read</span>
+                    <div class="testimonial-content">
+                      <div class="preview-top">
+                        <p class="preview-label">Tech stack</p>
+                        <p class="preview-tech">{testimonial.data.techStack?.join(' • ') ?? 'Tech stack inside'}</p>
+                      </div>
+                      <div class="preview-meta">
+                        <span class="preview-person">{testimonial.data.author}</span>
+                        <span class="preview-company">{testimonial.data.company}</span>
+                      </div>
+                      {testimonial.data.project && (
+                        <p class="preview-project">{testimonial.data.project}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div class="flip-face flip-back">
+                    <span class="flip-hint" aria-hidden="true">Flip to close</span>
+                    <div class="testimonial-content">
+                      <p class="testimonial-text">"{testimonial.data.text}"</p>
+                      <div class="testimonial-author">
+                        {testimonial.data.companyLogo && (
+                          <img
+                            src={`/logos/${testimonial.data.companyLogo}.png`}
+                            alt={testimonial.data.company}
+                            class="company-logo"
+                            width="32"
+                            height="32"
+                            loading="lazy"
+                            onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                        )}
+                        <div class="author-details">
+                          <div class="author-name">{testimonial.data.author}</div>
+                          <div class="author-title">{testimonial.data.title}, {testimonial.data.company}</div>
+                          {testimonial.data.project && (
+                            <div class="author-project">{testimonial.data.project}</div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
-        ))}
+          <div class="carousel-group" aria-hidden="true">
+            {carouselItems.map((testimonial) => (
+              <div class="testimonial-card flip-card" data-flip-card>
+                <button class="flip-trigger" type="button" aria-pressed="false" aria-label="Flip testimonial"></button>
+                <div class="flip-inner">
+                  <div class="flip-face flip-front">
+                    <span class="flip-hint" aria-hidden="true">Flip to read</span>
+                    <div class="testimonial-content">
+                      <div class="preview-top">
+                        <p class="preview-label">Tech stack</p>
+                        <p class="preview-tech">{testimonial.data.techStack?.join(' • ') ?? 'Tech stack inside'}</p>
+                      </div>
+                      <div class="preview-meta">
+                        <span class="preview-person">{testimonial.data.author}</span>
+                        <span class="preview-company">{testimonial.data.company}</span>
+                      </div>
+                      {testimonial.data.project && (
+                        <p class="preview-project">{testimonial.data.project}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div class="flip-face flip-back">
+                    <span class="flip-hint" aria-hidden="true">Flip to close</span>
+                    <div class="testimonial-content">
+                      <p class="testimonial-text">"{testimonial.data.text}"</p>
+                      <div class="testimonial-author">
+                        {testimonial.data.companyLogo && (
+                          <img
+                            src={`/logos/${testimonial.data.companyLogo}.png`}
+                            alt={testimonial.data.company}
+                            class="company-logo"
+                            width="32"
+                            height="32"
+                            loading="lazy"
+                            onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                        )}
+                        <div class="author-details">
+                          <div class="author-name">{testimonial.data.author}</div>
+                          <div class="author-title">{testimonial.data.title}, {testimonial.data.company}</div>
+                          {testimonial.data.project && (
+                            <div class="author-project">{testimonial.data.project}</div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   )}
@@ -323,73 +452,327 @@ function formatStatsAndCompanies(text: string) {
     }
   }
 
+  .compact-section .section-header {
+    margin-bottom: 0.55rem;
+    padding-bottom: 0.2rem;
+  }
+
   /* Testimonials Section */
-  .testimonials-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1.5rem;
+  .testimonials-carousel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: min(90vw, 1600px);
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .testimonials-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: center;
+    text-align: center;
+  }
+
+  .testimonials-heading {
+    margin: 0;
+    font-size: 0.85rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: rgb(var(--fg));
+  }
+
+  .testimonials-note {
+    margin: 0;
+    font-size: 0.85rem;
+    color: rgb(var(--muted));
+    max-width: 38ch;
+  }
+
+  .carousel-viewport {
+    --carousel-gap: 1.5rem;
+    --carousel-duration: 200s;
+    overflow: visible;
+    width: 100%;
+  }
+
+  .carousel-track {
+    display: flex;
+    width: max-content;
+    animation: carousel-scroll var(--carousel-duration) linear infinite;
+    will-change: transform;
+  }
+
+  .carousel-group {
+    display: flex;
+    gap: var(--carousel-gap);
+    padding-right: var(--carousel-gap);
   }
 
   .testimonial-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 250, 250, 0.95) 100%);
-    border: 2px solid rgba(0, 0, 0, 0.08);
-    border-left: 4px solid #3b82f6;
-    border-radius: 12px;
-    padding: 1.5rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
     position: relative;
+    border-radius: 16px;
+    width: clamp(320px, 32vw, 460px);
+    min-height: 420px;
+    perspective: 1400px;
+    transform-style: preserve-3d;
+    cursor: pointer;
+    transition: transform 0.3s ease;
   }
 
-  :global(html.dark) .testimonial-card {
-    background: linear-gradient(135deg, rgba(30, 30, 30, 0.95) 0%, rgba(20, 20, 20, 0.95) 100%);
-    border: 2px solid rgba(255, 255, 255, 0.12);
-    border-left: 4px solid #60a5fa;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  .flip-trigger {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 16px;
+  }
+
+  .flip-trigger:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.8);
+    outline-offset: 4px;
+  }
+
+  .flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .testimonial-card.is-flipped .flip-inner {
+    transform: rotateY(180deg);
+  }
+
+  .flip-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 1.7rem 1.6rem;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(226, 238, 255, 0.7) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.28);
+    box-shadow:
+      0 18px 36px rgba(15, 23, 42, 0.18),
+      inset 0 1px 1px rgba(255, 255, 255, 0.7),
+      inset 0 -12px 24px rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(24px) saturate(180%);
+    backface-visibility: hidden;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .flip-face::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0) 70%);
+    opacity: 0.85;
+    pointer-events: none;
+  }
+
+  .flip-face::after {
+    content: '';
+    position: absolute;
+    top: -60%;
+    left: -60%;
+    width: 220%;
+    height: 220%;
+    background: linear-gradient(120deg, transparent 35%, rgba(240, 192, 32, 0.45) 50%, rgba(208, 32, 32, 0.28) 58%, transparent 72%);
+    opacity: 0;
+    transform: translateX(-80%);
+    pointer-events: none;
+  }
+
+  .flip-face > .testimonial-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .flip-front {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(220, 236, 255, 0.76) 100%);
+  }
+
+  .flip-back {
+    transform: rotateY(180deg);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(235, 235, 235, 0.86) 100%);
+  }
+
+  :global(html.dark) .flip-face {
+    background: linear-gradient(135deg, rgba(18, 21, 30, 0.85) 0%, rgba(16, 20, 30, 0.7) 100%);
+    border: 1px solid rgba(96, 165, 250, 0.25);
+    box-shadow:
+      0 18px 40px rgba(0, 0, 0, 0.55),
+      inset 0 1px 1px rgba(255, 255, 255, 0.05),
+      inset 0 -12px 24px rgba(0, 0, 0, 0.45);
+  }
+
+  :global(html.dark) .flip-face::before {
+    background: linear-gradient(140deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0) 75%);
+    opacity: 0.6;
+  }
+
+  :global(html.dark) .flip-face::after {
+    background: linear-gradient(120deg, transparent 0%, rgba(148, 197, 255, 0.55) 45%, transparent 70%);
+  }
+
+  :global(html.dark) .flip-front {
+    background: linear-gradient(135deg, rgba(16, 20, 30, 0.95) 0%, rgba(12, 16, 24, 0.8) 100%);
+  }
+
+  :global(html.dark) .flip-back {
+    background: linear-gradient(135deg, rgba(20, 20, 24, 0.92) 0%, rgba(12, 12, 14, 0.82) 100%);
   }
 
   .testimonial-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    border-left-color: #2563eb;
   }
 
-  :global(html.dark) .testimonial-card:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-    border-left-color: #3b82f6;
+  .testimonial-card:hover .flip-face {
+    box-shadow:
+      0 22px 48px rgba(15, 23, 42, 0.22),
+      inset 0 1px 1px rgba(255, 255, 255, 0.75),
+      inset 0 -14px 28px rgba(15, 23, 42, 0.1);
   }
 
-  .testimonial-rating {
+  :global(html.dark) .testimonial-card:hover .flip-face {
+    box-shadow:
+      0 22px 48px rgba(0, 0, 0, 0.6),
+      inset 0 1px 1px rgba(255, 255, 255, 0.08),
+      inset 0 -14px 28px rgba(0, 0, 0, 0.55);
+  }
+
+  .testimonial-card:hover .flip-face::after {
+    opacity: 0.85;
+    animation: glisten 1.3s ease-in-out infinite;
+  }
+
+  .flip-hint {
+    position: absolute;
+    top: 1rem;
+    right: 1.2rem;
+    z-index: 2;
+    font-size: 0.65rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: rgba(var(--muted), 0.8);
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+  }
+
+  .testimonial-card:hover .flip-hint,
+  .testimonial-card:focus-within .flip-hint {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  :global(html.dark) .flip-hint {
+    color: rgba(248, 250, 252, 0.55);
+  }
+
+  .testimonial-content {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 1.1rem;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .flip-front .testimonial-content {
+    grid-template-rows: auto 1fr auto;
+  }
+
+  .flip-back .testimonial-content {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .preview-top {
     display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .preview-label {
+    margin: 0;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: rgb(var(--muted));
+  }
+
+  .preview-tech {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: rgb(var(--fg));
+    line-height: 1.4;
+  }
+
+  .preview-meta {
+    display: flex;
+    flex-direction: column;
     gap: 0.25rem;
+  }
+
+  .preview-person {
     font-size: 1rem;
+    font-weight: 600;
+    color: rgb(var(--fg));
+  }
+
+  .preview-company {
+    font-size: 0.9rem;
+    color: rgb(var(--muted));
+  }
+
+  .preview-project {
+    margin: 0;
+    font-size: 0.9rem;
+    color: rgb(var(--muted));
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .testimonial-text {
-    font-size: 0.9375rem;
+    font-size: 0.95rem;
     line-height: 1.6;
     color: rgb(var(--fg));
     font-style: italic;
     margin: 0;
     flex: 1;
+    max-width: 36ch;
+    align-self: flex-start;
+    text-align: left;
   }
 
   .testimonial-author {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid rgba(var(--border), 0.08);
+    padding-top: 1rem;
+    padding-bottom: 0.4rem;
+    margin-top: auto;
+    border-top: 1px solid rgba(var(--border), 0.1);
   }
 
   .company-logo {
     border-radius: 6px;
     flex-shrink: 0;
     object-fit: contain;
+    padding-bottom: 1.4rem;
   }
 
   .author-details {
@@ -416,9 +799,46 @@ function formatStatsAndCompanies(text: string) {
     margin-top: 0.125rem;
   }
 
+  @keyframes glisten {
+    0% {
+      transform: translateX(-80%);
+    }
+    100% {
+      transform: translateX(80%);
+    }
+  }
+
+  @keyframes carousel-scroll {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .carousel-track {
+      animation: none;
+    }
+  }
+
   @media (max-width: 640px) {
-    .testimonials-grid {
-      grid-template-columns: 1fr;
+    .carousel-viewport {
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      scroll-snap-type: x mandatory;
+    }
+
+    .carousel-track {
+      animation: none;
+    }
+
+    .carousel-group[aria-hidden="true"] {
+      display: none;
+    }
+
+    .testimonial-card {
+      min-width: 240px;
+      min-height: 360px;
+      scroll-snap-align: start;
     }
   }
 
@@ -432,24 +852,44 @@ function formatStatsAndCompanies(text: string) {
 </style>
 
 <script>
-  // Hide signpost when video is visible
-  const signpost = document.querySelector('.video-signpost');
-  const videoSection = document.querySelector('#intro-video');
+  const initializeInteractiveSections = () => {
+    // Hide signpost when video is visible
+    const signpost = document.querySelector('.video-signpost');
+    const videoSection = document.querySelector('#intro-video');
 
-  if (signpost && videoSection) {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            signpost.classList.add('hidden-when-visible');
-          } else {
-            signpost.classList.remove('hidden-when-visible');
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
+    if (signpost && videoSection) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              signpost.classList.add('hidden-when-visible');
+            } else {
+              signpost.classList.remove('hidden-when-visible');
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
 
-    observer.observe(videoSection);
+      observer.observe(videoSection);
+    }
+
+    const flipCards = document.querySelectorAll('[data-flip-card]');
+    flipCards.forEach((card) => {
+      const trigger = card.querySelector('.flip-trigger');
+      if (!trigger) {
+        return;
+      }
+      trigger.addEventListener('click', () => {
+        const isFlipped = card.classList.toggle('is-flipped');
+        trigger.setAttribute('aria-pressed', String(isFlipped));
+      });
+    });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeInteractiveSections, { once: true });
+  } else {
+    initializeInteractiveSections();
   }
 </script>
