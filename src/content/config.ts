@@ -40,6 +40,7 @@ const project = defineCollection({
     featured: z.boolean().optional(), // Highlight important projects
     deployed: z.boolean().optional(), // Show "Deployed to Production" badge
     order: z.number().optional(), // Custom sort order
+    wide: z.boolean().optional(), // Span two columns on projects grid
   }),
 });
 

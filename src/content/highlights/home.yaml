@@ -15,9 +15,9 @@ what_makes_me_different:
 
 
 building:
-  - point: "[LINK:https://accessibility-quick-scan.vercel.app]Accessibility QuickScan[/LINK] : Web tool helping websites verify WCAG compliance through HTML analysis (TypeScript, React, Next.js)"
-
-  - point: "[LINK: https://www.linkedin.com/feed/update/urn:li:activity:7377847789801590784/] Jupyter Notebook Documentation tool [/LINK]: AI-assisted in-place documentation reducing context-switching for data scientists (TypeScript, Ollama, JupyterAI)"
+  - point: "[LINK:https://peer-cv.vercel.app]PeerCV[/LINK]: Community resume review platform with secure uploads and threaded feedback (FastAPI, Next.js, PostgreSQL, JWT, SQLAlchemy)"
+    details:
+      - "[IMAGE:peer-cv.png|https://peer-cv.vercel.app]"
 
   - point: "[LOGO:uw_dsc] UW Data Science Events Coordinator: Planning and executing networking and technical events to enrich the student community"
 

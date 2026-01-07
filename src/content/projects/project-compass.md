@@ -13,7 +13,7 @@ highlights:
 role: Full-Stack Developer & Accessibility Engineer
 duration: 36 hours (HTV 2025)
 featured: true
-order: 3
+order: 4
 ---
 
 Built a comprehensive accessibility platform at Hack the Valley supporting neurodivergent individuals with multimodal features including text-to-speech, interactive visualizations, and real-time crowd-density mapping. Conducted extensive QA testing to ensure accessibility compliance.

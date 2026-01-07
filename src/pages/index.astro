@@ -31,6 +31,7 @@ const companyData: Record<string, { url: string; logo?: string }> = {
   'Next.js': { url: 'https://nextjs.org' },
   'React': { url: 'https://react.dev' },
   'Flask': { url: 'https://flask.palletsprojects.com' },
+  'FastAPI': { url: 'https://fastapi.tiangolo.com' },
   'TailwindCSS': { url: 'https://tailwindcss.com' },
   'Figma': { url: 'https://www.figma.com' },
   'Python': { url: 'https://www.python.org' },
@@ -40,6 +41,9 @@ const companyData: Record<string, { url: string; logo?: string }> = {
   'Jupyter docs tool': { url: 'https://github.com/Elrich-Chen/jupyterlab_docs_helper' },
   'MongoDB': { url: 'https://www.mongodb.com' },
   'JavaScript': { url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript' },
+  'PostgreSQL': { url: 'https://www.postgresql.org' },
+  'SQLAlchemy': { url: 'https://www.sqlalchemy.org' },
+  'JWT': { url: 'https://jwt.io' },
   'Stanford Code In Place' : { url: 'https://codeinplace.stanford.edu', logo: 'stanford'},
   "Queen's Sports Analytics Organization" : { url: 'https://www.instagram.com/p/DH4J-30SmkA/?img_index=6', logo: 'qsao'},
   'Chinese Lion Dancing' : {url : 'https://www.chinadailyhk.com/hk/article/603804'},
@@ -61,6 +65,17 @@ function formatStatsAndCompanies(text: string) {
     /\[LINK:\s*([^\]]+?)\s*\](.+?)\[\/LINK\]/gi,
     '<a href="$1" class="company-link" target="_blank" rel="noopener noreferrer"><strong><em>$2</em></strong></a>'
   );
+
+  // Support preview images: [IMAGE:filename.png] or [IMAGE:filename.png|https://link]
+  result = result.replace(/\[IMAGE:\s*([^\]|]+?)(?:\|([^\]]+))?\s*\]/gi, (_, fileName, link) => {
+    const safeName = String(fileName).trim().replace(/^\/+/, '');
+    const src = safeName.startsWith('http') ? safeName : `/photos/elrich_photos/${safeName}`;
+    if (link) {
+      const href = String(link).trim();
+      return `<a href="${href}" class="highlight-preview-link" target="_blank" rel="noopener noreferrer"><img src="${src}" alt="Preview image" loading="lazy" class="highlight-preview" /></a>`;
+    }
+    return `<img src="${src}" alt="Preview image" loading="lazy" class="highlight-preview" />`;
+  });
 
   // Render inline logos in sub-points
   result = result.replace(/\[LOGO:([^\]]+)\]/gi, (_, logoName) => {

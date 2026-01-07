@@ -14,7 +14,7 @@ role: Full-Stack Developer
 duration: "Ongoing"
 featured: true
 deployed: true
-order: 2
+order: 3
 ---
 
 A basic web tool built with TypeScript, React, and Next.js to help websites check if they meet WCAG guidelines. Users paste HTML content and receive structured reports identifying accessibility violations and compliance issues.
