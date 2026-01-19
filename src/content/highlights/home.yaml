@@ -1,8 +1,13 @@
 what_makes_me_different:
-  - point: "Enganing in Client work with 2 early‑stage startups in 1 Year (2025)"
+  - point: "Client work with early‑stage startups (2025)"
     details:
       - "Software tooling at Ontario Legal Tech: Enabled lawyers to efficiently process Personal Injury cases (TypeScript, Next.js)"
       - "AI automations for [LOGO:zivko] DoneMaker: Streamlining client conversion, saving 5 hours/week with Make, Notion, and Gmail integrations"
+
+  - point: "Client work (ongoing)"
+
+    details:
+      - "<strong><em>Leo Charter Services</em></strong>: Migrating charter booking workflows to a Next.js/Node.js ecosystem with automated invoice tracking for CRM."
 
   - point: "Designed governance portal for 2000+ Queen's University Computing students at [LOGO:compsa] Queen's COMPSA"
 
@@ -16,8 +21,6 @@ building:
   - point: "[LINK:https://peer-cv.vercel.app]PeerCV[/LINK]: Community resume review platform with secure uploads and threaded feedback (FastAPI, Next.js, PostgreSQL, JWT, SQLAlchemy)"
     details:
       - "[IMAGE:peer-cv.png|https://peer-cv.vercel.app]"
-
-  - point: "Leo Charter Services: Migrating charter booking workflows to a Next.js/Node.js ecosystem with automated invoice tracking for CRM."
 
   - point: "[LOGO:uw_dsc] UW Data Science Events Coordinator: Planning and executing networking and technical events to enrich the student community"
 
