@@ -1,6 +1,4 @@
 what_makes_me_different:
-  - point: "Transferred from [LOGO:queensu] QueensU to [LOGO:uwaterloo] UWaterloo for Computer Science"
-
   - point: "Enganing in Client work with 2 early‑stage startups in 1 Year (2025)"
     details:
       - "Software tooling at Ontario Legal Tech: Enabled lawyers to efficiently process Personal Injury cases (TypeScript, Next.js)"
@@ -18,6 +16,8 @@ building:
   - point: "[LINK:https://peer-cv.vercel.app]PeerCV[/LINK]: Community resume review platform with secure uploads and threaded feedback (FastAPI, Next.js, PostgreSQL, JWT, SQLAlchemy)"
     details:
       - "[IMAGE:peer-cv.png|https://peer-cv.vercel.app]"
+
+  - point: "Leo Charter Services: Migrating charter booking workflows to a Next.js/Node.js ecosystem with automated invoice tracking for CRM."
 
   - point: "[LOGO:uw_dsc] UW Data Science Events Coordinator: Planning and executing networking and technical events to enrich the student community"
 
