@@ -5,7 +5,7 @@ href: "https://accessibility-quick-scan.vercel.app"
 year: "2025"
 tags: ["typescript", "react", "nextjs", "accessibility", "wcag"]
 tagline: Web tool to help websites verify WCAG compliance through HTML analysis
-image: /photos/elrich_photos/IMG_7569.jpeg
+image: /photos/elrich_photos/acessibility.png
 highlights:
   - Built accessibility compliance tool enabling quick WCAG guideline verification
   - Paste HTML and receive detailed compliance reports identifying violations
@@ -14,7 +14,8 @@ role: Full-Stack Developer
 duration: "Ongoing"
 featured: true
 deployed: true
-order: 3
+order: 2
+wide: true
 ---
 
 A basic web tool built with TypeScript, React, and Next.js to help websites check if they meet WCAG guidelines. Users paste HTML content and receive structured reports identifying accessibility violations and compliance issues.
