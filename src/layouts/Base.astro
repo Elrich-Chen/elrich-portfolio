@@ -116,6 +116,13 @@ const contactLinks = [
         </div>
       </footer>
     )}
+    <div id="dark-mode-toast" class="dark-mode-toast" role="status" aria-live="polite">
+      <div class="dark-mode-toast-content">
+        <span class="dark-mode-toast-label">Try dark mode?</span>
+        <button type="button" class="dark-mode-toast-cta">Switch</button>
+        <button type="button" class="dark-mode-toast-dismiss" aria-label="Dismiss">×</button>
+      </div>
+    </div>
     <script is:inline>
       // Optimized loading state - hide faster for better perceived performance
       function hideLoading() {
@@ -136,6 +143,37 @@ const contactLinks = [
         // Reduced fallback timeout from 3s to 1s for better UX
         setTimeout(hideLoading, 1000);
       }
+
+      // One-time dark mode prompt (fixed position, no layout shift).
+      document.addEventListener('DOMContentLoaded', () => {
+        const toast = document.getElementById('dark-mode-toast');
+        if (!toast) return;
+
+        const stored = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const isDark = stored ? stored === 'dark' : prefersDark;
+        if (isDark) return;
+
+        const seenKey = 'darkModePromptSeen';
+        if (!localStorage.getItem(seenKey)) {
+          toast.classList.add('is-visible');
+          localStorage.setItem(seenKey, '1');
+        }
+
+        const cta = toast.querySelector('.dark-mode-toast-cta');
+        const dismiss = toast.querySelector('.dark-mode-toast-dismiss');
+        const hideToast = () => toast.classList.remove('is-visible');
+
+        cta?.addEventListener('click', () => {
+          const toggle = document.getElementById('theme-toggle');
+          if (toggle instanceof HTMLButtonElement) {
+            toggle.click();
+          }
+          hideToast();
+        });
+
+        dismiss?.addEventListener('click', hideToast);
+      });
     </script>
     <style>
       .email-card {
@@ -280,6 +318,75 @@ const contactLinks = [
 
       :global(html.dark) .email-card-link:hover {
         box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+      }
+
+      .dark-mode-toast {
+        position: fixed;
+        right: clamp(1rem, 4vw, 2rem);
+        top: clamp(1rem, 4vw, 2rem);
+        z-index: 40;
+        opacity: 0;
+        transform: translateY(-10px);
+        pointer-events: none;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+
+      .dark-mode-toast.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      .dark-mode-toast-content {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.6rem 0.8rem;
+        border-radius: 999px;
+        border: 1px solid rgba(var(--border), 0.2);
+        background: rgba(var(--bg), 0.92);
+        color: rgb(var(--fg));
+        box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
+        backdrop-filter: blur(10px);
+      }
+
+      .dark-mode-toast-label {
+        font-size: 0.85rem;
+        font-weight: 500;
+      }
+
+      .dark-mode-toast-cta {
+        border: none;
+        border-radius: 999px;
+        padding: 0.25rem 0.7rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: rgba(var(--border), 0.1);
+        color: rgb(var(--fg));
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease;
+      }
+
+      .dark-mode-toast-cta:hover {
+        transform: translateY(-1px);
+        background: rgba(var(--border), 0.2);
+      }
+
+      .dark-mode-toast-dismiss {
+        border: none;
+        background: transparent;
+        color: rgb(var(--muted));
+        font-size: 1rem;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0 0.2rem;
+      }
+
+      :global(html.dark) .dark-mode-toast-content {
+        border-color: rgba(var(--border), 0.35);
+        box-shadow: 0 14px 28px rgba(0, 0, 0, 0.45);
       }
 
       @media (max-width: 768px) {
