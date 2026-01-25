@@ -52,6 +52,19 @@ const companyData: Record<string, { url: string; logo?: string }> = {
   'UW Data Science' : {url: 'https://www.uwdatascience.ca/', logo: 'uw_dsc'}
 };
 
+const logoOverrides: Record<string, string> = {
+  'uw_cube': 'cube',
+  'uw cube': 'cube',
+};
+
+function resolveLogoFileName(logoName: string) {
+  const cleaned = String(logoName).trim().toLowerCase();
+  if (logoOverrides[cleaned]) {
+    return logoOverrides[cleaned];
+  }
+  return cleaned.replace(/\s+/g, '-');
+}
+
 // Function to bold+italicize stats and make companies clickable with bold+italic
 function formatStatsAndCompanies(text: string) {
   // Match numbers with optional +, K, M, %, and common stat patterns, plus ordinals (1st, 2nd, 3rd, etc.)
@@ -80,7 +93,7 @@ function formatStatsAndCompanies(text: string) {
   // Render inline logos in sub-points
   result = result.replace(/\[LOGO:([^\]]+)\]/gi, (_, logoName) => {
     const safeName = String(logoName).trim();
-    const fileName = safeName.toLowerCase().replace(/\s+/g, '-');
+    const fileName = resolveLogoFileName(safeName);
     return `<img src="/logos/${fileName}.png" alt="${safeName}" width="20" height="20" loading="lazy" class="inline-block align-middle mx-1 logo-placeholder" onerror="this.style.display='none'" />`;
   });
 
@@ -182,7 +195,7 @@ function formatStatsAndCompanies(text: string) {
                     ) : (
                       parts.map((part, i) => {
                         if (i % 2 === 1) {
-                          const companyName = part.toLowerCase().replace(/\s+/g, '-');
+                            const companyName = resolveLogoFileName(part);
                           return (
                             <img
                               src={`/logos/${companyName}.png`}
@@ -250,7 +263,7 @@ function formatStatsAndCompanies(text: string) {
                   <div class="highlight-main-point">
                     {parts.map((part, i) => {
                       if (i % 2 === 1) {
-                        const companyName = part.toLowerCase().replace(/\s+/g, '-');
+                        const companyName = resolveLogoFileName(part);
                         return (
                           <img
                             src={`/logos/${companyName}.png`}
