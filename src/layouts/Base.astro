@@ -61,61 +61,74 @@ const contactLinks = [
     <noscript><link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap" rel="stylesheet" /></noscript>
     
   </head>
-  <body>
+  <body class="overflow-x-hidden">
     <div id="loading" class="fixed inset-0 bg-[rgb(var(--bg))] flex items-center justify-center z-50 transition-opacity duration-200">
       <span class="text-sm text-neutral-500">Loading</span>
     </div>
     <PixelTrail />
-    <div class="prose-measure">
-      <header class="py-6 border-b border-neutral-200 relative">
-        <div class="flex items-center justify-between">
+    <div class="page-shell" id="page-shell">
+      <aside class="rail rail-left" aria-hidden="true">
+        <div class="rail-card rail-card-left rail-card-waterloo" data-label="Present CS student at Waterloo"></div>
+      </aside>
+      <div class="page-main">
+        <div class="prose-measure">
+      <header class="py-6 border-b border-neutral-200 relative overflow-x-hidden">
+        <div class="header-inner">
           {showSignature && (
-            <div>
+            <div class="header-signature">
               <Signature />
             </div>
           )}
-          <Nav />
+          <div class="header-nav">
+            <Nav />
+          </div>
         </div>
       </header>
-      <main class="pb-32">
+      <main class="pt-3 pb-32">
         <slot />
       </main>
-    </div>
-    {showContactForm && (
-      <footer class="prose-measure pb-32" id="contact-card">
-        <div class="email-card">
-          <div class="email-card-copy">
-            <p class="email-card-eyebrow">◆ Email</p>
-            <h2 class="email-card-title">Let’s connect.</h2>
-            <p class="email-card-text">
-              Reach me directly at <a href="mailto:elrichchen123@gmail.com" class="email-card-inline">elrichchen123@gmail.com</a>.
-            </p>
-            <a href="mailto:elrichchen123@gmail.com" class="email-card-link">Send an email</a>
-          </div>
-          <div class="email-card-polaroid">
-            <Polaroid
-              src="/photos/elrich_photos/Elrich_Headshot.png"
-              alt="Elrich Chen"
-              caption="Say hi"
-              rotation={-2}
-            />
-            <div class="email-card-icons" aria-label="Social links">
-              {contactLinks.map((link) => (
-                <a
-                  href={link.href}
-                  aria-label={link.label}
-                  class="email-card-icon"
-                  target={link.href.startsWith('mailto:') ? undefined : '_blank'}
-                  rel={link.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-                >
-                  <span class="email-card-icon-svg" set:html={link.icon}></span>
-                </a>
-              ))}
-            </div>
-          </div>
         </div>
-      </footer>
-    )}
+        {showContactForm && (
+          <footer class="prose-measure pb-32" id="contact-card">
+            <div class="email-card">
+              <div class="email-card-copy">
+                <p class="email-card-eyebrow">◆ Email</p>
+                <h2 class="email-card-title">Let’s connect.</h2>
+                <p class="email-card-text">
+                  Reach me directly at <a href="mailto:elrichchen123@gmail.com" class="email-card-inline">elrichchen123@gmail.com</a>.
+                </p>
+                <a href="mailto:elrichchen123@gmail.com" class="email-card-link">Send an email</a>
+              </div>
+              <div class="email-card-polaroid">
+                <Polaroid
+                  src="/photos/elrich_photos/Elrich_Headshot.png"
+                  alt="Elrich Chen"
+                  caption="Say hi"
+                  rotation={-2}
+                />
+                <div class="email-card-icons" aria-label="Social links">
+                  {contactLinks.map((link) => (
+                    <a
+                      href={link.href}
+                      aria-label={link.label}
+                      class="email-card-icon"
+                      target={link.href.startsWith('mailto:') ? undefined : '_blank'}
+                      rel={link.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+                    >
+                      <span class="email-card-icon-svg" set:html={link.icon}></span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </footer>
+        )}
+      </div>
+      <aside class="rail rail-right" aria-hidden="true">
+        <div class="rail-card rail-card-right rail-card-top rail-card-queens" data-label="Ex-Queen's student"></div>
+        <div class="rail-card rail-card-right rail-card-bottom rail-card-uoft" data-label="UofT Residence Counsellor"></div>
+      </aside>
+    </div>
     <div id="dark-mode-toast" class="dark-mode-toast" role="status" aria-live="polite">
       <div class="dark-mode-toast-content">
         <span class="dark-mode-toast-label">Try dark mode?</span>
@@ -318,6 +331,184 @@ const contactLinks = [
 
       :global(html.dark) .email-card-link:hover {
         box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+      }
+
+      .page-shell {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 42rem) minmax(0, 1fr);
+        gap: clamp(1.5rem, 4vw, 3.5rem);
+        align-items: start;
+      }
+
+      .page-main {
+        min-width: 0;
+      }
+
+      .header-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .header-signature {
+        flex: 0 0 auto;
+      }
+
+      .header-nav {
+        flex: 1 1 260px;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .rail {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4.5rem;
+        pointer-events: auto;
+      }
+
+      .rail-left {
+        align-items: flex-end;
+        padding-top: 16vh;
+      }
+
+      .rail-right {
+        align-items: flex-start;
+        padding-top: 10vh;
+      }
+
+      .rail-card {
+        position: sticky;
+        top: clamp(4rem, 10vh, 7rem);
+        width: clamp(180px, 16vw, 240px);
+        height: clamp(110px, 10vw, 150px);
+        border-radius: 14px;
+        border: 2px solid rgba(var(--border), 0.45);
+        background-color: rgba(240, 240, 240, 0.95);
+        box-shadow: 0 20px 38px rgba(15, 23, 42, 0.18);
+        backdrop-filter: blur(6px);
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 120%;
+        cursor: pointer;
+        opacity: 0;
+        transform: translateX(var(--offset, 0px)) rotate(var(--tilt, 0deg)) scale(0.92);
+        transition: transform 0.45s cubic-bezier(0.2, 0.85, 0.25, 1.2), opacity 0.25s ease;
+        pointer-events: none;
+      }
+
+      .page-shell.id-cards-open .rail-card {
+        opacity: 1;
+        transform: translateX(0) rotate(var(--tilt, 0deg)) scale(1);
+        pointer-events: auto;
+      }
+
+      .rail-card::after {
+        content: attr(data-label);
+        position: absolute;
+        left: 50%;
+        top: calc(100% + 14px);
+        transform: translate(-50%, 6px) scale(0.98);
+        padding: 0.5rem 0.7rem;
+        border-radius: 10px;
+        background: rgba(10, 10, 10, 0.86);
+        color: #fff;
+        font-size: 0.72rem;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        pointer-events: none;
+      }
+
+      .rail-card::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: calc(100% + 6px);
+        width: 10px;
+        height: 10px;
+        background: rgba(10, 10, 10, 0.86);
+        transform: translateX(-50%) rotate(45deg);
+        opacity: 0;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+
+      .rail-card:hover::after,
+      .rail-card:hover::before {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+      }
+
+      .rail-card:hover::before {
+        transform: translateX(-50%) rotate(45deg);
+      }
+
+      :global(html.dark) .rail-card {
+        border-color: rgba(255, 255, 255, 0.2);
+        background-color: rgba(25, 25, 25, 0.9);
+        box-shadow: 0 22px 42px rgba(0, 0, 0, 0.45);
+      }
+
+      .rail-card-waterloo {
+        background-image: url('/photos/elrich_photos/watiam.png');
+      }
+
+      .rail-card-queens {
+        background-image: url('/photos/elrich_photos/queens.png');
+      }
+
+      .rail-card-uoft {
+        background-image: url('/photos/elrich_photos/uoft.png');
+      }
+
+      :global(html.dark) .rail-card-waterloo,
+      :global(html.dark) .rail-card-queens,
+      :global(html.dark) .rail-card-uoft {
+        background-size: 130%;
+      }
+
+      .rail-card-left {
+        --tilt: -3deg;
+        --offset: -70px;
+        transition-delay: 0s;
+        margin-top: clamp(6rem, 18vh, 12rem);
+      }
+
+      .rail-card-top {
+        --tilt: 2.5deg;
+        --offset: 70px;
+        transition-delay: 0.12s;
+        margin-top: clamp(2rem, 6vh, 5rem);
+      }
+
+      .rail-card-bottom {
+        --tilt: -2deg;
+        --offset: 70px;
+        transition-delay: 0.24s;
+        margin-top: clamp(8rem, 24vh, 14rem);
+      }
+
+      @media (max-width: 1024px) {
+        .page-shell {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .rail {
+          display: none;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .header-nav {
+          flex-basis: 100%;
+          justify-content: flex-start;
+        }
       }
 
       .dark-mode-toast {

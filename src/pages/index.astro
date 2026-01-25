@@ -161,6 +161,7 @@ function formatStatsAndCompanies(text: string) {
           }
           
           // Extract company names and add logo placeholders
+          const isIdTrail = mainPoint.toLowerCase().includes('id trail');
           const parts = mainPoint.split(/\[LOGO:([^\]]+)\]/g);
           
           return (
@@ -169,23 +170,34 @@ function formatStatsAndCompanies(text: string) {
                 <span class="bullet-point"></span>
                 <div class="flex-1">
                   <div class="highlight-main-point">
-                    {parts.map((part, i) => {
-                      if (i % 2 === 1) {
-                        const companyName = part.toLowerCase().replace(/\s+/g, '-');
-                        return (
-                          <img
-                            src={`/logos/${companyName}.png`}
-                            alt={part}
-                            width="20"
-                            height="20"
-                            loading="lazy"
-                            class="inline-block align-middle mx-1 logo-placeholder"
-                            onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                          />
-                        );
-                      }
-                      return <span set:html={formatStatsAndCompanies(part)}></span>;
-                    })}
+                    {isIdTrail ? (
+                      <button
+                        type="button"
+                        class="id-trail-toggle"
+                        data-id-trail-toggle
+                        aria-pressed="false"
+                      >
+                        {mainPoint}
+                      </button>
+                    ) : (
+                      parts.map((part, i) => {
+                        if (i % 2 === 1) {
+                          const companyName = part.toLowerCase().replace(/\s+/g, '-');
+                          return (
+                            <img
+                              src={`/logos/${companyName}.png`}
+                              alt={part}
+                              width="20"
+                              height="20"
+                              loading="lazy"
+                              class="inline-block align-middle mx-1 logo-placeholder"
+                              onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            />
+                          );
+                        }
+                        return <span set:html={formatStatsAndCompanies(part)}></span>;
+                      })
+                    )}
                   </div>
                   {subPoints.length > 0 && (
                     <ul class="highlight-sub-points">
@@ -396,6 +408,42 @@ function formatStatsAndCompanies(text: string) {
 </Base>
 
 <style>
+  .id-trail-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    color: rgb(var(--fg));
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .id-trail-toggle::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -3px;
+    width: 0;
+    height: 1px;
+    background: currentColor;
+    transition: width 0.2s ease;
+  }
+
+  .id-trail-toggle:hover::after,
+  .id-trail-toggle:focus-visible::after {
+    width: 100%;
+  }
+
+  .id-trail-toggle:focus-visible {
+    outline: 2px solid rgba(var(--border), 0.5);
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
   .video-signpost {
     position: fixed;
     right: 10rem;
@@ -900,6 +948,15 @@ function formatStatsAndCompanies(text: string) {
         trigger.setAttribute('aria-pressed', String(isFlipped));
       });
     });
+
+    const idTrailToggle = document.querySelector('[data-id-trail-toggle]');
+    const pageShell = document.querySelector('#page-shell');
+    if (idTrailToggle && pageShell) {
+      idTrailToggle.addEventListener('click', () => {
+        const isOpen = pageShell.classList.toggle('id-cards-open');
+        idTrailToggle.setAttribute('aria-pressed', String(isOpen));
+      });
+    }
   };
 
   if (document.readyState === 'loading') {
