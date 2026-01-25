@@ -12,17 +12,220 @@ const navLinks = [
 ];
 ---
 
-<nav class="flex items-center justify-end text-sm gap-4">
-  <div class="flex items-center gap-4">
-    {navLinks.map((link) => (
-      <a
-        href={link.href}
-        aria-current={!link.isExternal && isActive(link.href) ? 'page' : undefined}
-        class:list={['nav-link', { 'nav-active': !link.isExternal && isActive(link.href) }]}
-        target={link.isExternal ? '_blank' : undefined}
-        rel={link.isExternal ? 'noopener noreferrer' : undefined}
-      >{link.text}</a>
-    ))}
+<nav class="site-nav text-sm">
+  <div class="nav-row">
+    <div class="nav-links nav-links-desktop">
+      {navLinks.map((link) => (
+        <a
+          href={link.href}
+          aria-current={!link.isExternal && isActive(link.href) ? 'page' : undefined}
+          class:list={['nav-link', { 'nav-active': !link.isExternal && isActive(link.href) }]}
+          target={link.isExternal ? '_blank' : undefined}
+          rel={link.isExternal ? 'noopener noreferrer' : undefined}
+        >{link.text}</a>
+      ))}
+    </div>
+    <div class="nav-actions">
+      <ThemeToggle />
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu">
+        <span class="sr-only">Toggle menu</span>
+        <span class="nav-toggle-line"></span>
+      </button>
+    </div>
   </div>
-  <ThemeToggle />
+  <div id="nav-menu" class="nav-menu" hidden>
+    <div class="nav-links nav-links-mobile">
+      {navLinks.map((link) => (
+        <a
+          href={link.href}
+          aria-current={!link.isExternal && isActive(link.href) ? 'page' : undefined}
+          class:list={['nav-link', { 'nav-active': !link.isExternal && isActive(link.href) }]}
+          target={link.isExternal ? '_blank' : undefined}
+          rel={link.isExternal ? 'noopener noreferrer' : undefined}
+        >{link.text}</a>
+      ))}
+    </div>
+  </div>
 </nav>
+
+<style>
+  .site-nav {
+    width: 100%;
+  }
+
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .nav-links-desktop {
+    display: none;
+  }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .nav-toggle {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid rgba(var(--border), 0.18);
+    background: rgba(var(--bg), 0.6);
+    color: rgb(var(--fg));
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  }
+
+  .nav-toggle:hover {
+    transform: translateY(-1px);
+    border-color: rgba(var(--border), 0.35);
+    background: rgba(var(--bg), 0.8);
+  }
+
+  .nav-toggle-line {
+    position: relative;
+    width: 18px;
+    height: 2px;
+    background: currentColor;
+    border-radius: 999px;
+  }
+
+  .nav-toggle-line::before,
+  .nav-toggle-line::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 18px;
+    height: 2px;
+    background: currentColor;
+    border-radius: 999px;
+  }
+
+  .nav-toggle-line::before {
+    top: -6px;
+  }
+
+  .nav-toggle-line::after {
+    top: 6px;
+  }
+
+  .nav-menu {
+    margin-top: 0.75rem;
+    padding: 0.65rem;
+    border: 1px solid rgba(var(--border), 0.18);
+    border-radius: 14px;
+    background: rgba(var(--bg), 0.96);
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.12);
+    backdrop-filter: blur(10px);
+  }
+
+  .nav-links-mobile {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .nav-links-mobile .nav-link {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.6rem 0.75rem;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid rgba(var(--border), 0.15);
+    background: rgba(var(--bg), 0.6);
+  }
+
+  .nav-links-mobile .nav-link:hover {
+    background: rgba(var(--border), 0.08);
+    transform: translateY(0);
+  }
+
+  :global(html.dark) .nav-menu {
+    background: rgba(15, 15, 15, 0.85);
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.45);
+  }
+
+  :global(html.dark) .nav-links-mobile .nav-link {
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(10, 10, 10, 0.55);
+  }
+
+  @media (max-width: 420px) {
+    .nav-links-mobile {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .nav-links-desktop {
+      display: flex;
+    }
+
+    .nav-toggle {
+      display: none;
+    }
+
+    .nav-menu {
+      display: none !important;
+    }
+  }
+</style>
+
+<script>
+  const nav = document.querySelector('.site-nav');
+  const toggle = nav?.querySelector('.nav-toggle');
+  const menu = nav?.querySelector('#nav-menu');
+
+  if (toggle instanceof HTMLButtonElement && menu instanceof HTMLElement) {
+    const closeMenu = () => {
+      menu.hidden = true;
+      toggle.setAttribute('aria-expanded', 'false');
+    };
+
+    const openMenu = () => {
+      menu.hidden = false;
+      toggle.setAttribute('aria-expanded', 'true');
+    };
+
+    toggle.addEventListener('click', () => {
+      if (menu.hidden) {
+        openMenu();
+      } else {
+        closeMenu();
+      }
+    });
+
+    menu.addEventListener('click', (event) => {
+      if ((event.target as HTMLElement).closest('a')) {
+        closeMenu();
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      if (nav && !nav.contains(event.target as Node)) {
+        closeMenu();
+      }
+    });
+
+    const media = window.matchMedia('(min-width: 768px)');
+    media.addEventListener('change', (event) => {
+      if (event.matches) closeMenu();
+    });
+  }
+</script>
