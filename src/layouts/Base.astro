@@ -349,8 +349,8 @@ const contactLinks = [
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 1rem;
-        flex-wrap: wrap;
+        gap: 0.75rem;
+        flex-wrap: nowrap;
       }
 
       .header-signature {
@@ -358,7 +358,7 @@ const contactLinks = [
       }
 
       .header-nav {
-        flex: 1 1 260px;
+        flex: 0 1 auto;
         display: flex;
         justify-content: flex-end;
       }
@@ -505,9 +505,8 @@ const contactLinks = [
       }
 
       @media (max-width: 640px) {
-        .header-nav {
-          flex-basis: 100%;
-          justify-content: flex-start;
+        .header-inner {
+          gap: 0.5rem;
         }
       }
 

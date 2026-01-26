@@ -11,7 +11,7 @@ const { text = 'Elrich Chen' } = Astro.props;
 <style>
   .signature-text {
     font-family: 'Reenie Beanie', cursive;
-    font-size: 2.5rem;
+    font-size: clamp(1.6rem, 6vw, 2.5rem);
     line-height: 1;
     font-weight: 400;
     color: #000;
@@ -52,4 +52,3 @@ const { text = 'Elrich Chen' } = Astro.props;
     }
   } catch {}
 </script>
-
