@@ -159,7 +159,7 @@ function formatStatsAndCompanies(text: string) {
 
   {highlights?.data?.what_makes_me_different?.length > 0 && (
     <section class="mb-12 mt-8 compact-section">
-      <h2 class="section-header mt-2">◆ How I've Grown:</h2>
+      <h2 class="section-header mt-2">◆ Recently, I:</h2>
       <ul class="highlight-list">
         {highlights.data.what_makes_me_different.map((item: any) => {
           // Support both string (old format) and object (new format with sub-points)
@@ -222,7 +222,7 @@ function formatStatsAndCompanies(text: string) {
 
   {highlights?.data?.building?.length > 0 && (
     <section class="mb-12 compact-section">
-      <h2 class="section-header">◆ Currently Building:</h2>
+      <h2 class="section-header">◆ Things I am working on:</h2>
       <ul class="highlight-list">
         {highlights.data.building.map((item: any) => {
           let mainPoint: string;

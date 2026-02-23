@@ -1,19 +1,13 @@
 what_makes_me_different:
-  - point: "Client work with early‑stage startups (2025)"
+  - point: "Became an incoming SWE @ [LOGO:medme] [LINK:https://www.ycombinator.com/companies/medme-health]Medme Health[/LINK] (YC 21)"
+
+  - point: "Won <strong><em>[LINK:https://devpost.com/software/golden-guide-ugoa6h]Best Use of Gemini</em></strong>[/LINK] at QHacks [LOGO:qhacks] (Queen's Univeristy Hackathon)"
+
+  - point: "Did client work with early‑stage startups"
     details:
       - "Software tooling at Ontario Legal Tech: Enabled lawyers to efficiently process Personal Injury cases (TypeScript, Next.js)"
       - "AI automations for [LOGO:zivko] DoneMaker: Streamlining client conversion, saving 5 hours/week with Make, Notion, and Gmail integrations"
 
-  - point: "Client work (ongoing)"
-
-    details:
-      - "<strong><em>Leo Charter Services</em></strong>: Migrating charter booking workflows to a Next.js/Node.js ecosystem with automated invoice tracking for CRM."
-
-  - point: "Designed governance portal for 2000+ Queen's University Computing students at [LOGO:compsa] Queen's COMPSA"
-
-  - point: "Secured 2nd place among 20+ teams in [LOGO:qsao] Queen's University NBA Data Analytics case competition"
-
-  - point: "Mentored 200+ students at [LOGO:UofT2] University of Toronto Engineering Outreach as Residence Counsellor for Engineering Outreach Team"
   
 building:
   - point: "[LINK:https://peer-cv.vercel.app]PeerCV[/LINK]: Community resume review platform with secure uploads and threaded feedback (FastAPI, Next.js, PostgreSQL, JWT, SQLAlchemy)"

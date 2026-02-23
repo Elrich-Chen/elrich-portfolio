@@ -32,6 +32,19 @@ const tldr = {
   body: "I build across student orgs and freelance projects, and I care about clarity, reliability, and community impact.",
 };
 
+const highlights = [
+  {
+    text: "Secured 2nd place among 20+ teams in Queen's University NBA Data Analytics case competition",
+    href: 'https://www.instagram.com/p/DH4J-30SmkA/?img_index=6',
+    logo: '/logos/qsao.png',
+  },
+  {
+    text: "Mentored 200+ students at University of Toronto Engineering Outreach as a Residence Counsellor",
+    href: 'https://outreach.engineering.utoronto.ca',
+    logo: '/logos/uoft2.png',
+  },
+];
+
 const education = [
   {
     school: 'University of Waterloo',
@@ -97,19 +110,14 @@ const techStack = {
             </div>
           </div>
 
-          <div class="profile-text">
-            <h2 class="profile-name">Elrich Chen</h2>
-            <p class="profile-title">CS @ Waterloo</p>
-          </div>
+	          <div class="profile-text">
+	            <h2 class="profile-name">Elrich Chen</h2>
+	            <p class="profile-title">CS @ Waterloo</p>
+	          </div>
 
-          <div class="status-badge">
-            <span class="status-dot" aria-hidden="true"></span>
-            <span>Open to Co-op (Summer 2026)</span>
-          </div>
-
-          <div class="stats-grid">
-            {stats.map((stat) => (
-              <div class="stat-item">
+	          <div class="stats-grid">
+	            {stats.map((stat) => (
+	              <div class="stat-item">
                 <span class="stat-value">{stat.value}</span>
                 <span class="stat-label">{stat.label}</span>
               </div>
@@ -133,15 +141,29 @@ const techStack = {
       </aside>
 
       <div class="about-cards">
-        <section class="about-card tldr-card">
-          <p class="card-eyebrow">TL;DR</p>
-          <h2 class="tldr-hook">{tldr.hook}</h2>
-          <p class="tldr-body">{tldr.body}</p>
-        </section>
+	        <section class="about-card tldr-card">
+	          <p class="card-eyebrow">TL;DR</p>
+	          <h2 class="tldr-hook">{tldr.hook}</h2>
+	          <p class="tldr-body">{tldr.body}</p>
+	        </section>
 
-        <section class="about-card education-card">
-          <p class="card-eyebrow">Education</p>
-          <div class="edu-grid">
+	        <section class="about-card highlights-card">
+	          <p class="card-eyebrow">Highlights</p>
+	          <ul class="highlights-list">
+	            {highlights.map((item) => (
+	              <li class="highlights-item">
+	                <img src={item.logo} alt="" class="highlights-logo" loading="lazy" />
+	                <a href={item.href} class="highlights-link" target="_blank" rel="noopener noreferrer">
+	                  {item.text}
+	                </a>
+	              </li>
+	            ))}
+	          </ul>
+	        </section>
+
+	        <section class="about-card education-card">
+	          <p class="card-eyebrow">Education</p>
+	          <div class="edu-grid">
             {education.map((item) => (
               <div class="edu-card">
                 <div class="edu-top">
@@ -430,13 +452,45 @@ const techStack = {
     max-width: 32ch;
   }
 
-  .tldr-body {
-    margin: 0;
-    font-size: 0.95rem;
-    color: rgb(var(--muted));
-    line-height: 1.6;
-    max-width: 60ch;
-  }
+	  .tldr-body {
+	    margin: 0;
+	    font-size: 0.95rem;
+	    color: rgb(var(--muted));
+	    line-height: 1.6;
+	    max-width: 60ch;
+	  }
+
+	  .highlights-list {
+	    margin: 0;
+	    padding: 0;
+	    list-style: none;
+	    display: grid;
+	    gap: 0.75rem;
+	  }
+
+	  .highlights-item {
+	    display: flex;
+	    align-items: flex-start;
+	    gap: 0.75rem;
+	  }
+
+	  .highlights-logo {
+	    width: 22px;
+	    height: 22px;
+	    object-fit: contain;
+	    margin-top: 0.1rem;
+	    flex: 0 0 auto;
+	  }
+
+	  .highlights-link {
+	    color: rgb(var(--fg));
+	    text-decoration: none;
+	    line-height: 1.55;
+	  }
+
+	  .highlights-link:hover {
+	    text-decoration: underline;
+	  }
 
   .edu-grid {
     display: grid;
