@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
-import Signature from '../components/Signature.astro';
 import HeroLoom from '../components/HeroLoom.astro';
+import Basketball from '../components/Basketball.astro';
 import { getEntry, getCollection } from 'astro:content';
 const highlights = await getEntry('highlights', 'home');
 const testimonials = await getCollection('testimonials');
@@ -144,382 +144,457 @@ function formatStatsAndCompanies(text: string) {
 }
 ---
 
-<Base title="Elrich Chen" description="CS @ UWaterloo | AI automations for DoneMaker | Aspiring Backend Engineer" showSignature={true} showContactForm={true}>
+<Base title="Elrich Chen" description="CS @ UWaterloo | Incoming SWE @ Medme Health | Builder">
 
-  {/* Video signpost - sticky on right side for desktop */}
-  {/* <a href="#intro-video" class="video-signpost hidden lg:block">
-    <div class="signpost-content">
-      <span class="signpost-text">Watch me!</span>
-      <svg class="arrow-bounce" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="5" x2="12" y2="19"></line>
-        <polyline points="19 12 12 19 5 12"></polyline>
-      </svg>
+  <!-- Fixed 3D basketball canvas — sits above page at z-index:5 -->
+  <Basketball />
+
+  <!-- ═══════════════════════════════════════════════════════════
+       SECTION 0: HERO — name ghosted behind basketball
+       Ball position: center (x:0, y:0)
+  ══════════════════════════════════════════════════════════════ -->
+  <section id="section-hero" class="scroll-section hero-section">
+    <div class="hero-inner">
+      <h1 class="hero-name">ELRICH CHEN</h1>
+      <p class="hero-sub">CS @ UWaterloo &nbsp;·&nbsp; Builder &nbsp;·&nbsp; Incoming SWE @ Medme Health</p>
     </div>
-  </a> */}
+  </section>
 
-  {highlights?.data?.what_makes_me_different?.length > 0 && (
-    <section class="mb-12 mt-8 compact-section">
-      <h2 class="section-header mt-2">◆ Recently, I:</h2>
-      <ul class="highlight-list">
-        {highlights.data.what_makes_me_different.map((item: any) => {
-          // Support both string (old format) and object (new format with sub-points)
-          let mainPoint: string;
-          let subPoints: string[] = [];
-          
-          if (typeof item === 'string') {
-            mainPoint = item;
-          } else {
-            mainPoint = item.point || '';
-            subPoints = item.details || [];
-          }
-          
-          // Extract company names and add logo placeholders
-          const parts = mainPoint.split(/\[LOGO:([^\]]+)\]/g);
-          
-          return (
-            <li class="highlight-item-group">
-              <div class="flex items-start">
-                <span class="bullet-point"></span>
-                <div class="flex-1">
-                  <div class="highlight-main-point">
-                    {parts.map((part, i) => {
-                      if (i % 2 === 1) {
-                        const companyName = resolveLogoFileName(part);
-                        return (
-                          <img
-                            src={`/logos/${companyName}.png`}
-                            alt={part}
-                            width="20"
-                            height="20"
-                            loading="lazy"
-                            class="inline-block align-middle mx-1 logo-placeholder"
-                            onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                          />
-                        );
-                      }
-                      return <span set:html={formatStatsAndCompanies(part)}></span>;
-                    })}
-                  </div>
-                  {subPoints.length > 0 && (
-                    <ul class="highlight-sub-points">
-                      {subPoints.map((sub: string) => {
-                        // Process the sub-point text first to handle LINK tags
-                        const processedSub = formatStatsAndCompanies(sub);
-                        return (
-                          <li class="highlight-sub-item" set:html={processedSub}></li>
-                        );
+  <!-- ═══════════════════════════════════════════════════════════
+       SECTION 1: RECENTLY I — LEFT panel
+       Ball moves to top-right diagonal
+  ══════════════════════════════════════════════════════════════ -->
+  <section id="section-recent" class="scroll-section">
+    <div class="content-panel panel-left">
+      <h2 class="panel-heading">◆ Recently, I:</h2>
+      {highlights?.data?.what_makes_me_different?.length > 0 && (
+        <ul class="highlight-list">
+          {highlights.data.what_makes_me_different.map((item: any) => {
+            let mainPoint: string;
+            let subPoints: string[] = [];
+            if (typeof item === 'string') {
+              mainPoint = item;
+            } else {
+              mainPoint = item.point || '';
+              subPoints = item.details || [];
+            }
+            const parts = mainPoint.split(/\[LOGO:([^\]]+)\]/g);
+            return (
+              <li class="highlight-item-group">
+                <div class="flex items-start">
+                  <span class="bullet-point"></span>
+                  <div class="flex-1">
+                    <div class="highlight-main-point">
+                      {parts.map((part: string, i: number) => {
+                        if (i % 2 === 1) {
+                          const companyName = resolveLogoFileName(part);
+                          return (
+                            <img src={`/logos/${companyName}.png`} alt={part} width="20" height="20" loading="lazy" class="inline-block align-middle mx-1 logo-placeholder" onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                          );
+                        }
+                        return <span set:html={formatStatsAndCompanies(part)}></span>;
                       })}
-                    </ul>
-                  )}
-                </div>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
-  )}
-
-  {highlights?.data?.building?.length > 0 && (
-    <section class="mb-12 compact-section">
-      <h2 class="section-header">◆ Things I am working on:</h2>
-      <ul class="highlight-list">
-        {highlights.data.building.map((item: any) => {
-          let mainPoint: string;
-          let subPoints: string[] = [];
-          
-          if (typeof item === 'string') {
-            mainPoint = item;
-          } else {
-            mainPoint = item.point || '';
-            subPoints = item.details || [];
-          }
-
-          // Inject the new sub-bullet point for TechPlus UW
-          if (mainPoint.includes('TechPlus UW')) {
-            const newSubPoint = "Organised mentorship & dinner for <strong><em>200+</em></strong> members for the F25 term.";
-            subPoints.unshift(newSubPoint); // Add to the beginning of the list
-          }
-          
-          const parts = mainPoint.split(/\[LOGO:([^\]]+)\]/g);
-          
-          return (
-            <li class="highlight-item-group">
-              <div class="flex items-start">
-                <span class="bullet-point"></span>
-                <div class="flex-1">
-                  <div class="highlight-main-point">
-                    {parts.map((part, i) => {
-                      if (i % 2 === 1) {
-                        const companyName = resolveLogoFileName(part);
-                        return (
-                          <img
-                            src={`/logos/${companyName}.png`}
-                            alt={part}
-                            width="20"
-                            height="20"
-                            loading="lazy"
-                            class="inline-block align-middle mx-1 logo-placeholder"
-                            onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                          />
-                        );
-                      }
-                      return <span set:html={formatStatsAndCompanies(part)}></span>;
-                    })}
+                    </div>
+                    {subPoints.length > 0 && (
+                      <ul class="highlight-sub-points">
+                        {subPoints.map((sub: string) => (
+                          <li class="highlight-sub-item" set:html={formatStatsAndCompanies(sub)}></li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
-                  {subPoints.length > 0 && (
-                    <ul class="highlight-sub-points">
-                      {subPoints.map((sub: string) => {
-                        // Process the sub-point text first to handle LINK tags
-                        const processedSub = formatStatsAndCompanies(sub);
-                        return (
-                          <li class="highlight-sub-item" set:html={processedSub}></li>
-                        );
-                      })}
-                    </ul>
-                  )}
                 </div>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
-  )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  </section>
 
-  {/* <div class="mb-12" id="intro-video">
-    <HeroLoom id="ed3b3c692e9d49e59ef4229617141ea1" title="Project Compass - Demo" />
-  </div> */}
+  <!-- ═══════════════════════════════════════════════════════════
+       SECTION 2: BUILDING — RIGHT panel
+       Ball moves to bottom-left diagonal
+  ══════════════════════════════════════════════════════════════ -->
+  <section id="section-building" class="scroll-section">
+    <div class="content-panel panel-right">
+      <h2 class="panel-heading">◆ Things I am working on:</h2>
+      {highlights?.data?.building?.length > 0 && (
+        <ul class="highlight-list">
+          {highlights.data.building.map((item: any) => {
+            let mainPoint: string;
+            let subPoints: string[] = [];
+            if (typeof item === 'string') {
+              mainPoint = item;
+            } else {
+              mainPoint = item.point || '';
+              subPoints = item.details || [];
+            }
+            if (mainPoint.includes('TechPlus UW')) {
+              subPoints = ["Organised mentorship & dinner for <strong><em>200+</em></strong> members for the F25 term.", ...subPoints];
+            }
+            const parts = mainPoint.split(/\[LOGO:([^\]]+)\]/g);
+            return (
+              <li class="highlight-item-group">
+                <div class="flex items-start">
+                  <span class="bullet-point"></span>
+                  <div class="flex-1">
+                    <div class="highlight-main-point">
+                      {parts.map((part: string, i: number) => {
+                        if (i % 2 === 1) {
+                          const companyName = resolveLogoFileName(part);
+                          return (
+                            <img src={`/logos/${companyName}.png`} alt={part} width="20" height="20" loading="lazy" class="inline-block align-middle mx-1 logo-placeholder" onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                          );
+                        }
+                        return <span set:html={formatStatsAndCompanies(part)}></span>;
+                      })}
+                    </div>
+                    {subPoints.length > 0 && (
+                      <ul class="highlight-sub-points">
+                        {subPoints.map((sub: string) => (
+                          <li class="highlight-sub-item" set:html={formatStatsAndCompanies(sub)}></li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  </section>
 
-  {/* Testimonials Section */}
-  {testimonials.length > 0 && (
-    <section class="mb-12 testimonials-carousel">
-      <div class="testimonials-header">
-        <p class="testimonials-heading">Client References</p>
-        <p class="testimonials-note">Highlights from early-stage startups I've partnered with.</p>
+  <!-- ═══════════════════════════════════════════════════════════
+       SECTION 3: LET'S CONNECT (1st) — LEFT panel
+       Ball moves to top-right diagonal
+  ══════════════════════════════════════════════════════════════ -->
+  <section id="section-connect1" class="scroll-section">
+    <div class="content-panel panel-left">
+      <p class="panel-eyebrow">◆ Email</p>
+      <h2 class="panel-heading">Let's connect.</h2>
+      <p class="panel-body">I'm always open to interesting conversations, collaborations, and opportunities.</p>
+      <a href="mailto:elrichchen123@gmail.com" class="panel-cta">Send an email →</a>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       SECTION 4: CLIENT REFERENCES — LEFT panel
+       Ball moves to bottom-right diagonal
+  ══════════════════════════════════════════════════════════════ -->
+  <section id="section-clients" class="scroll-section section-clients-wide">
+    <div class="clients-inner">
+      <div class="clients-header">
+        <p class="panel-eyebrow">Client References</p>
+        <p class="panel-body" style="max-width:38ch; margin:0;">Highlights from early-stage startups I've partnered with.</p>
       </div>
-      <div class="carousel-viewport" role="region" aria-label="Client testimonials carousel">
-        <div class="carousel-track">
-          <div class="carousel-group">
-            {carouselItems.map((testimonial) => (
-              <div class="testimonial-card flip-card" data-flip-card>
-                <button class="flip-trigger" type="button" aria-pressed="false" aria-label="Flip testimonial"></button>
-                <div class="flip-inner">
-                  <div class="flip-face flip-front">
-                    <span class="flip-hint" aria-hidden="true">Flip to read</span>
-                    <div class="testimonial-content">
-                      <div class="preview-top">
-                        <p class="preview-label">Tech stack</p>
-                        <p class="preview-tech">{testimonial.data.techStack?.join(' • ') ?? 'Tech stack inside'}</p>
+      {testimonials.length > 0 && (
+        <div class="carousel-viewport" role="region" aria-label="Client testimonials">
+          <div class="carousel-track">
+            <div class="carousel-group">
+              {carouselItems.map((testimonial) => (
+                <div class="testimonial-card flip-card" data-flip-card>
+                  <button class="flip-trigger" type="button" aria-pressed="false" aria-label="Flip testimonial"></button>
+                  <div class="flip-inner">
+                    <div class="flip-face flip-front">
+                      <span class="flip-hint" aria-hidden="true">Flip to read</span>
+                      <div class="testimonial-content">
+                        <div class="preview-top">
+                          <p class="preview-label">Tech stack</p>
+                          <p class="preview-tech">{testimonial.data.techStack?.join(' • ') ?? 'Tech stack inside'}</p>
+                        </div>
+                        <div class="preview-meta">
+                          <span class="preview-person">{testimonial.data.author}</span>
+                          <span class="preview-company">{testimonial.data.company}</span>
+                        </div>
+                        {testimonial.data.project && <p class="preview-project">{testimonial.data.project}</p>}
                       </div>
-                      <div class="preview-meta">
-                        <span class="preview-person">{testimonial.data.author}</span>
-                        <span class="preview-company">{testimonial.data.company}</span>
-                      </div>
-                      {testimonial.data.project && (
-                        <p class="preview-project">{testimonial.data.project}</p>
-                      )}
                     </div>
-                  </div>
-                  <div class="flip-face flip-back">
-                    <span class="flip-hint" aria-hidden="true">Flip to close</span>
-                    <div class="testimonial-content">
-                      <p class="testimonial-text">"{testimonial.data.text}"</p>
-                      <div class="testimonial-author">
-                        {testimonial.data.companyLogo && (
-                          <img
-                            src={`/logos/${testimonial.data.companyLogo}.png`}
-                            alt={testimonial.data.company}
-                            class="company-logo"
-                            width="32"
-                            height="32"
-                            loading="lazy"
-                            onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                          />
-                        )}
-                        <div class="author-details">
-                          <div class="author-name">{testimonial.data.author}</div>
-                          <div class="author-title">{testimonial.data.title}, {testimonial.data.company}</div>
-                          {testimonial.data.project && (
-                            <div class="author-project">{testimonial.data.project}</div>
+                    <div class="flip-face flip-back">
+                      <span class="flip-hint" aria-hidden="true">Flip to close</span>
+                      <div class="testimonial-content">
+                        <p class="testimonial-text">"{testimonial.data.text}"</p>
+                        <div class="testimonial-author">
+                          {testimonial.data.companyLogo && (
+                            <img src={`/logos/${testimonial.data.companyLogo}.png`} alt={testimonial.data.company} class="company-logo" width="32" height="32" loading="lazy" onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                           )}
+                          <div class="author-details">
+                            <div class="author-name">{testimonial.data.author}</div>
+                            <div class="author-title">{testimonial.data.title}, {testimonial.data.company}</div>
+                            {testimonial.data.project && <div class="author-project">{testimonial.data.project}</div>}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-          <div class="carousel-group" aria-hidden="true">
-            {carouselItems.map((testimonial) => (
-              <div class="testimonial-card flip-card" data-flip-card>
-                <button class="flip-trigger" type="button" aria-pressed="false" aria-label="Flip testimonial"></button>
-                <div class="flip-inner">
-                  <div class="flip-face flip-front">
-                    <span class="flip-hint" aria-hidden="true">Flip to read</span>
-                    <div class="testimonial-content">
-                      <div class="preview-top">
-                        <p class="preview-label">Tech stack</p>
-                        <p class="preview-tech">{testimonial.data.techStack?.join(' • ') ?? 'Tech stack inside'}</p>
+              ))}
+            </div>
+            <div class="carousel-group" aria-hidden="true">
+              {carouselItems.map((testimonial) => (
+                <div class="testimonial-card flip-card" data-flip-card>
+                  <button class="flip-trigger" type="button" aria-pressed="false" aria-label="Flip testimonial"></button>
+                  <div class="flip-inner">
+                    <div class="flip-face flip-front">
+                      <span class="flip-hint" aria-hidden="true">Flip to read</span>
+                      <div class="testimonial-content">
+                        <div class="preview-top">
+                          <p class="preview-label">Tech stack</p>
+                          <p class="preview-tech">{testimonial.data.techStack?.join(' • ') ?? 'Tech stack inside'}</p>
+                        </div>
+                        <div class="preview-meta">
+                          <span class="preview-person">{testimonial.data.author}</span>
+                          <span class="preview-company">{testimonial.data.company}</span>
+                        </div>
+                        {testimonial.data.project && <p class="preview-project">{testimonial.data.project}</p>}
                       </div>
-                      <div class="preview-meta">
-                        <span class="preview-person">{testimonial.data.author}</span>
-                        <span class="preview-company">{testimonial.data.company}</span>
-                      </div>
-                      {testimonial.data.project && (
-                        <p class="preview-project">{testimonial.data.project}</p>
-                      )}
                     </div>
-                  </div>
-                  <div class="flip-face flip-back">
-                    <span class="flip-hint" aria-hidden="true">Flip to close</span>
-                    <div class="testimonial-content">
-                      <p class="testimonial-text">"{testimonial.data.text}"</p>
-                      <div class="testimonial-author">
-                        {testimonial.data.companyLogo && (
-                          <img
-                            src={`/logos/${testimonial.data.companyLogo}.png`}
-                            alt={testimonial.data.company}
-                            class="company-logo"
-                            width="32"
-                            height="32"
-                            loading="lazy"
-                            onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                          />
-                        )}
-                        <div class="author-details">
-                          <div class="author-name">{testimonial.data.author}</div>
-                          <div class="author-title">{testimonial.data.title}, {testimonial.data.company}</div>
-                          {testimonial.data.project && (
-                            <div class="author-project">{testimonial.data.project}</div>
+                    <div class="flip-face flip-back">
+                      <span class="flip-hint" aria-hidden="true">Flip to close</span>
+                      <div class="testimonial-content">
+                        <p class="testimonial-text">"{testimonial.data.text}"</p>
+                        <div class="testimonial-author">
+                          {testimonial.data.companyLogo && (
+                            <img src={`/logos/${testimonial.data.companyLogo}.png`} alt={testimonial.data.company} class="company-logo" width="32" height="32" loading="lazy" onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                           )}
+                          <div class="author-details">
+                            <div class="author-name">{testimonial.data.author}</div>
+                            <div class="author-title">{testimonial.data.title}, {testimonial.data.company}</div>
+                            {testimonial.data.project && <div class="author-project">{testimonial.data.project}</div>}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
+      )}
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       SECTION 5: LET'S CONNECT (2nd) — RIGHT panel
+       Ball moves to top-left diagonal
+  ══════════════════════════════════════════════════════════════ -->
+  <section id="section-connect2" class="scroll-section">
+    <div class="content-panel panel-right">
+      <p class="panel-eyebrow">◆ Say hello</p>
+      <h2 class="panel-heading">Let's build something.</h2>
+      <p class="panel-body">Reach me at <a href="mailto:elrichchen123@gmail.com" class="panel-inline-link">elrichchen123@gmail.com</a></p>
+      <div class="connect-links">
+        <a href="https://github.com/Elrich-Chen" target="_blank" rel="noopener noreferrer" class="connect-link">GitHub</a>
+        <a href="https://linkedin.com/in/elrichchen" target="_blank" rel="noopener noreferrer" class="connect-link">LinkedIn</a>
+        <a href="https://x.com/ChenElrich_" target="_blank" rel="noopener noreferrer" class="connect-link">X</a>
+        <a href="https://drive.google.com/drive/folders/1JB5jWDtohn4ddSp5ro-jeZshZw2Q-5lc?usp=share_link" target="_blank" rel="noopener noreferrer" class="connect-link">Resume</a>
       </div>
-    </section>
-  )}
+    </div>
+  </section>
+
 </Base>
 
 <style>
-  .video-signpost {
-    position: fixed;
-    right: 10rem;
-    top: 40%;
-    z-index: 50;
-    transform: rotate(-4deg);
-    transition: all 0.3s ease;
-  }
-
-  .signpost-content {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 1rem 1.25rem;
-    background: rgba(255, 255, 255, 0.98);
-    border: 2px dashed rgba(0, 0, 0, 0.2);
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    text-decoration: none;
-    backdrop-filter: blur(10px);
-    font-family: 'Inter', sans-serif; /* Or your preferred modern font */
-  }
-
-  .signpost-text {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #333;
-  }
-
-  .video-signpost:hover {
-    transform: rotate(-3deg) scale(1.05);
-  }
-
-  .video-signpost:hover .signpost-content {
-    background: rgba(255, 255, 255, 1);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-  }
-
-  .video-signpost:hover .signpost-text {
-    color: #000;
-  }
-
-  .arrow-bounce {
-    animation: bounce-horizontal 1.5s ease-in-out infinite;
-    color: #666;
-  }
-
-  .video-signpost:hover .arrow-bounce {
-    color: #333;
-    animation: bounce 0.8s ease-in-out infinite;
-  }
-
-  @keyframes bounce {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(8px);
-    }
-  }
-
-  @keyframes bounce-horizontal {
-    0%, 100% {
-      transform: translateX(0);
-    }
-    50% {
-      transform: translateX(4px);
-    }
-  }
-
-  .compact-section .section-header {
-    margin-bottom: 0.55rem;
-    padding-bottom: 0.2rem;
-  }
-
-  /* Testimonials Section */
-  .testimonials-carousel {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    width: min(90vw, 1600px);
+  /* ── Scroll sections ──────────────────────────────────── */
+  .scroll-section {
+    /* Full-bleed: breaks out of prose-measure (max-w-2xl) */
+    width: 100vw;
     position: relative;
     left: 50%;
     transform: translateX(-50%);
-  }
-
-  .testimonials-header {
+    min-height: 100vh;
     display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
     align-items: center;
-    text-align: center;
+    padding: 3rem 0;
+    box-sizing: border-box;
   }
 
-  .testimonials-heading {
+  /* Hero section: z-index BELOW the fixed canvas (z:5) */
+  .hero-section {
+    justify-content: center;
+    text-align: center;
+    z-index: 4;
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 4;
+  }
+
+  .hero-name {
+    font-size: clamp(3.5rem, 13vw, 10rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    color: rgb(var(--fg));
+    opacity: 0.08;
     margin: 0;
-    font-size: 0.85rem;
-    letter-spacing: 0.18em;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .hero-sub {
+    font-size: clamp(0.8rem, 1.5vw, 1rem);
+    color: rgb(var(--muted));
+    margin: 1rem 0 0;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+  }
+
+  /* ── Content panels ───────────────────────────────────── */
+  /* z-index: 10 — renders ABOVE the fixed canvas (z:5) */
+  .content-panel {
+    position: relative;
+    z-index: 10;
+    max-width: 440px;
+    padding: 2rem 1.75rem;
+    background: rgba(var(--bg), 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(var(--border), 0.12);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  }
+
+  :global(html.dark) .content-panel {
+    background: rgba(var(--bg), 0.92);
+    border-color: rgba(var(--border), 0.18);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  /* Left panel: left side of viewport with padding from edge */
+  .panel-left {
+    margin-left: clamp(1.5rem, 8vw, 7rem);
+    margin-right: auto;
+  }
+
+  /* Right panel: right side of viewport */
+  .panel-right {
+    margin-right: clamp(1.5rem, 8vw, 7rem);
+    margin-left: auto;
+  }
+
+  .panel-eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     font-weight: 700;
-    color: rgb(var(--fg));
-  }
-
-  .testimonials-note {
-    margin: 0;
-    font-size: 0.85rem;
     color: rgb(var(--muted));
-    max-width: 38ch;
+    margin: 0 0 0.5rem;
   }
 
+  .panel-heading {
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    font-weight: 700;
+    color: rgb(var(--fg));
+    margin: 0 0 0.75rem;
+    line-height: 1.2;
+  }
+
+  .panel-body {
+    font-size: 0.9rem;
+    color: rgb(var(--muted));
+    line-height: 1.6;
+    margin: 0 0 1.25rem;
+  }
+
+  .panel-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(var(--border), 0.25);
+    background: rgba(var(--bg), 0.7);
+    color: rgb(var(--fg));
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .panel-cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  }
+
+  .panel-inline-link {
+    color: rgb(var(--fg));
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .connect-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .connect-link {
+    padding: 0.35rem 0.8rem;
+    border-radius: 8px;
+    border: 1px solid rgba(var(--border), 0.2);
+    color: rgb(var(--fg));
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+
+  .connect-link:hover {
+    background: rgba(var(--border), 0.08);
+    border-color: rgba(var(--border), 0.35);
+  }
+
+  /* ── Clients section ──────────────────────────────────── */
+  .section-clients-wide {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: clamp(1.5rem, 8vw, 7rem);
+    gap: 2rem;
+  }
+
+  .clients-inner {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .clients-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  /* ── Mobile adjustments ───────────────────────────────── */
+  @media (max-width: 640px) {
+    .panel-left,
+    .panel-right {
+      margin-left: 1rem;
+      margin-right: 1rem;
+      max-width: 100%;
+    }
+
+    .section-clients-wide {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+
+    .hero-name {
+      font-size: clamp(2.5rem, 18vw, 5rem);
+    }
+  }
+
+  /* ── Testimonials carousel ────────────────────────────── */
   .carousel-viewport {
     --carousel-gap: 1.5rem;
     --carousel-duration: 200s;
@@ -869,39 +944,10 @@ function formatStatsAndCompanies(text: string) {
       scroll-snap-align: start;
     }
   }
-
-  /* Hide when video is in viewport */
-  @media (min-width: 1024px) {
-    .video-signpost.hidden-when-visible {
-      opacity: 0;
-      pointer-events: none;
-    }
-  }
 </style>
 
 <script>
-  const initializeInteractiveSections = () => {
-    // Hide signpost when video is visible
-    const signpost = document.querySelector('.video-signpost');
-    const videoSection = document.querySelector('#intro-video');
-
-    if (signpost && videoSection) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              signpost.classList.add('hidden-when-visible');
-            } else {
-              signpost.classList.remove('hidden-when-visible');
-            }
-          });
-        },
-        { threshold: 0.1 }
-      );
-
-      observer.observe(videoSection);
-    }
-
+  const initializeFlipCards = () => {
     const flipCards = document.querySelectorAll('[data-flip-card]');
     flipCards.forEach((card) => {
       const trigger = card.querySelector('.flip-trigger');
@@ -913,12 +959,11 @@ function formatStatsAndCompanies(text: string) {
         trigger.setAttribute('aria-pressed', String(isFlipped));
       });
     });
-
   };
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeInteractiveSections, { once: true });
+    document.addEventListener('DOMContentLoaded', initializeFlipCards, { once: true });
   } else {
-    initializeInteractiveSections();
+    initializeFlipCards();
   }
 </script>

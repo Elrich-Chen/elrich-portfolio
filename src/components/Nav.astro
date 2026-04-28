@@ -9,12 +9,12 @@ const navLinks = [
   { href: '/about', text: 'About' },
   { href: '/photos', text: 'Photos' },
   { href: '/hobbies', text: 'Hobbies' },
-  { href: '/basketball', text: 'Basketball' },
 ];
 ---
 
 <nav class="site-nav text-sm">
   <div class="nav-row">
+    <a href="/" class="nav-home" aria-label="Go to home page">Elrich Chen</a>
     <div class="nav-links nav-links-desktop">
       {navLinks.map((link) => (
         <a
@@ -57,8 +57,24 @@ const navLinks = [
   .nav-row {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 0.75rem;
+  }
+
+  .nav-home {
+    font-family: 'Reenie Beanie', cursive;
+    font-size: clamp(1.3rem, 3vw, 1.8rem);
+    font-weight: 400;
+    color: rgb(var(--fg));
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    line-height: 1;
+    transition: opacity 0.2s ease;
+  }
+
+  .nav-home:hover {
+    opacity: 0.65;
   }
 
   .nav-links {

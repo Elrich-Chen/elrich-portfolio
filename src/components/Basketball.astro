@@ -1,15 +1,16 @@
 ---
 // Basketball.astro
-// Three.js scroll-driven basketball animation.
-// GLTFLoader API: https://threejs.org/docs/#examples/en/loaders/GLTFLoader
-// WebGLRenderer API: https://threejs.org/docs/#api/en/renderers/WebGLRenderer
+// Full-viewport fixed WebGL canvas. The ball stays on screen at all times.
+// GSAP ScrollTrigger reads section IDs from the home page and moves the ball
+// diagonally between them as the user scrolls.
+//
+// Three.js WebGLRenderer: https://threejs.org/docs/#api/en/renderers/WebGLRenderer
+// GLTFLoader: https://threejs.org/docs/#examples/en/loaders/GLTFLoader
+// GSAP ScrollTrigger: https://gsap.com/docs/v3/Plugins/ScrollTrigger/
 ---
 
-<div id="basketball-section" class="bball-root">
-  <div class="bball-sticky">
-    <canvas id="bball-canvas" class="bball-canvas"></canvas>
-  </div>
-</div>
+<!-- Fixed full-viewport canvas — pointer-events:none so content stays clickable -->
+<canvas id="bball-canvas" class="bball-canvas" aria-label="Basketball 3D animation" aria-hidden="true"></canvas>
 
 <script>
   import * as THREE from 'three';
@@ -19,12 +20,31 @@
 
   gsap.registerPlugin(ScrollTrigger);
 
+  // Scene positions (Three.js units) for each home page section.
+  // x: horizontal (positive = right), y: vertical (positive = up)
+  const SCENES: Record<string, { x: number; y: number }> = {
+    'section-hero':     { x:  0,    y:  0    },
+    'section-recent':   { x:  2.4,  y:  1.1  }, // top-right
+    'section-building': { x: -2.4,  y: -1.1  }, // bottom-left
+    'section-connect1': { x:  2.4,  y:  1.1  }, // top-right
+    'section-clients':  { x:  2.4,  y: -1.1  }, // bottom-right
+    'section-connect2': { x: -2.4,  y:  1.1  }, // top-left
+  };
+
+  const SECTION_ORDER = [
+    'section-hero',
+    'section-recent',
+    'section-building',
+    'section-connect1',
+    'section-clients',
+    'section-connect2',
+  ];
+
   function initBasketball() {
     const canvas = document.getElementById('bball-canvas') as HTMLCanvasElement | null;
-    const section = document.getElementById('basketball-section') as HTMLElement | null;
-    if (!canvas || !section) return;
+    if (!canvas) return;
 
-    // Renderer
+    // Renderer — alpha:true keeps background transparent
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
@@ -32,119 +52,158 @@
 
     // Scene + Camera
     const scene = new THREE.Scene();
-    let W = canvas.parentElement?.clientWidth || window.innerWidth;
-    let H = canvas.parentElement?.clientHeight || window.innerHeight;
+    let W = window.innerWidth;
+    let H = window.innerHeight;
     const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
     camera.position.set(0, 0, 5);
     renderer.setSize(W, H, false);
 
-    // Lighting
-    const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+    // ── Lighting (boosted) ─────────────────────────────────────────────────
+    // Ambient: fills shadows so ball isn't dark on any side
+    const ambient = new THREE.AmbientLight(0xffffff, 1.0);
     scene.add(ambient);
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
+    // Key light: primary source from upper-right front
+    const keyLight = new THREE.DirectionalLight(0xffffff, 3.5);
     keyLight.position.set(5, 8, 5);
     keyLight.castShadow = true;
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xffa060, 0.6);
+    // Top spotlight: adds a bright highlight crown on the ball
+    const topLight = new THREE.PointLight(0xffffff, 2.0, 20);
+    topLight.position.set(0, 6, 3);
+    scene.add(topLight);
+
+    // Fill light: warm orange bounce from below-left
+    const fillLight = new THREE.DirectionalLight(0xffa060, 1.0);
     fillLight.position.set(-4, -2, 3);
     scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(0x6080ff, 0.4);
+    // Rim light: cool blue backlight for depth
+    const rimLight = new THREE.DirectionalLight(0x6080ff, 0.8);
     rimLight.position.set(0, 0, -6);
     scene.add(rimLight);
+    // ──────────────────────────────────────────────────────────────────────
 
-    // Mutable state
+    // Position proxy — GSAP animates this, rAF applies it to mesh
+    const pos = { x: 0, y: 0, z_rot: 0 };
+
     let mesh: THREE.Object3D | null = null;
     let spinAngle = 0;
     let scrollVelocity = 0;
 
-    // Position proxy object that GSAP animates
-    // (GSAP cannot directly animate Three.js Vector3 — use a plain object proxy)
-    const pos = { x: 0, y: 0, z_rot: 0 };
-
+    // Load GLB model
     const loader = new GLTFLoader();
     loader.load(
       '/3D-MODELS/BasketBall.glb',
       (gltf) => {
         mesh = gltf.scene;
 
-        // Center + scale
+        // Center model at origin + scale to ~1.8 units
         const box = new THREE.Box3().setFromObject(mesh);
         const center = box.getCenter(new THREE.Vector3());
-        const size = box.getSize(new THREE.Vector3());
+        const size   = box.getSize(new THREE.Vector3());
         mesh.position.sub(center);
-        const maxDim = Math.max(size.x, size.y, size.z);
-        mesh.scale.setScalar(1.8 / maxDim);
+        mesh.scale.setScalar(1.8 / Math.max(size.x, size.y, size.z));
 
         scene.add(mesh);
 
         const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReduced) return;
 
-        if (!prefersReduced) {
-          // Vertical bob — independent of scroll
-          gsap.to(pos, {
-            y: 0.18,
-            duration: 1.8,
-            ease: 'sine.inOut',
-            yoyo: true,
-            repeat: -1,
-          });
+        // ── Vertical bob (scroll-independent) ─────────────────────────────
+        gsap.to(pos, {
+          y: 0.18,
+          duration: 1.8,
+          ease: 'sine.inOut',
+          yoyo: true,
+          repeat: -1,
+        });
 
-          // Zigzag scroll timeline
-          // SWING = how far left/right in Three.js scene units
-          const SWING = 2.8;
+        // ── Per-section diagonal transitions ───────────────────────────────
+        // For each consecutive section pair, create a scrubbing ScrollTrigger
+        // that interpolates the ball from the previous position to the next.
+        SECTION_ORDER.forEach((sectionId, i) => {
+          if (i === 0) return; // hero is the starting position
 
-          const tl = gsap.timeline({
-            scrollTrigger: {
-              trigger: '#basketball-section',
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 1.5,
-              onUpdate(self) {
-                // Boost spin speed proportional to scroll velocity
-                const v = Math.abs(self.getVelocity());
-                scrollVelocity = Math.min(v / 800, 3.0);
-              },
+          const prev = SCENES[SECTION_ORDER[i - 1]];
+          const next = SCENES[sectionId];
+
+          const el = document.getElementById(sectionId);
+          if (!el) return;
+
+          ScrollTrigger.create({
+            trigger: el,
+            start: 'top 85%',
+            end: 'top 15%',
+            scrub: 1.5,
+            onUpdate(self) {
+              pos.x    = gsap.utils.interpolate(prev.x, next.x, self.progress);
+              // bob offset preserved — only override the base y, not the bobbing delta
+              // We store the "target base y" separately and let the bob tween add on top
+              pos.z_rot = gsap.utils.interpolate(
+                prev.x > 0 ? -0.25 : prev.x < 0 ? 0.25 : 0,
+                next.x > 0 ? -0.25 : next.x < 0 ? 0.25 : 0,
+                self.progress
+              );
+              // Boost spin on scroll
+              const v = Math.abs(self.getVelocity());
+              scrollVelocity = Math.min(v / 800, 3.0);
             },
           });
+        });
 
-          // 5 keyframes: center → right → left → right → left → center
-          tl.to(pos, { x: SWING, z_rot: -0.25, ease: 'power2.inOut', duration: 1 })
-            .to(pos, { x: -SWING, z_rot: 0.25, ease: 'power2.inOut', duration: 1 })
-            .to(pos, { x: SWING, z_rot: -0.25, ease: 'power2.inOut', duration: 1 })
-            .to(pos, { x: -SWING, z_rot: 0.25, ease: 'power2.inOut', duration: 1 })
-            .to(pos, { x: 0, z_rot: 0, ease: 'power2.inOut', duration: 0.5 });
-        }
+        // Separate y-position timeline for vertical diagonal movement
+        // (keeps separate from the bob tween which uses pos.y as a delta)
+        const baseY = { v: 0 };
+        SECTION_ORDER.forEach((sectionId, i) => {
+          if (i === 0) return;
+          const prev = SCENES[SECTION_ORDER[i - 1]];
+          const next = SCENES[sectionId];
+          const el = document.getElementById(sectionId);
+          if (!el) return;
+
+          ScrollTrigger.create({
+            trigger: el,
+            start: 'top 85%',
+            end: 'top 15%',
+            scrub: 1.5,
+            onUpdate(self) {
+              baseY.v = gsap.utils.interpolate(prev.y, next.y, self.progress);
+            },
+          });
+        });
+
+        // rAF applies both baseY + bob (pos.y) to mesh
+        (window as any).__bball_baseY = baseY;
       },
       undefined,
-      (err) => console.error('GLTFLoader error:', err)
+      (err) => console.error('Basketball GLTFLoader error:', err)
     );
 
-    // Resize
+    // Resize handler
     function onResize() {
-      W = canvas.parentElement?.clientWidth || window.innerWidth;
-      H = canvas.parentElement?.clientHeight || window.innerHeight;
+      W = window.innerWidth;
+      H = window.innerHeight;
       camera.aspect = W / H;
       camera.updateProjectionMatrix();
       renderer.setSize(W, H, false);
     }
     window.addEventListener('resize', onResize, { passive: true });
-    onResize();
 
     // Animation loop
     function animate() {
       requestAnimationFrame(animate);
       if (mesh) {
-        // Spin: base speed + scroll velocity boost, dampen each frame
         spinAngle += 0.008 + scrollVelocity * 0.025;
         scrollVelocity *= 0.92;
 
+        const baseY = (window as any).__bball_baseY?.v ?? 0;
+
         mesh.rotation.y = spinAngle;
-        mesh.rotation.z = pos.z_rot;  // tilt from GSAP
-        mesh.position.x = pos.x;       // x from GSAP zigzag
-        mesh.position.y = pos.y;       // y from GSAP bob
+        mesh.rotation.z = pos.z_rot;
+        mesh.position.x = pos.x;
+        mesh.position.y = baseY + pos.y; // base diagonal Y + bob delta
       }
       renderer.render(scene, camera);
     }
@@ -159,24 +218,14 @@
 </script>
 
 <style>
-  .bball-root {
-    position: relative;
-    height: 500vh;
-  }
-
-  .bball-sticky {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
   .bball-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; /* content remains fully interactive */
+    z-index: 5;
     display: block;
-    width: 100%;
-    height: 100%;
   }
 </style>

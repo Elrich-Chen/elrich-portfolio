@@ -1,7 +1,6 @@
 ---
-const { title = 'Elrich Chen', description = 'Builder. Engineer. Founder.', meta = [], showSignature = false, showContactForm = false } = Astro.props;
+const { title = 'Elrich Chen', description = 'Builder. Engineer. Founder.', meta = [], showContactForm = false } = Astro.props;
 import Nav from '../components/Nav.astro';
-import Signature from '../components/Signature.astro';
 import PixelTrail from '../components/PixelTrail.astro';
 import Polaroid from '../components/Polaroid.astro';
 import '../styles/global.css';
@@ -70,11 +69,6 @@ const contactLinks = [
       <div class="prose-measure">
         <header class="py-6 border-b border-neutral-200 relative overflow-x-hidden">
           <div class="header-inner">
-            {showSignature && (
-              <div class="header-signature">
-                <Signature />
-              </div>
-            )}
             <div class="header-nav">
               <Nav />
             </div>
