@@ -49,13 +49,11 @@ const education = [
   {
     school: 'University of Waterloo',
     degree: 'Bachelors in Computer Science',
-    period: 'Expected 2029',
     logo: '/logos/uwaterloo.png',
   },
   {
     school: "Queen's University",
     degree: 'Bachelors in Computer Science',
-    period: '2023 – 2024',
     logo: '/logos/queensu.png',
   },
 ];
@@ -168,7 +166,6 @@ const techStack = {
               <div class="edu-card">
                 <div class="edu-top">
                   <img src={item.logo} alt={item.school} class="edu-logo" loading="lazy" />
-                  <span class="edu-period">{item.period}</span>
                 </div>
                 <h3 class="edu-school">{item.school}</h3>
                 <p class="edu-degree">{item.degree}</p>
@@ -535,13 +532,6 @@ const techStack = {
     width: 32px;
     height: 32px;
     object-fit: contain;
-  }
-
-  .edu-period {
-    font-size: 0.72rem;
-    color: rgb(var(--muted));
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
   }
 
   .edu-school {
