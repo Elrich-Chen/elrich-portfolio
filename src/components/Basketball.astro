@@ -1,16 +1,16 @@
 ---
 // Basketball.astro
-// Full-viewport fixed WebGL canvas. The ball stays on screen at all times.
-// GSAP ScrollTrigger reads section IDs from the home page and moves the ball
-// diagonally between them as the user scrolls.
+// Full-viewport fixed canvas — overlays entire page, pointer-events:none.
+// The ball position is driven by GSAP ScrollTrigger listening to section IDs
+// in the parent page. Canvas uses alpha:true so page background shows through.
 //
 // Three.js WebGLRenderer: https://threejs.org/docs/#api/en/renderers/WebGLRenderer
-// GLTFLoader: https://threejs.org/docs/#examples/en/loaders/GLTFLoader
+// GLTFLoader (r150+): https://threejs.org/docs/#examples/en/loaders/GLTFLoader
 // GSAP ScrollTrigger: https://gsap.com/docs/v3/Plugins/ScrollTrigger/
 ---
 
-<!-- Fixed full-viewport canvas — pointer-events:none so content stays clickable -->
-<canvas id="bball-canvas" class="bball-canvas" aria-label="Basketball 3D animation" aria-hidden="true"></canvas>
+<!-- Fixed canvas — sits above page background (z:5), below content panels (z:10) -->
+<canvas id="bball-canvas" class="bball-canvas-fixed" aria-hidden="true"></canvas>
 
 <script>
   import * as THREE from 'three';
@@ -20,37 +20,28 @@
 
   gsap.registerPlugin(ScrollTrigger);
 
-  // Scene positions (Three.js units) for each home page section.
-  // x: horizontal (positive = right), y: vertical (positive = up)
-  const SCENES: Record<string, { x: number; y: number }> = {
-    'section-hero':     { x:  0,    y:  0    },
-    'section-recent':   { x:  2.4,  y:  1.1  }, // top-right
-    'section-building': { x: -2.4,  y: -1.1  }, // bottom-left
-    'section-connect1': { x:  2.4,  y:  1.1  }, // top-right
-    'section-clients':  { x:  2.4,  y: -1.1  }, // bottom-right
-    'section-connect2': { x: -2.4,  y:  1.1  }, // top-left
-  };
-
-  const SECTION_ORDER = [
-    'section-hero',
-    'section-recent',
-    'section-building',
-    'section-connect1',
-    'section-clients',
-    'section-connect2',
+  // Section IDs and the Three.js scene position the ball moves TO when that
+  // section enters the viewport. x/y are in Three.js scene units (camera z=5).
+  const SCENES = [
+    { id: 'section-hero',     x: 0,    y: 0    }, // center
+    { id: 'section-recent',   x: 2.4,  y: 1.1  }, // top-right
+    { id: 'section-building', x: -2.4, y: -1.1 }, // bottom-left
+    { id: 'section-connect1', x: 2.4,  y: 1.1  }, // top-right
+    { id: 'section-clients',  x: 2.4,  y: -1.1 }, // bottom-right
+    { id: 'section-connect2', x: -2.4, y: 1.1  }, // top-left
   ];
 
   function initBasketball() {
     const canvas = document.getElementById('bball-canvas') as HTMLCanvasElement | null;
     if (!canvas) return;
 
-    // Renderer — alpha:true keeps background transparent
+    // --- Renderer ---
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    // Scene + Camera
+    // --- Scene + Camera ---
     const scene = new THREE.Scene();
     let W = window.innerWidth;
     let H = window.innerHeight;
@@ -58,130 +49,131 @@
     camera.position.set(0, 0, 5);
     renderer.setSize(W, H, false);
 
-    // ── Lighting (boosted) ─────────────────────────────────────────────────
-    // Ambient: fills shadows so ball isn't dark on any side
+    // --- Lighting (boosted for high visibility) ---
     const ambient = new THREE.AmbientLight(0xffffff, 1.0);
     scene.add(ambient);
 
-    // Key light: primary source from upper-right front
     const keyLight = new THREE.DirectionalLight(0xffffff, 3.5);
     keyLight.position.set(5, 8, 5);
     keyLight.castShadow = true;
     scene.add(keyLight);
 
-    // Top spotlight: adds a bright highlight crown on the ball
+    // Top spotlight for sharp highlight on the ball
     const topLight = new THREE.PointLight(0xffffff, 2.0, 20);
     topLight.position.set(0, 6, 3);
     scene.add(topLight);
 
-    // Fill light: warm orange bounce from below-left
     const fillLight = new THREE.DirectionalLight(0xffa060, 1.0);
     fillLight.position.set(-4, -2, 3);
     scene.add(fillLight);
 
-    // Rim light: cool blue backlight for depth
     const rimLight = new THREE.DirectionalLight(0x6080ff, 0.8);
     rimLight.position.set(0, 0, -6);
     scene.add(rimLight);
-    // ──────────────────────────────────────────────────────────────────────
 
-    // Position proxy — GSAP animates this, rAF applies it to mesh
-    const pos = { x: 0, y: 0, z_rot: 0 };
-
+    // --- State ---
     let mesh: THREE.Object3D | null = null;
     let spinAngle = 0;
     let scrollVelocity = 0;
 
-    // Load GLB model
+    // Proxy object — GSAP animates this; rAF reads it and applies to mesh.
+    // This prevents GSAP/requestAnimationFrame conflicts on the same property.
+    const pos = { x: 0, y: 0, z_rot: 0 };
+
+    // --- Load GLB ---
     const loader = new GLTFLoader();
     loader.load(
       '/3D-MODELS/BasketBall.glb',
       (gltf) => {
         mesh = gltf.scene;
 
-        // Center model at origin + scale to ~1.8 units
+        // Center model at origin using its bounding box
         const box = new THREE.Box3().setFromObject(mesh);
         const center = box.getCenter(new THREE.Vector3());
         const size   = box.getSize(new THREE.Vector3());
         mesh.position.sub(center);
-        mesh.scale.setScalar(1.8 / Math.max(size.x, size.y, size.z));
+
+        // Scale so longest axis = 1.8 scene units
+        const maxDim = Math.max(size.x, size.y, size.z);
+        mesh.scale.setScalar(1.8 / maxDim);
 
         scene.add(mesh);
 
         const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (prefersReduced) return;
+        if (prefersReduced) return; // ball renders statically at center
 
-        // ── Vertical bob (scroll-independent) ─────────────────────────────
+        // --- Vertical bob (independent of scroll) ---
         gsap.to(pos, {
-          y: 0.18,
+          y: 0.2,
           duration: 1.8,
           ease: 'sine.inOut',
           yoyo: true,
           repeat: -1,
         });
 
-        // ── Per-section diagonal transitions ───────────────────────────────
-        // For each consecutive section pair, create a scrubbing ScrollTrigger
-        // that interpolates the ball from the previous position to the next.
-        SECTION_ORDER.forEach((sectionId, i) => {
-          if (i === 0) return; // hero is the starting position
-
-          const prev = SCENES[SECTION_ORDER[i - 1]];
-          const next = SCENES[sectionId];
-
-          const el = document.getElementById(sectionId);
+        // --- Diagonal per-section ScrollTriggers ---
+        // Each consecutive pair of SCENES creates a scrubbed transition.
+        SCENES.forEach((scene, i) => {
+          if (i === 0) return; // hero is the starting position, no trigger needed
+          const prev = SCENES[i - 1];
+          const el = document.getElementById(scene.id);
           if (!el) return;
 
           ScrollTrigger.create({
             trigger: el,
             start: 'top 85%',
-            end: 'top 15%',
+            end:   'top 15%',
             scrub: 1.5,
             onUpdate(self) {
-              pos.x    = gsap.utils.interpolate(prev.x, next.x, self.progress);
-              // bob offset preserved — only override the base y, not the bobbing delta
-              // We store the "target base y" separately and let the bob tween add on top
+              pos.x     = gsap.utils.interpolate(prev.x, scene.x, self.progress);
+              // y bob is additive; only override the non-bob portion via a separate tween
+              // Instead, tween pos.x and z_rot directly; the bob is separate:
               pos.z_rot = gsap.utils.interpolate(
-                prev.x > 0 ? -0.25 : prev.x < 0 ? 0.25 : 0,
-                next.x > 0 ? -0.25 : next.x < 0 ? 0.25 : 0,
+                prev.x > scene.x ? -0.2 : 0.2,  // tilt away from direction of travel
+                scene.x > prev.x ? -0.2 : 0.2,
                 self.progress
               );
-              // Boost spin on scroll
+
+              // Boost spin on fast scroll
               const v = Math.abs(self.getVelocity());
-              scrollVelocity = Math.min(v / 800, 3.0);
+              scrollVelocity = Math.min(v / 600, 3.0);
             },
           });
-        });
 
-        // Separate y-position timeline for vertical diagonal movement
-        // (keeps separate from the bob tween which uses pos.y as a delta)
-        const baseY = { v: 0 };
-        SECTION_ORDER.forEach((sectionId, i) => {
-          if (i === 0) return;
-          const prev = SCENES[SECTION_ORDER[i - 1]];
-          const next = SCENES[sectionId];
-          const el = document.getElementById(sectionId);
-          if (!el) return;
-
+          // Snap the position target cleanly once section fully entered
           ScrollTrigger.create({
             trigger: el,
-            start: 'top 85%',
-            end: 'top 15%',
-            scrub: 1.5,
-            onUpdate(self) {
-              baseY.v = gsap.utils.interpolate(prev.y, next.y, self.progress);
+            start: 'top 15%',
+            end:   'bottom bottom',
+            onEnter() {
+              gsap.to(pos, { x: scene.x, z_rot: scene.x > 0 ? -0.2 : 0.2, duration: 0.4, ease: 'power2.out' });
+            },
+            onLeaveBack() {
+              gsap.to(pos, { x: prev.x, z_rot: prev.x > 0 ? -0.2 : 0.2, duration: 0.4, ease: 'power2.out' });
             },
           });
         });
-
-        // rAF applies both baseY + bob (pos.y) to mesh
-        (window as any).__bball_baseY = baseY;
       },
       undefined,
-      (err) => console.error('Basketball GLTFLoader error:', err)
+      (err) => console.error('[Basketball] GLTFLoader error:', err)
     );
 
-    // Resize handler
+    // --- z-index toggle: high (15) on hero so ball renders IN FRONT of hero text;
+    //     low (4) for content sections so panels render in front of ball.
+    //     prose-measure in Base.astro has z-index:10, so:
+    //       canvas z:15 → above prose-measure → ball covers hero text  ✓
+    //       canvas z:4  → below prose-measure → content panels cover ball ✓
+    const heroEl = document.getElementById('section-hero');
+    if (heroEl && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      ScrollTrigger.create({
+        trigger: heroEl,
+        start: 'bottom 70%',
+        onEnter()     { canvas.style.zIndex = '4';  },
+        onLeaveBack() { canvas.style.zIndex = '15'; },
+      });
+    }
+
+    // --- Resize handler ---
     function onResize() {
       W = window.innerWidth;
       H = window.innerHeight;
@@ -191,19 +183,17 @@
     }
     window.addEventListener('resize', onResize, { passive: true });
 
-    // Animation loop
+    // --- Animation loop ---
     function animate() {
       requestAnimationFrame(animate);
       if (mesh) {
-        spinAngle += 0.008 + scrollVelocity * 0.025;
-        scrollVelocity *= 0.92;
+        spinAngle       += 0.008 + scrollVelocity * 0.025;
+        scrollVelocity  *= 0.92; // dampen each frame
 
-        const baseY = (window as any).__bball_baseY?.v ?? 0;
-
-        mesh.rotation.y = spinAngle;
-        mesh.rotation.z = pos.z_rot;
-        mesh.position.x = pos.x;
-        mesh.position.y = baseY + pos.y; // base diagonal Y + bob delta
+        mesh.rotation.y  = spinAngle;   // rAF owns Y rotation
+        mesh.rotation.z  = pos.z_rot;   // tilt from GSAP
+        mesh.position.x  = pos.x;       // x from GSAP section triggers
+        mesh.position.y  = pos.y;       // y from GSAP bob
       }
       renderer.render(scene, camera);
     }
@@ -218,14 +208,15 @@
 </script>
 
 <style>
-  .bball-canvas {
+  .bball-canvas-fixed {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    pointer-events: none; /* content remains fully interactive */
-    z-index: 5;
+    pointer-events: none; /* click-through — page content remains interactive */
+    z-index: 15;          /* starts above prose-measure (z:10) for hero overlay;
+                             toggled to z:4 by GSAP once hero section exits */
     display: block;
   }
 </style>

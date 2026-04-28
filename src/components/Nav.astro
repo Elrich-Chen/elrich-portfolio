@@ -14,15 +14,15 @@ const navLinks = [
 
 <nav class="site-nav text-sm">
   <div class="nav-row">
+    <!-- Home link — always visible on every page -->
     <a href="/" class="nav-home" aria-label="Go to home page">Elrich Chen</a>
+
     <div class="nav-links nav-links-desktop">
       {navLinks.map((link) => (
         <a
           href={link.href}
-          aria-current={!link.isExternal && isActive(link.href) ? 'page' : undefined}
-          class:list={['nav-link', { 'nav-active': !link.isExternal && isActive(link.href) }]}
-          target={link.isExternal ? '_blank' : undefined}
-          rel={link.isExternal ? 'noopener noreferrer' : undefined}
+          aria-current={isActive(link.href) ? 'page' : undefined}
+          class:list={['nav-link', { 'nav-active': isActive(link.href) }]}
         >{link.text}</a>
       ))}
     </div>
@@ -39,10 +39,8 @@ const navLinks = [
       {navLinks.map((link) => (
         <a
           href={link.href}
-          aria-current={!link.isExternal && isActive(link.href) ? 'page' : undefined}
-          class:list={['nav-link', { 'nav-active': !link.isExternal && isActive(link.href) }]}
-          target={link.isExternal ? '_blank' : undefined}
-          rel={link.isExternal ? 'noopener noreferrer' : undefined}
+          aria-current={isActive(link.href) ? 'page' : undefined}
+          class:list={['nav-link', { 'nav-active': isActive(link.href) }]}
         >{link.text}</a>
       ))}
     </div>
@@ -63,7 +61,7 @@ const navLinks = [
 
   .nav-home {
     font-family: 'Reenie Beanie', cursive;
-    font-size: clamp(1.3rem, 3vw, 1.8rem);
+    font-size: clamp(1.3rem, 3vw, 1.9rem);
     font-weight: 400;
     color: rgb(var(--fg));
     text-decoration: none;
@@ -74,7 +72,7 @@ const navLinks = [
   }
 
   .nav-home:hover {
-    opacity: 0.65;
+    opacity: 0.6;
   }
 
   .nav-links {
@@ -133,13 +131,8 @@ const navLinks = [
     border-radius: 999px;
   }
 
-  .nav-toggle-line::before {
-    top: -6px;
-  }
-
-  .nav-toggle-line::after {
-    top: 6px;
-  }
+  .nav-toggle-line::before { top: -6px; }
+  .nav-toggle-line::after  { top: 6px; }
 
   .nav-menu {
     margin-top: 0.75rem;
@@ -184,23 +177,13 @@ const navLinks = [
   }
 
   @media (max-width: 420px) {
-    .nav-links-mobile {
-      grid-template-columns: 1fr;
-    }
+    .nav-links-mobile { grid-template-columns: 1fr; }
   }
 
   @media (min-width: 768px) {
-    .nav-links-desktop {
-      display: flex;
-    }
-
-    .nav-toggle {
-      display: none;
-    }
-
-    .nav-menu {
-      display: none !important;
-    }
+    .nav-links-desktop { display: flex; }
+    .nav-toggle { display: none; }
+    .nav-menu { display: none !important; }
   }
 </style>
 
@@ -221,28 +204,18 @@ const navLinks = [
     };
 
     toggle.addEventListener('click', () => {
-      if (menu.hidden) {
-        openMenu();
-      } else {
-        closeMenu();
-      }
+      if (menu.hidden) { openMenu(); } else { closeMenu(); }
     });
 
     menu.addEventListener('click', (event) => {
-      if ((event.target as HTMLElement).closest('a')) {
-        closeMenu();
-      }
+      if ((event.target as HTMLElement).closest('a')) { closeMenu(); }
     });
 
     document.addEventListener('click', (event) => {
-      if (nav && !nav.contains(event.target as Node)) {
-        closeMenu();
-      }
+      if (nav && !nav.contains(event.target as Node)) { closeMenu(); }
     });
 
     const media = window.matchMedia('(min-width: 768px)');
-    media.addEventListener('change', (event) => {
-      if (event.matches) closeMenu();
-    });
+    media.addEventListener('change', (event) => { if (event.matches) closeMenu(); });
   }
 </script>

@@ -1,55 +1,51 @@
 ---
 import Base from '../layouts/Base.astro';
-import HeroLoom from '../components/HeroLoom.astro';
 import Basketball from '../components/Basketball.astro';
 import { getEntry, getCollection } from 'astro:content';
-const highlights = await getEntry('highlights', 'home');
-const testimonials = await getCollection('testimonials');
+
+const highlights    = await getEntry('highlights', 'home');
+const testimonials  = await getCollection('testimonials');
+
+// Ensure at least 6 cards for the carousel
 const carouselItems = (() => {
-  if (testimonials.length === 0) {
-    return [];
-  }
-  if (testimonials.length >= 6) {
-    return testimonials;
-  }
+  if (testimonials.length === 0) return [];
+  if (testimonials.length >= 6) return testimonials;
   const repeated: typeof testimonials = [];
-  while (repeated.length < 6) {
-    repeated.push(...testimonials);
-  }
+  while (repeated.length < 6) repeated.push(...testimonials);
   return repeated.slice(0, 6);
 })();
 
-// Company data with URLs and logos
+// ── Company link map ──────────────────────────────────────────────────────────
 const companyData: Record<string, { url: string; logo?: string }> = {
-  'Ontario Legal Tech': { url: 'https://ontariomandatorymediation.my.canva.site/ontario-court-helper'},
-  "Queen's COMPSA": { url: 'https://compsa.ca/', logo: 'compsa' },
-  'DoneMaker': { url: 'https://donemaker.com', logo: 'zivko' },
-  'UWaterloo': { url: 'https://uwaterloo.ca', logo: 'uwaterloo' },
-  'QueensU': { url: 'http://queensu.ca/', logo: 'queenu' },
+  'Ontario Legal Tech':                      { url: 'https://ontariomandatorymediation.my.canva.site/ontario-court-helper' },
+  "Queen's COMPSA":                          { url: 'https://compsa.ca/', logo: 'compsa' },
+  'DoneMaker':                               { url: 'https://donemaker.com', logo: 'zivko' },
+  'UWaterloo':                               { url: 'https://uwaterloo.ca', logo: 'uwaterloo' },
+  'QueensU':                                 { url: 'http://queensu.ca/', logo: 'queenu' },
   'University of Toronto Engineering Outreach': { url: 'https://outreach.engineering.utoronto.ca', logo: 'uoft2' },
-  'TypeScript': { url: 'https://www.typescriptlang.org' },
-  'Next.js': { url: 'https://nextjs.org' },
-  'React': { url: 'https://react.dev' },
-  'Flask': { url: 'https://flask.palletsprojects.com' },
-  'FastAPI': { url: 'https://fastapi.tiangolo.com' },
-  'TailwindCSS': { url: 'https://tailwindcss.com' },
-  'Figma': { url: 'https://www.figma.com' },
-  'Python': { url: 'https://www.python.org' },
-  'PyTorch': { url: 'https://pytorch.org' },
-  'NumPy': { url: 'https://numpy.org' },
-  'Pandas': { url: 'https://pandas.pydata.org' },
-  'Jupyter docs tool': { url: 'https://github.com/Elrich-Chen/jupyterlab_docs_helper' },
-  'MongoDB': { url: 'https://www.mongodb.com' },
-  'JavaScript': { url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript' },
-  'PostgreSQL': { url: 'https://www.postgresql.org' },
-  'SQLAlchemy': { url: 'https://www.sqlalchemy.org' },
-  'JWT': { url: 'https://jwt.io' },
-  'Stanford Code In Place' : { url: 'https://codeinplace.stanford.edu', logo: 'stanford'},
-  "Queen's Sports Analytics Organization" : { url: 'https://www.instagram.com/p/DH4J-30SmkA/?img_index=6', logo: 'qsao'},
-  'Chinese Lion Dancing' : {url : 'https://www.chinadailyhk.com/hk/article/603804'},
-  'Tech Plus UW' : {url : 'https://www.techplusuw.com', logo: 'techplusuw'},
-  'UW FinTech' : {url : 'https://www.instagram.com/uwfintech/?hl=en', logo: 'fintech'},
-  'UW Data Science' : {url: 'https://www.uwdatascience.ca/', logo: 'uw_dsc'}
+  'TypeScript':                              { url: 'https://www.typescriptlang.org' },
+  'Next.js':                                 { url: 'https://nextjs.org' },
+  'React':                                   { url: 'https://react.dev' },
+  'Flask':                                   { url: 'https://flask.palletsprojects.com' },
+  'FastAPI':                                 { url: 'https://fastapi.tiangolo.com' },
+  'TailwindCSS':                             { url: 'https://tailwindcss.com' },
+  'Figma':                                   { url: 'https://www.figma.com' },
+  'Python':                                  { url: 'https://www.python.org' },
+  'PyTorch':                                 { url: 'https://pytorch.org' },
+  'NumPy':                                   { url: 'https://numpy.org' },
+  'Pandas':                                  { url: 'https://pandas.pydata.org' },
+  'Jupyter docs tool':                       { url: 'https://github.com/Elrich-Chen/jupyterlab_docs_helper' },
+  'MongoDB':                                 { url: 'https://www.mongodb.com' },
+  'JavaScript':                              { url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript' },
+  'PostgreSQL':                              { url: 'https://www.postgresql.org' },
+  'SQLAlchemy':                              { url: 'https://www.sqlalchemy.org' },
+  'JWT':                                     { url: 'https://jwt.io' },
+  'Stanford Code In Place':                  { url: 'https://codeinplace.stanford.edu', logo: 'stanford' },
+  "Queen's Sports Analytics Organization":  { url: 'https://www.instagram.com/p/DH4J-30SmkA/?img_index=6', logo: 'qsao' },
+  'Chinese Lion Dancing':                    { url: 'https://www.chinadailyhk.com/hk/article/603804' },
+  'Tech Plus UW':                            { url: 'https://www.techplusuw.com', logo: 'techplusuw' },
+  'UW FinTech':                              { url: 'https://www.instagram.com/uwfintech/?hl=en', logo: 'fintech' },
+  'UW Data Science':                         { url: 'https://www.uwdatascience.ca/', logo: 'uw_dsc' },
 };
 
 const logoOverrides: Record<string, string> = {
@@ -59,125 +55,101 @@ const logoOverrides: Record<string, string> = {
 
 function resolveLogoFileName(logoName: string) {
   const cleaned = String(logoName).trim().toLowerCase();
-  if (logoOverrides[cleaned]) {
-    return logoOverrides[cleaned];
-  }
-  return cleaned.replace(/\s+/g, '-');
+  return logoOverrides[cleaned] ?? cleaned.replace(/\s+/g, '-');
 }
 
-// Function to bold+italicize stats and make companies clickable with bold+italic
 function formatStatsAndCompanies(text: string) {
-  // Match numbers with optional +, K, M, %, and common stat patterns, plus ordinals (1st, 2nd, 3rd, etc.)
   const statPattern = /(\d+(?:\.\d+)?(?:st|nd|rd|th|[KMB%+]\+?))/gi;
-
-  // Bold and italicize stats
   let result = text.replace(statPattern, '<strong><em>$1</em></strong>');
 
-  // Support custom project links: [LINK:url]text[/LINK] - MUST come before "View project →" replacement
   result = result.replace(
     /\[LINK:\s*([^\]]+?)\s*\](.+?)\[\/LINK\]/gi,
     '<a href="$1" class="company-link" target="_blank" rel="noopener noreferrer"><strong><em>$2</em></strong></a>'
   );
 
-  // Support preview images: [IMAGE:filename.png] or [IMAGE:filename.png|https://link]
   result = result.replace(/\[IMAGE:\s*([^\]|]+?)(?:\|([^\]]+))?\s*\]/gi, (_, fileName, link) => {
     const safeName = String(fileName).trim().replace(/^\/+/, '');
     const src = safeName.startsWith('http') ? safeName : `/photos/elrich_photos/${safeName}`;
     if (link) {
       const href = String(link).trim();
-      return `<a href="${href}" class="highlight-preview-link" target="_blank" rel="noopener noreferrer"><img src="${src}" alt="Preview image" loading="lazy" class="highlight-preview" /></a>`;
+      return `<a href="${href}" class="highlight-preview-link" target="_blank" rel="noopener noreferrer"><img src="${src}" alt="Preview" loading="lazy" class="highlight-preview" /></a>`;
     }
-    return `<img src="${src}" alt="Preview image" loading="lazy" class="highlight-preview" />`;
+    return `<img src="${src}" alt="Preview" loading="lazy" class="highlight-preview" />`;
   });
 
-  // Render inline logos in sub-points
   result = result.replace(/\[LOGO:([^\]]+)\]/gi, (_, logoName) => {
-    const safeName = String(logoName).trim();
-    const fileName = resolveLogoFileName(safeName);
-    return `<img src="/logos/${fileName}.png" alt="${safeName}" width="20" height="20" loading="lazy" class="inline-block align-middle mx-1 logo-placeholder" onerror="this.style.display='none'" />`;
+    const fileName = resolveLogoFileName(String(logoName).trim());
+    return `<img src="/logos/${fileName}.png" alt="${logoName}" width="20" height="20" loading="lazy" class="inline-block align-middle mx-1 logo-placeholder" onerror="this.style.display='none'" />`;
   });
 
-  // Process company names without touching existing HTML or nested links
   const companyKeys = Object.keys(companyData).sort((a, b) => b.length - a.length);
-  const companyMap = new Map(companyKeys.map((key) => [key.toLowerCase(), key]));
+  const companyMap  = new Map(companyKeys.map((k) => [k.toLowerCase(), k]));
   const companyPattern = new RegExp(
-    `(${companyKeys.map((key) => key.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')).join('|')})`,
+    `(${companyKeys.map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`,
     'gi'
   );
+
   const tokens = result.split(/(<[^>]+>)/g);
   let insideAnchor = false;
   const rebuilt: string[] = [];
 
   for (const token of tokens) {
-    if (/^<a\b/i.test(token)) {
-      insideAnchor = true;
-      rebuilt.push(token);
-      continue;
-    }
-    if (/^<\/a/i.test(token)) {
-      insideAnchor = false;
-      rebuilt.push(token);
-      continue;
-    }
-    if (token.startsWith('<') || insideAnchor) {
-      rebuilt.push(token);
-      continue;
-    }
-
-    const updated = token.replace(companyPattern, (match) => {
-      const key = companyMap.get(match.toLowerCase());
-      if (!key) {
-        return match;
-      }
+    if (/^<a\b/i.test(token))  { insideAnchor = true;  rebuilt.push(token); continue; }
+    if (/^<\/a/i.test(token))  { insideAnchor = false; rebuilt.push(token); continue; }
+    if (token.startsWith('<') || insideAnchor) { rebuilt.push(token); continue; }
+    rebuilt.push(token.replace(companyPattern, (match) => {
+      const key  = companyMap.get(match.toLowerCase());
+      if (!key) return match;
       const data = companyData[key];
       return `<a href="${data.url}" target="_blank" rel="noopener" class="company-link"><strong><em>${match}</em></strong></a>`;
-    });
-    rebuilt.push(updated);
+    }));
   }
-
   result = rebuilt.join('');
-
-  // Convert "View project →" into a link to /projects (fallback) - comes LAST
   result = result.replace(/View project\s*→/gi, '<a href="/projects" class="view-project-link">View project →</a>');
-
   return result;
 }
+
+// Contact links used in both connect sections
+const contactLinks = [
+  { href: 'mailto:elrichchen123@gmail.com', label: 'Email',
+    icon: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm0 2v.01L12 13l8-5.99V7H4z"/></svg>` },
+  { href: 'https://github.com/Elrich-Chen', label: 'GitHub',
+    icon: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>` },
+  { href: 'https://linkedin.com/in/elrichchen', label: 'LinkedIn',
+    icon: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 23.2 24 22.222 0h.003z"/></svg>` },
+  { href: 'https://x.com/ChenElrich_', label: 'X',
+    icon: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>` },
+  { href: 'https://drive.google.com/drive/folders/1JB5jWDtohn4ddSp5ro-jeZshZw2Q-5lc?usp=share_link', label: 'Resume',
+    icon: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 15h8v2H8v-2zm0-4h8v2H8v-2zm0-4h5v2H8V7z"/></svg>` },
+];
 ---
 
-<Base title="Elrich Chen" description="CS @ UWaterloo | Incoming SWE @ Medme Health | Builder">
+<Base title="Elrich Chen" description="CS @ UWaterloo | AI automations for DoneMaker | Aspiring Backend Engineer">
 
-  <!-- Fixed 3D basketball canvas — sits above page at z-index:5 -->
+  <!-- Fixed basketball canvas — sits at z:15 for hero, drops to z:4 for content sections -->
   <Basketball />
 
-  <!-- ═══════════════════════════════════════════════════════════
-       SECTION 0: HERO — name ghosted behind basketball
-       Ball position: center (x:0, y:0)
-  ══════════════════════════════════════════════════════════════ -->
+  <!-- ── HERO ──────────────────────────────────────────────────────────────── -->
   <section id="section-hero" class="scroll-section hero-section">
-    <div class="hero-inner">
-      <h1 class="hero-name">ELRICH CHEN</h1>
-      <p class="hero-sub">CS @ UWaterloo &nbsp;·&nbsp; Builder &nbsp;·&nbsp; Incoming SWE @ Medme Health</p>
+    <div class="hero-content">
+      <h1 class="hero-name">Elrich Chen</h1>
+      <p class="hero-tagline">CS @ UWaterloo &middot; Builder &middot; Engineer</p>
+      <div class="hero-scroll-hint" aria-hidden="true">
+        <span class="hint-label">scroll</span>
+        <span class="hint-arrow">↓</span>
+      </div>
     </div>
   </section>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       SECTION 1: RECENTLY I — LEFT panel
-       Ball moves to top-right diagonal
-  ══════════════════════════════════════════════════════════════ -->
-  <section id="section-recent" class="scroll-section">
-    <div class="content-panel panel-left">
-      <h2 class="panel-heading">◆ Recently, I:</h2>
-      {highlights?.data?.what_makes_me_different?.length > 0 && (
+  <!-- ── RECENTLY I (LEFT) ──────────────────────────────────────────────────── -->
+  {highlights?.data?.what_makes_me_different?.length > 0 && (
+    <section id="section-recent" class="scroll-section">
+      <div class="content-panel panel-left">
+        <h2 class="panel-header">◆ Recently, I:</h2>
         <ul class="highlight-list">
           {highlights.data.what_makes_me_different.map((item: any) => {
-            let mainPoint: string;
-            let subPoints: string[] = [];
-            if (typeof item === 'string') {
-              mainPoint = item;
-            } else {
-              mainPoint = item.point || '';
-              subPoints = item.details || [];
-            }
+            const mainPoint = typeof item === 'string' ? item : (item.point || '');
+            const subPoints: string[] = typeof item === 'string' ? [] : (item.details || []);
             const parts = mainPoint.split(/\[LOGO:([^\]]+)\]/g);
             return (
               <li class="highlight-item-group">
@@ -187,10 +159,8 @@ function formatStatsAndCompanies(text: string) {
                     <div class="highlight-main-point">
                       {parts.map((part: string, i: number) => {
                         if (i % 2 === 1) {
-                          const companyName = resolveLogoFileName(part);
-                          return (
-                            <img src={`/logos/${companyName}.png`} alt={part} width="20" height="20" loading="lazy" class="inline-block align-middle mx-1 logo-placeholder" onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                          );
+                          const n = resolveLogoFileName(part);
+                          return <img src={`/logos/${n}.png`} alt={part} width="20" height="20" loading="lazy" class="inline-block align-middle mx-1 logo-placeholder" onerror={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />;
                         }
                         return <span set:html={formatStatsAndCompanies(part)}></span>;
                       })}
@@ -208,28 +178,19 @@ function formatStatsAndCompanies(text: string) {
             );
           })}
         </ul>
-      )}
-    </div>
-  </section>
+      </div>
+    </section>
+  )}
 
-  <!-- ═══════════════════════════════════════════════════════════
-       SECTION 2: BUILDING — RIGHT panel
-       Ball moves to bottom-left diagonal
-  ══════════════════════════════════════════════════════════════ -->
-  <section id="section-building" class="scroll-section">
-    <div class="content-panel panel-right">
-      <h2 class="panel-heading">◆ Things I am working on:</h2>
-      {highlights?.data?.building?.length > 0 && (
+  <!-- ── BUILDING (RIGHT) ──────────────────────────────────────────────────── -->
+  {highlights?.data?.building?.length > 0 && (
+    <section id="section-building" class="scroll-section">
+      <div class="content-panel panel-right">
+        <h2 class="panel-header">◆ Things I am working on:</h2>
         <ul class="highlight-list">
           {highlights.data.building.map((item: any) => {
-            let mainPoint: string;
-            let subPoints: string[] = [];
-            if (typeof item === 'string') {
-              mainPoint = item;
-            } else {
-              mainPoint = item.point || '';
-              subPoints = item.details || [];
-            }
+            const mainPoint = typeof item === 'string' ? item : (item.point || '');
+            let subPoints: string[] = typeof item === 'string' ? [] : (item.details || []);
             if (mainPoint.includes('TechPlus UW')) {
               subPoints = ["Organised mentorship & dinner for <strong><em>200+</em></strong> members for the F25 term.", ...subPoints];
             }
@@ -242,10 +203,8 @@ function formatStatsAndCompanies(text: string) {
                     <div class="highlight-main-point">
                       {parts.map((part: string, i: number) => {
                         if (i % 2 === 1) {
-                          const companyName = resolveLogoFileName(part);
-                          return (
-                            <img src={`/logos/${companyName}.png`} alt={part} width="20" height="20" loading="lazy" class="inline-block align-middle mx-1 logo-placeholder" onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                          );
+                          const n = resolveLogoFileName(part);
+                          return <img src={`/logos/${n}.png`} alt={part} width="20" height="20" loading="lazy" class="inline-block align-middle mx-1 logo-placeholder" onerror={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />;
                         }
                         return <span set:html={formatStatsAndCompanies(part)}></span>;
                       })}
@@ -263,38 +222,48 @@ function formatStatsAndCompanies(text: string) {
             );
           })}
         </ul>
-      )}
-    </div>
-  </section>
-
-  <!-- ═══════════════════════════════════════════════════════════
-       SECTION 3: LET'S CONNECT (1st) — LEFT panel
-       Ball moves to top-right diagonal
-  ══════════════════════════════════════════════════════════════ -->
-  <section id="section-connect1" class="scroll-section">
-    <div class="content-panel panel-left">
-      <p class="panel-eyebrow">◆ Email</p>
-      <h2 class="panel-heading">Let's connect.</h2>
-      <p class="panel-body">I'm always open to interesting conversations, collaborations, and opportunities.</p>
-      <a href="mailto:elrichchen123@gmail.com" class="panel-cta">Send an email →</a>
-    </div>
-  </section>
-
-  <!-- ═══════════════════════════════════════════════════════════
-       SECTION 4: CLIENT REFERENCES — LEFT panel
-       Ball moves to bottom-right diagonal
-  ══════════════════════════════════════════════════════════════ -->
-  <section id="section-clients" class="scroll-section section-clients-wide">
-    <div class="clients-inner">
-      <div class="clients-header">
-        <p class="panel-eyebrow">Client References</p>
-        <p class="panel-body" style="max-width:38ch; margin:0;">Highlights from early-stage startups I've partnered with.</p>
       </div>
-      {testimonials.length > 0 && (
-        <div class="carousel-viewport" role="region" aria-label="Client testimonials">
+    </section>
+  )}
+
+  <!-- ── LET'S CONNECT 1 (LEFT) ─────────────────────────────────────────────── -->
+  <section id="section-connect1" class="scroll-section">
+    <div class="content-panel panel-left contact-panel">
+      <p class="contact-eyebrow">◆ Email</p>
+      <h2 class="contact-heading">Let's connect.</h2>
+      <p class="contact-body">
+        Reach me directly at
+        <a href="mailto:elrichchen123@gmail.com" class="contact-inline-link">elrichchen123@gmail.com</a>.
+      </p>
+      <a href="mailto:elrichchen123@gmail.com" class="contact-cta">Send an email</a>
+      <div class="contact-icons">
+        {contactLinks.map((link) => (
+          <a
+            href={link.href}
+            aria-label={link.label}
+            class="contact-icon"
+            target={link.href.startsWith('mailto:') ? undefined : '_blank'}
+            rel={link.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+          >
+            <span class="contact-icon-svg" set:html={link.icon}></span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CLIENT REFERENCES (LEFT-ANCHORED HEADER + FULL-WIDTH CAROUSEL) ────── -->
+  {testimonials.length > 0 && (
+    <section id="section-clients" class="scroll-section clients-section">
+      <div class="clients-inner">
+        <div class="clients-header panel-left">
+          <p class="clients-eyebrow">◆ Client References</p>
+          <p class="clients-note">Highlights from early-stage startups I've partnered with.</p>
+        </div>
+        <div class="carousel-viewport" role="region" aria-label="Client testimonials carousel">
           <div class="carousel-track">
             <div class="carousel-group">
-              {carouselItems.map((testimonial) => (
+              {carouselItems.map((t) => (
                 <div class="testimonial-card flip-card" data-flip-card>
                   <button class="flip-trigger" type="button" aria-pressed="false" aria-label="Flip testimonial"></button>
                   <div class="flip-inner">
@@ -303,27 +272,29 @@ function formatStatsAndCompanies(text: string) {
                       <div class="testimonial-content">
                         <div class="preview-top">
                           <p class="preview-label">Tech stack</p>
-                          <p class="preview-tech">{testimonial.data.techStack?.join(' • ') ?? 'Tech stack inside'}</p>
+                          <p class="preview-tech">{t.data.techStack?.join(' • ') ?? 'Tech stack inside'}</p>
                         </div>
                         <div class="preview-meta">
-                          <span class="preview-person">{testimonial.data.author}</span>
-                          <span class="preview-company">{testimonial.data.company}</span>
+                          <span class="preview-person">{t.data.author}</span>
+                          <span class="preview-company">{t.data.company}</span>
                         </div>
-                        {testimonial.data.project && <p class="preview-project">{testimonial.data.project}</p>}
+                        {t.data.project && <p class="preview-project">{t.data.project}</p>}
                       </div>
                     </div>
                     <div class="flip-face flip-back">
                       <span class="flip-hint" aria-hidden="true">Flip to close</span>
                       <div class="testimonial-content">
-                        <p class="testimonial-text">"{testimonial.data.text}"</p>
+                        <p class="testimonial-text">"{t.data.text}"</p>
                         <div class="testimonial-author">
-                          {testimonial.data.companyLogo && (
-                            <img src={`/logos/${testimonial.data.companyLogo}.png`} alt={testimonial.data.company} class="company-logo" width="32" height="32" loading="lazy" onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                          {t.data.companyLogo && (
+                            <img src={`/logos/${t.data.companyLogo}.png`} alt={t.data.company}
+                              class="company-logo" width="32" height="32" loading="lazy"
+                              onerror={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />
                           )}
                           <div class="author-details">
-                            <div class="author-name">{testimonial.data.author}</div>
-                            <div class="author-title">{testimonial.data.title}, {testimonial.data.company}</div>
-                            {testimonial.data.project && <div class="author-project">{testimonial.data.project}</div>}
+                            <div class="author-name">{t.data.author}</div>
+                            <div class="author-title">{t.data.title}, {t.data.company}</div>
+                            {t.data.project && <div class="author-project">{t.data.project}</div>}
                           </div>
                         </div>
                       </div>
@@ -333,7 +304,7 @@ function formatStatsAndCompanies(text: string) {
               ))}
             </div>
             <div class="carousel-group" aria-hidden="true">
-              {carouselItems.map((testimonial) => (
+              {carouselItems.map((t) => (
                 <div class="testimonial-card flip-card" data-flip-card>
                   <button class="flip-trigger" type="button" aria-pressed="false" aria-label="Flip testimonial"></button>
                   <div class="flip-inner">
@@ -342,27 +313,29 @@ function formatStatsAndCompanies(text: string) {
                       <div class="testimonial-content">
                         <div class="preview-top">
                           <p class="preview-label">Tech stack</p>
-                          <p class="preview-tech">{testimonial.data.techStack?.join(' • ') ?? 'Tech stack inside'}</p>
+                          <p class="preview-tech">{t.data.techStack?.join(' • ') ?? 'Tech stack inside'}</p>
                         </div>
                         <div class="preview-meta">
-                          <span class="preview-person">{testimonial.data.author}</span>
-                          <span class="preview-company">{testimonial.data.company}</span>
+                          <span class="preview-person">{t.data.author}</span>
+                          <span class="preview-company">{t.data.company}</span>
                         </div>
-                        {testimonial.data.project && <p class="preview-project">{testimonial.data.project}</p>}
+                        {t.data.project && <p class="preview-project">{t.data.project}</p>}
                       </div>
                     </div>
                     <div class="flip-face flip-back">
                       <span class="flip-hint" aria-hidden="true">Flip to close</span>
                       <div class="testimonial-content">
-                        <p class="testimonial-text">"{testimonial.data.text}"</p>
+                        <p class="testimonial-text">"{t.data.text}"</p>
                         <div class="testimonial-author">
-                          {testimonial.data.companyLogo && (
-                            <img src={`/logos/${testimonial.data.companyLogo}.png`} alt={testimonial.data.company} class="company-logo" width="32" height="32" loading="lazy" onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                          {t.data.companyLogo && (
+                            <img src={`/logos/${t.data.companyLogo}.png`} alt={t.data.company}
+                              class="company-logo" width="32" height="32" loading="lazy"
+                              onerror={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />
                           )}
                           <div class="author-details">
-                            <div class="author-name">{testimonial.data.author}</div>
-                            <div class="author-title">{testimonial.data.title}, {testimonial.data.company}</div>
-                            {testimonial.data.project && <div class="author-project">{testimonial.data.project}</div>}
+                            <div class="author-name">{t.data.author}</div>
+                            <div class="author-title">{t.data.title}, {t.data.company}</div>
+                            {t.data.project && <div class="author-project">{t.data.project}</div>}
                           </div>
                         </div>
                       </div>
@@ -373,24 +346,31 @@ function formatStatsAndCompanies(text: string) {
             </div>
           </div>
         </div>
-      )}
-    </div>
-  </section>
+      </div>
+    </section>
+  )}
 
-  <!-- ═══════════════════════════════════════════════════════════
-       SECTION 5: LET'S CONNECT (2nd) — RIGHT panel
-       Ball moves to top-left diagonal
-  ══════════════════════════════════════════════════════════════ -->
+  <!-- ── LET'S CONNECT 2 (RIGHT) ───────────────────────────────────────────── -->
   <section id="section-connect2" class="scroll-section">
-    <div class="content-panel panel-right">
-      <p class="panel-eyebrow">◆ Say hello</p>
-      <h2 class="panel-heading">Let's build something.</h2>
-      <p class="panel-body">Reach me at <a href="mailto:elrichchen123@gmail.com" class="panel-inline-link">elrichchen123@gmail.com</a></p>
-      <div class="connect-links">
-        <a href="https://github.com/Elrich-Chen" target="_blank" rel="noopener noreferrer" class="connect-link">GitHub</a>
-        <a href="https://linkedin.com/in/elrichchen" target="_blank" rel="noopener noreferrer" class="connect-link">LinkedIn</a>
-        <a href="https://x.com/ChenElrich_" target="_blank" rel="noopener noreferrer" class="connect-link">X</a>
-        <a href="https://drive.google.com/drive/folders/1JB5jWDtohn4ddSp5ro-jeZshZw2Q-5lc?usp=share_link" target="_blank" rel="noopener noreferrer" class="connect-link">Resume</a>
+    <div class="content-panel panel-right contact-panel">
+      <p class="contact-eyebrow">◆ Get in touch</p>
+      <h2 class="contact-heading">Work with me.</h2>
+      <p class="contact-body">
+        Open to internships, collaborations, and freelance projects.
+      </p>
+      <a href="mailto:elrichchen123@gmail.com" class="contact-cta">elrichchen123@gmail.com →</a>
+      <div class="contact-icons">
+        {contactLinks.map((link) => (
+          <a
+            href={link.href}
+            aria-label={link.label}
+            class="contact-icon"
+            target={link.href.startsWith('mailto:') ? undefined : '_blank'}
+            rel={link.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+          >
+            <span class="contact-icon-svg" set:html={link.icon}></span>
+          </a>
+        ))}
       </div>
     </div>
   </section>
@@ -398,9 +378,8 @@ function formatStatsAndCompanies(text: string) {
 </Base>
 
 <style>
-  /* ── Scroll sections ──────────────────────────────────── */
+  /* ── Scroll sections: full-bleed, min 100vh ─────────────────────────────── */
   .scroll-section {
-    /* Full-bleed: breaks out of prose-measure (max-w-2xl) */
     width: 100vw;
     position: relative;
     left: 50%;
@@ -408,161 +387,265 @@ function formatStatsAndCompanies(text: string) {
     min-height: 100vh;
     display: flex;
     align-items: center;
-    padding: 3rem 0;
-    box-sizing: border-box;
+    padding: 4rem 0;
   }
 
-  /* Hero section: z-index BELOW the fixed canvas (z:5) */
+  /* ── Hero ──────────────────────────────────────────────────────────────── */
   .hero-section {
     justify-content: center;
+    flex-direction: column;
     text-align: center;
-    z-index: 4;
+    /* z-index intentionally NOT set — falls inside prose-measure z:10,
+       which is below canvas z:15 during hero, so ball renders in front */
   }
 
-  .hero-inner {
-    position: relative;
-    z-index: 4;
-  }
-
-  .hero-name {
-    font-size: clamp(3.5rem, 13vw, 10rem);
-    font-weight: 900;
-    letter-spacing: -0.04em;
-    text-transform: uppercase;
-    color: rgb(var(--fg));
-    opacity: 0.08;
-    margin: 0;
-    line-height: 1;
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
     pointer-events: none;
     user-select: none;
   }
 
-  .hero-sub {
-    font-size: clamp(0.8rem, 1.5vw, 1rem);
-    color: rgb(var(--muted));
-    margin: 1rem 0 0;
-    letter-spacing: 0.05em;
-    opacity: 0.7;
+  .hero-name {
+    font-size: clamp(3.5rem, 14vw, 10rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+    text-transform: uppercase;
+    color: rgb(var(--fg));
+    margin: 0;
   }
 
-  /* ── Content panels ───────────────────────────────────── */
-  /* z-index: 10 — renders ABOVE the fixed canvas (z:5) */
+  .hero-tagline {
+    font-size: clamp(0.8rem, 2vw, 1rem);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgb(var(--muted));
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .hero-scroll-hint {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 2rem;
+    opacity: 0.45;
+  }
+
+  .hint-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgb(var(--muted));
+  }
+
+  .hint-arrow {
+    font-size: 1.2rem;
+    color: rgb(var(--muted));
+    animation: hint-bounce 1.8s ease-in-out infinite;
+  }
+
+  @keyframes hint-bounce {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(8px); }
+  }
+
+  /* ── Content panels ────────────────────────────────────────────────────── */
   .content-panel {
     position: relative;
-    z-index: 10;
-    max-width: 440px;
+    z-index: 10; /* within prose-measure stacking context → always above canvas z:4 */
+    max-width: min(460px, 90vw);
     padding: 2rem 1.75rem;
     background: rgba(var(--bg), 0.88);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(var(--border), 0.12);
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    border: 1px solid rgba(var(--border), 0.14);
+    border-radius: 18px;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.08);
   }
 
   :global(html.dark) .content-panel {
-    background: rgba(var(--bg), 0.92);
-    border-color: rgba(var(--border), 0.18);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    background: rgba(var(--bg), 0.9);
+    border-color: rgba(var(--border), 0.2);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4);
   }
 
-  /* Left panel: left side of viewport with padding from edge */
-  .panel-left {
-    margin-left: clamp(1.5rem, 8vw, 7rem);
-    margin-right: auto;
-  }
+  /* Horizontal placement */
+  .panel-left  { margin-left:  clamp(1.5rem, 7vw, 6rem); margin-right: auto; }
+  .panel-right { margin-right: clamp(1.5rem, 7vw, 6rem); margin-left:  auto; }
 
-  /* Right panel: right side of viewport */
-  .panel-right {
-    margin-right: clamp(1.5rem, 8vw, 7rem);
-    margin-left: auto;
-  }
-
-  .panel-eyebrow {
+  /* ── Panel headers ─────────────────────────────────────────────────────── */
+  .panel-header {
     font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
     font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgb(var(--fg));
+    margin: 0 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(var(--border), 0.12);
+  }
+
+  /* ── Highlight lists (reuse global.css classes) ─────────────────────── */
+  .highlight-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .highlight-item-group { }
+
+  .bullet-point {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgb(var(--fg));
+    margin-top: 0.45em;
+    margin-right: 0.6rem;
+    flex-shrink: 0;
+    opacity: 0.5;
+  }
+
+  .highlight-main-point {
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: rgb(var(--fg));
+  }
+
+  .highlight-sub-points {
+    list-style: none;
+    margin: 0.4rem 0 0 0.5rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    border-left: 2px solid rgba(var(--border), 0.12);
+    padding-left: 0.75rem;
+  }
+
+  .highlight-sub-item {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: rgb(var(--muted));
+  }
+
+  /* ── Contact panels ────────────────────────────────────────────────────── */
+  .contact-panel { gap: 0; }
+
+  .contact-eyebrow {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
     color: rgb(var(--muted));
     margin: 0 0 0.5rem;
   }
 
-  .panel-heading {
-    font-size: clamp(1.1rem, 2vw, 1.4rem);
+  .contact-heading {
+    font-size: 1.5rem;
     font-weight: 700;
-    color: rgb(var(--fg));
     margin: 0 0 0.75rem;
-    line-height: 1.2;
+    color: rgb(var(--fg));
   }
 
-  .panel-body {
+  .contact-body {
     font-size: 0.9rem;
+    line-height: 1.55;
     color: rgb(var(--muted));
-    line-height: 1.6;
     margin: 0 0 1.25rem;
   }
 
-  .panel-cta {
+  .contact-inline-link {
+    color: rgb(var(--fg));
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(var(--border), 0.3);
+  }
+
+  .contact-inline-link:hover { border-bottom-color: rgba(var(--border), 0.6); }
+
+  .contact-cta {
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
-    padding: 0.5rem 1rem;
+    gap: 0.35rem;
+    padding: 0.5rem 1.1rem;
     border-radius: 999px;
-    border: 1px solid rgba(var(--border), 0.25);
-    background: rgba(var(--bg), 0.7);
+    border: 1px solid rgba(var(--border), 0.22);
     color: rgb(var(--fg));
-    text-decoration: none;
     font-size: 0.85rem;
     font-weight: 600;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .panel-cta:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-  }
-
-  .panel-inline-link {
-    color: rgb(var(--fg));
-    font-weight: 600;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-
-  .connect-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-  }
-
-  .connect-link {
-    padding: 0.35rem 0.8rem;
-    border-radius: 8px;
-    border: 1px solid rgba(var(--border), 0.2);
-    color: rgb(var(--fg));
     text-decoration: none;
-    font-size: 0.8rem;
-    font-weight: 500;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    background: rgba(255, 255, 255, 0.6);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 1rem;
   }
 
-  .connect-link:hover {
-    background: rgba(var(--border), 0.08);
-    border-color: rgba(var(--border), 0.35);
+  .contact-cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
   }
 
-  /* ── Clients section ──────────────────────────────────── */
-  .section-clients-wide {
+  :global(html.dark) .contact-cta {
+    background: rgba(30, 30, 30, 0.7);
+    border-color: rgba(255,255,255,0.15);
+  }
+
+  .contact-icons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .contact-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: rgb(var(--fg));
+    border: 1px solid rgba(var(--border), 0.18);
+    text-decoration: none;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  }
+
+  .contact-icon:hover {
+    transform: translateY(-2px);
+    border-color: rgba(var(--border), 0.45);
+    background: rgba(var(--border), 0.06);
+  }
+
+  .contact-icon-svg {
+    display: inline-flex;
+    width: 15px;
+    height: 15px;
+  }
+
+  .contact-icon svg { width: 100%; height: 100%; }
+
+  :global(html.dark) .contact-icon {
+    border-color: rgba(255,255,255,0.18);
+  }
+
+  /* ── Clients section ───────────────────────────────────────────────────── */
+  .clients-section {
     flex-direction: column;
     align-items: flex-start;
-    padding-left: clamp(1.5rem, 8vw, 7rem);
-    gap: 2rem;
+    gap: 1.5rem;
+    padding: 5rem 0;
+    overflow: hidden;
   }
 
   .clients-inner {
-    position: relative;
-    z-index: 10;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -572,34 +655,35 @@ function formatStatsAndCompanies(text: string) {
   .clients-header {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.3rem;
+    position: relative;
+    z-index: 10;
   }
 
-  /* ── Mobile adjustments ───────────────────────────────── */
-  @media (max-width: 640px) {
-    .panel-left,
-    .panel-right {
-      margin-left: 1rem;
-      margin-right: 1rem;
-      max-width: 100%;
-    }
-
-    .section-clients-wide {
-      padding-left: 1rem;
-      padding-right: 1rem;
-    }
-
-    .hero-name {
-      font-size: clamp(2.5rem, 18vw, 5rem);
-    }
+  .clients-eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: rgb(var(--fg));
+    margin: 0;
   }
 
-  /* ── Testimonials carousel ────────────────────────────── */
+  .clients-note {
+    font-size: 0.85rem;
+    color: rgb(var(--muted));
+    margin: 0;
+    max-width: 38ch;
+  }
+
+  /* ── Testimonials carousel (preserved from original) ──────────────────── */
   .carousel-viewport {
     --carousel-gap: 1.5rem;
     --carousel-duration: 200s;
     overflow: visible;
     width: 100%;
+    position: relative;
+    z-index: 10;
   }
 
   .carousel-track {
@@ -618,8 +702,8 @@ function formatStatsAndCompanies(text: string) {
   .testimonial-card {
     position: relative;
     border-radius: 16px;
-    width: clamp(320px, 32vw, 460px);
-    min-height: 420px;
+    width: clamp(280px, 30vw, 420px);
+    min-height: 380px;
     perspective: 1400px;
     transform-style: preserve-3d;
     cursor: pointer;
@@ -649,117 +733,33 @@ function formatStatsAndCompanies(text: string) {
     transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 
-  .testimonial-card.is-flipped .flip-inner {
-    transform: rotateY(180deg);
-  }
+  .testimonial-card.is-flipped .flip-inner { transform: rotateY(180deg); }
 
   .flip-face {
     position: absolute;
     inset: 0;
     border-radius: 16px;
-    padding: 1.7rem 1.6rem;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(226, 238, 255, 0.7) 100%);
-    border: 1px solid rgba(59, 130, 246, 0.28);
-    box-shadow:
-      0 18px 36px rgba(15, 23, 42, 0.18),
-      inset 0 1px 1px rgba(255, 255, 255, 0.7),
-      inset 0 -12px 24px rgba(15, 23, 42, 0.08);
+    padding: 1.6rem 1.5rem;
+    background: linear-gradient(135deg, rgba(255,255,255,0.88) 0%, rgba(226,238,255,0.7) 100%);
+    border: 1px solid rgba(59,130,246,0.28);
+    box-shadow: 0 18px 36px rgba(15,23,42,0.18), inset 0 1px 1px rgba(255,255,255,0.7);
     backdrop-filter: blur(24px) saturate(180%);
     backface-visibility: hidden;
     overflow: hidden;
-    transition: box-shadow 0.3s ease;
-  }
-
-  .flip-face::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0) 70%);
-    opacity: 0.85;
-    pointer-events: none;
-  }
-
-  .flip-face::after {
-    content: '';
-    position: absolute;
-    top: -60%;
-    left: -60%;
-    width: 220%;
-    height: 220%;
-    background: linear-gradient(120deg, transparent 35%, rgba(240, 192, 32, 0.45) 50%, rgba(208, 32, 32, 0.28) 58%, transparent 72%);
-    opacity: 0;
-    transform: translateX(-80%);
-    pointer-events: none;
-  }
-
-  .flip-face > .testimonial-content {
-    position: relative;
-    z-index: 1;
-  }
-
-  .flip-front {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(220, 236, 255, 0.76) 100%);
-  }
-
-  .flip-back {
-    transform: rotateY(180deg);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(235, 235, 235, 0.86) 100%);
   }
 
   :global(html.dark) .flip-face {
-    background: linear-gradient(135deg, rgba(18, 21, 30, 0.85) 0%, rgba(16, 20, 30, 0.7) 100%);
-    border: 1px solid rgba(96, 165, 250, 0.25);
-    box-shadow:
-      0 18px 40px rgba(0, 0, 0, 0.55),
-      inset 0 1px 1px rgba(255, 255, 255, 0.05),
-      inset 0 -12px 24px rgba(0, 0, 0, 0.45);
+    background: linear-gradient(135deg, rgba(18,21,30,0.85) 0%, rgba(16,20,30,0.7) 100%);
+    border: 1px solid rgba(96,165,250,0.25);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.55), inset 0 1px 1px rgba(255,255,255,0.05);
   }
 
-  :global(html.dark) .flip-face::before {
-    background: linear-gradient(140deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0) 75%);
-    opacity: 0.6;
-  }
-
-  :global(html.dark) .flip-face::after {
-    background: linear-gradient(120deg, transparent 0%, rgba(148, 197, 255, 0.55) 45%, transparent 70%);
-  }
-
-  :global(html.dark) .flip-front {
-    background: linear-gradient(135deg, rgba(16, 20, 30, 0.95) 0%, rgba(12, 16, 24, 0.8) 100%);
-  }
-
-  :global(html.dark) .flip-back {
-    background: linear-gradient(135deg, rgba(20, 20, 24, 0.92) 0%, rgba(12, 12, 14, 0.82) 100%);
-  }
-
-  .testimonial-card:hover {
-    transform: translateY(-4px);
-  }
-
-  .testimonial-card:hover .flip-face {
-    box-shadow:
-      0 22px 48px rgba(15, 23, 42, 0.22),
-      inset 0 1px 1px rgba(255, 255, 255, 0.75),
-      inset 0 -14px 28px rgba(15, 23, 42, 0.1);
-  }
-
-  :global(html.dark) .testimonial-card:hover .flip-face {
-    box-shadow:
-      0 22px 48px rgba(0, 0, 0, 0.6),
-      inset 0 1px 1px rgba(255, 255, 255, 0.08),
-      inset 0 -14px 28px rgba(0, 0, 0, 0.55);
-  }
-
-  .testimonial-card:hover .flip-face::after {
-    opacity: 0.85;
-    animation: glisten 1.3s ease-in-out infinite;
-  }
+  .flip-back { transform: rotateY(180deg); }
 
   .flip-hint {
     position: absolute;
     top: 1rem;
     right: 1.2rem;
-    z-index: 2;
     font-size: 0.65rem;
     letter-spacing: 0.22em;
     text-transform: uppercase;
@@ -772,188 +772,63 @@ function formatStatsAndCompanies(text: string) {
   }
 
   .testimonial-card:hover .flip-hint,
-  .testimonial-card:focus-within .flip-hint {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  :global(html.dark) .flip-hint {
-    color: rgba(248, 250, 252, 0.55);
-  }
+  .testimonial-card:focus-within .flip-hint { opacity: 1; transform: translateY(0); }
 
   .testimonial-content {
     position: relative;
     z-index: 1;
     display: grid;
-    gap: 1.1rem;
+    gap: 1rem;
     height: 100%;
-    min-height: 0;
   }
 
-  .flip-front .testimonial-content {
-    grid-template-rows: auto 1fr auto;
-  }
+  .flip-front .testimonial-content { grid-template-rows: auto 1fr auto; }
+  .flip-back  .testimonial-content { grid-template-rows: minmax(0,1fr) auto; }
 
-  .flip-back .testimonial-content {
-    grid-template-rows: minmax(0, 1fr) auto;
-  }
+  .preview-top    { display: flex; flex-direction: column; gap: 0.4rem; }
+  .preview-label  { margin: 0; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; color: rgb(var(--muted)); }
+  .preview-tech   { margin: 0; font-size: 1rem; font-weight: 600; color: rgb(var(--fg)); line-height: 1.4; }
+  .preview-meta   { display: flex; flex-direction: column; gap: 0.2rem; }
+  .preview-person { font-size: 0.95rem; font-weight: 600; color: rgb(var(--fg)); }
+  .preview-company{ font-size: 0.85rem; color: rgb(var(--muted)); }
+  .preview-project{ margin: 0; font-size: 0.85rem; color: rgb(var(--muted)); line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
 
-  .preview-top {
-    display: flex;
-    flex-direction: column;
-    gap: 0.45rem;
-  }
+  .testimonial-text { font-size: 0.9rem; line-height: 1.6; color: rgb(var(--fg)); font-style: italic; margin: 0; align-self: flex-start; }
 
-  .preview-label {
-    margin: 0;
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    font-weight: 600;
-    color: rgb(var(--muted));
-  }
+  .testimonial-author { display: flex; align-items: center; gap: 0.75rem; padding-top: 1rem; margin-top: auto; border-top: 1px solid rgba(var(--border), 0.1); }
+  .company-logo   { border-radius: 6px; flex-shrink: 0; object-fit: contain; padding-bottom: 1rem; }
+  .author-details { display: flex; flex-direction: column; gap: 0.1rem; }
+  .author-name    { font-weight: 600; font-size: 0.9rem; color: rgb(var(--fg)); }
+  .author-title   { font-size: 0.8rem; color: rgb(var(--muted)); }
+  .author-project { font-size: 0.72rem; color: rgb(var(--muted)); opacity: 0.8; }
 
-  .preview-tech {
-    margin: 0;
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: rgb(var(--fg));
-    line-height: 1.4;
-  }
-
-  .preview-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .preview-person {
-    font-size: 1rem;
-    font-weight: 600;
-    color: rgb(var(--fg));
-  }
-
-  .preview-company {
-    font-size: 0.9rem;
-    color: rgb(var(--muted));
-  }
-
-  .preview-project {
-    margin: 0;
-    font-size: 0.9rem;
-    color: rgb(var(--muted));
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .testimonial-text {
-    font-size: 0.95rem;
-    line-height: 1.6;
-    color: rgb(var(--fg));
-    font-style: italic;
-    margin: 0;
-    flex: 1;
-    max-width: 36ch;
-    align-self: flex-start;
-    text-align: left;
-  }
-
-  .testimonial-author {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding-top: 1rem;
-    padding-bottom: 0.4rem;
-    margin-top: auto;
-    border-top: 1px solid rgba(var(--border), 0.1);
-  }
-
-  .company-logo {
-    border-radius: 6px;
-    flex-shrink: 0;
-    object-fit: contain;
-    padding-bottom: 1.4rem;
-  }
-
-  .author-details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-  }
-
-  .author-name {
-    font-weight: 600;
-    font-size: 0.9375rem;
-    color: rgb(var(--fg));
-  }
-
-  .author-title {
-    font-size: 0.8125rem;
-    color: rgb(var(--muted));
-  }
-
-  .author-project {
-    font-size: 0.75rem;
-    color: rgb(var(--muted));
-    opacity: 0.8;
-    margin-top: 0.125rem;
-  }
-
-  @keyframes glisten {
-    0% {
-      transform: translateX(-80%);
-    }
-    100% {
-      transform: translateX(80%);
-    }
-  }
+  .testimonial-card:hover { transform: translateY(-4px); }
 
   @keyframes carousel-scroll {
-    to {
-      transform: translateX(-50%);
-    }
+    to { transform: translateX(-50%); }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .carousel-track {
-      animation: none;
-    }
+    .carousel-track { animation: none; }
+    .hint-arrow     { animation: none; }
   }
 
   @media (max-width: 640px) {
-    .carousel-viewport {
-      overflow-x: auto;
-      padding-bottom: 0.5rem;
-      scroll-snap-type: x mandatory;
-    }
-
-    .carousel-track {
-      animation: none;
-    }
-
-    .carousel-group[aria-hidden="true"] {
-      display: none;
-    }
-
-    .testimonial-card {
-      min-width: 240px;
-      min-height: 360px;
-      scroll-snap-align: start;
-    }
+    .carousel-viewport { overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 0.5rem; }
+    .carousel-track     { animation: none; }
+    .carousel-group[aria-hidden="true"] { display: none; }
+    .testimonial-card   { min-width: 240px; min-height: 340px; scroll-snap-align: start; }
+    .panel-left  { margin-left:  1.25rem; }
+    .panel-right { margin-right: 1.25rem; }
   }
 </style>
 
 <script>
-  const initializeFlipCards = () => {
-    const flipCards = document.querySelectorAll('[data-flip-card]');
-    flipCards.forEach((card) => {
+  // Flip card interaction
+  const initFlipCards = () => {
+    document.querySelectorAll('[data-flip-card]').forEach((card) => {
       const trigger = card.querySelector('.flip-trigger');
-      if (!trigger) {
-        return;
-      }
+      if (!trigger) return;
       trigger.addEventListener('click', () => {
         const isFlipped = card.classList.toggle('is-flipped');
         trigger.setAttribute('aria-pressed', String(isFlipped));
@@ -962,8 +837,8 @@ function formatStatsAndCompanies(text: string) {
   };
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeFlipCards, { once: true });
+    document.addEventListener('DOMContentLoaded', initFlipCards, { once: true });
   } else {
-    initializeFlipCards();
+    initFlipCards();
   }
 </script>
