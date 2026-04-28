@@ -1,0 +1,90 @@
+---
+import Base from '../layouts/Base.astro';
+import Basketball from '../components/Basketball.astro';
+---
+
+<Base title="Basketball – Elrich Chen" description="Scroll-driven 3D basketball animation experiment">
+
+  <!-- Hero: above the scroll section -->
+  <section class="bball-hero">
+    <p class="bball-eyebrow">Experiment</p>
+    <h1 class="bball-title">Watch it move.</h1>
+    <p class="bball-sub">Scroll down to see the ball zigzag across the screen.</p>
+    <div class="bball-hint" aria-hidden="true">↓</div>
+  </section>
+
+  <!-- Full-bleed animation section -->
+  <div class="bball-breakout">
+    <Basketball />
+  </div>
+
+  <!-- Below-fold landing zone -->
+  <section class="bball-outro">
+    <p class="bball-outro-text">End of sequence. Scroll back up to replay.</p>
+  </section>
+
+</Base>
+
+<style>
+  .bball-hero {
+    padding: 4rem 0 1.5rem;
+    text-align: center;
+  }
+
+  .bball-eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: rgb(var(--muted));
+    margin: 0 0 0.6rem;
+  }
+
+  .bball-title {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 700;
+    margin: 0 0 0.75rem;
+    color: rgb(var(--fg));
+  }
+
+  .bball-sub {
+    font-size: 0.95rem;
+    color: rgb(var(--muted));
+    margin: 0 0 1.5rem;
+    max-width: 36ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .bball-hint {
+    font-size: 1.4rem;
+    color: rgb(var(--muted));
+    animation: bball-bounce 1.6s ease-in-out infinite;
+  }
+
+  @keyframes bball-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(10px); }
+  }
+
+  /* Break out of the prose-measure container in Base.astro */
+  .bball-breakout {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .bball-outro {
+    padding: 5rem 0;
+    text-align: center;
+  }
+
+  .bball-outro-text {
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgb(var(--muted));
+    margin: 0;
+  }
+</style>

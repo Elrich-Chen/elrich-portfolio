@@ -1,0 +1,182 @@
+---
+// Basketball.astro
+// Three.js scroll-driven basketball animation.
+// GLTFLoader API: https://threejs.org/docs/#examples/en/loaders/GLTFLoader
+// WebGLRenderer API: https://threejs.org/docs/#api/en/renderers/WebGLRenderer
+---
+
+<div id="basketball-section" class="bball-root">
+  <div class="bball-sticky">
+    <canvas id="bball-canvas" class="bball-canvas"></canvas>
+  </div>
+</div>
+
+<script>
+  import * as THREE from 'three';
+  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initBasketball() {
+    const canvas = document.getElementById('bball-canvas') as HTMLCanvasElement | null;
+    const section = document.getElementById('basketball-section') as HTMLElement | null;
+    if (!canvas || !section) return;
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    // Scene + Camera
+    const scene = new THREE.Scene();
+    let W = canvas.parentElement?.clientWidth || window.innerWidth;
+    let H = canvas.parentElement?.clientHeight || window.innerHeight;
+    const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
+    camera.position.set(0, 0, 5);
+    renderer.setSize(W, H, false);
+
+    // Lighting
+    const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+    scene.add(ambient);
+
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
+    keyLight.position.set(5, 8, 5);
+    keyLight.castShadow = true;
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0xffa060, 0.6);
+    fillLight.position.set(-4, -2, 3);
+    scene.add(fillLight);
+
+    const rimLight = new THREE.DirectionalLight(0x6080ff, 0.4);
+    rimLight.position.set(0, 0, -6);
+    scene.add(rimLight);
+
+    // Mutable state
+    let mesh: THREE.Object3D | null = null;
+    let spinAngle = 0;
+    let scrollVelocity = 0;
+
+    // Position proxy object that GSAP animates
+    // (GSAP cannot directly animate Three.js Vector3 — use a plain object proxy)
+    const pos = { x: 0, y: 0, z_rot: 0 };
+
+    const loader = new GLTFLoader();
+    loader.load(
+      '/3D-MODELS/BasketBall.glb',
+      (gltf) => {
+        mesh = gltf.scene;
+
+        // Center + scale
+        const box = new THREE.Box3().setFromObject(mesh);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        mesh.position.sub(center);
+        const maxDim = Math.max(size.x, size.y, size.z);
+        mesh.scale.setScalar(1.8 / maxDim);
+
+        scene.add(mesh);
+
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (!prefersReduced) {
+          // Vertical bob — independent of scroll
+          gsap.to(pos, {
+            y: 0.18,
+            duration: 1.8,
+            ease: 'sine.inOut',
+            yoyo: true,
+            repeat: -1,
+          });
+
+          // Zigzag scroll timeline
+          // SWING = how far left/right in Three.js scene units
+          const SWING = 2.8;
+
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: '#basketball-section',
+              start: 'top top',
+              end: 'bottom bottom',
+              scrub: 1.5,
+              onUpdate(self) {
+                // Boost spin speed proportional to scroll velocity
+                const v = Math.abs(self.getVelocity());
+                scrollVelocity = Math.min(v / 800, 3.0);
+              },
+            },
+          });
+
+          // 5 keyframes: center → right → left → right → left → center
+          tl.to(pos, { x: SWING, z_rot: -0.25, ease: 'power2.inOut', duration: 1 })
+            .to(pos, { x: -SWING, z_rot: 0.25, ease: 'power2.inOut', duration: 1 })
+            .to(pos, { x: SWING, z_rot: -0.25, ease: 'power2.inOut', duration: 1 })
+            .to(pos, { x: -SWING, z_rot: 0.25, ease: 'power2.inOut', duration: 1 })
+            .to(pos, { x: 0, z_rot: 0, ease: 'power2.inOut', duration: 0.5 });
+        }
+      },
+      undefined,
+      (err) => console.error('GLTFLoader error:', err)
+    );
+
+    // Resize
+    function onResize() {
+      W = canvas.parentElement?.clientWidth || window.innerWidth;
+      H = canvas.parentElement?.clientHeight || window.innerHeight;
+      camera.aspect = W / H;
+      camera.updateProjectionMatrix();
+      renderer.setSize(W, H, false);
+    }
+    window.addEventListener('resize', onResize, { passive: true });
+    onResize();
+
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      if (mesh) {
+        // Spin: base speed + scroll velocity boost, dampen each frame
+        spinAngle += 0.008 + scrollVelocity * 0.025;
+        scrollVelocity *= 0.92;
+
+        mesh.rotation.y = spinAngle;
+        mesh.rotation.z = pos.z_rot;  // tilt from GSAP
+        mesh.position.x = pos.x;       // x from GSAP zigzag
+        mesh.position.y = pos.y;       // y from GSAP bob
+      }
+      renderer.render(scene, camera);
+    }
+    animate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBasketball, { once: true });
+  } else {
+    initBasketball();
+  }
+</script>
+
+<style>
+  .bball-root {
+    position: relative;
+    height: 500vh;
+  }
+
+  .bball-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bball-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+</style>
