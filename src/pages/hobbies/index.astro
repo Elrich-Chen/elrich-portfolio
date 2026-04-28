@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 const posts = await getCollection('hobbies');
+const photos = await getCollection('photos');
 const entries = await Promise.all(
   posts.map(async (entry) => {
     const { Content } = await entry.render();
@@ -16,13 +17,20 @@ const sortedEntries = entries.sort((a, b) => {
   }
   return dateB - dateA;
 });
+
+const fallbackPhoto = '/photos/hat.jpeg';
+const getRandomPhotoForEntry = (seed: string) => {
+  if (!photos.length) return fallbackPhoto;
+  const hash = Array.from(seed).reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  return photos[hash % photos.length]?.data.image ?? fallbackPhoto;
+};
 ---
 
 <Base title="Hobbies – Elrich Chen">
   <div class="mb-6">
     <a href="/" class="back-home-link">← Back to home</a>
   </div>
-  <h1 class="text-xl font-semibold mb-4">Hobbies</h1>
+  <h1 class="page-title text-xl font-semibold mb-4">Hobbies</h1>
 
   <div class="hobby-grid">
     {sortedEntries.map(({ entry, Content }) => (
@@ -49,6 +57,13 @@ const sortedEntries = entries.sort((a, b) => {
           </span>
         </summary>
         <div class="hobby-body">
+          <img
+            src={getRandomPhotoForEntry(entry.slug)}
+            alt={`Hobby visual for ${entry.data.title}`}
+            class="hobby-body-photo"
+            loading="lazy"
+            decoding="async"
+          />
           <Content />
         </div>
       </details>
@@ -57,6 +72,10 @@ const sortedEntries = entries.sort((a, b) => {
 </Base>
 
 <style>
+  .page-title {
+    color: #fff;
+  }
+
   .hobby-grid {
     display: grid;
     gap: 1.2rem;
@@ -64,17 +83,19 @@ const sortedEntries = entries.sort((a, b) => {
 
   .hobby-card {
     border-radius: 16px;
-    border: 1px solid rgba(var(--border), 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.22);
     padding: 1.2rem 1.4rem;
-    background: rgba(var(--bg), 0.75);
-    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    background: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.14);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
   }
 
   :global(html.dark) .hobby-card {
-    background: rgba(var(--bg), 0.6);
-    border-color: rgba(var(--border), 0.3);
-    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
+    background: rgba(10, 10, 10, 0.58);
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.42);
   }
 
   .hobby-card[open] {
@@ -92,7 +113,7 @@ const sortedEntries = entries.sort((a, b) => {
   .hobby-title {
     margin: 0;
     font-size: 1.05rem;
-    color: rgb(var(--fg));
+    color: #fff;
   }
 
   .hobby-date {
@@ -100,7 +121,7 @@ const sortedEntries = entries.sort((a, b) => {
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: rgb(var(--muted));
+    color: rgba(255, 255, 255, 0.82);
   }
 
   .hobby-tags {
@@ -119,8 +140,8 @@ const sortedEntries = entries.sort((a, b) => {
     font-size: 0.65rem;
     padding: 0.2rem 0.55rem;
     border-radius: 999px;
-    background: rgba(var(--border), 0.08);
-    color: rgb(var(--fg));
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
   }
 
   .hobby-summary-toggle {
@@ -135,7 +156,7 @@ const sortedEntries = entries.sort((a, b) => {
     margin: 0;
     position: relative;
     padding-right: 2.5rem;
-    transition: color 0.2s ease, border-color 0.2s ease;
+    transition: color 0.35s ease, border-color 0.35s ease;
   }
 
   .hobby-summary-toggle:hover {
@@ -154,7 +175,7 @@ const sortedEntries = entries.sort((a, b) => {
     margin: 0.7rem 0 0;
     font-size: 0.92rem;
     line-height: 1.6;
-    color: rgb(var(--fg));
+    color: #fff;
   }
 
   .hobby-toggle {
@@ -167,10 +188,10 @@ const sortedEntries = entries.sort((a, b) => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(var(--border), 0.08);
-    border: 1px solid rgba(var(--border), 0.2);
-    color: rgb(var(--muted));
-    transition: transform 0.2s ease, color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.26);
+    color: rgba(255, 255, 255, 0.9);
+    transition: transform 0.35s ease, color 0.35s ease, background 0.35s ease, border-color 0.35s ease;
   }
 
   .hobby-toggle svg {
@@ -180,16 +201,44 @@ const sortedEntries = entries.sort((a, b) => {
 
   .hobby-card[open] .hobby-toggle {
     transform: rotate(180deg);
-    color: rgb(var(--fg));
-    background: rgba(var(--border), 0.14);
-    border-color: rgba(var(--border), 0.3);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.34);
   }
 
   .hobby-body {
     margin-top: 0.9rem;
     font-size: 0.9rem;
-    color: rgb(var(--muted));
+    color: #161616;
     line-height: 1.65;
+    background: rgba(255, 255, 255, 0.94);
+    border-radius: 12px;
+    padding: 0.9rem 0.95rem;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 0.38s ease, transform 0.38s ease;
+  }
+
+  .hobby-card[open] .hobby-body {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  :global(html.dark) .hobby-body {
+    background: rgba(12, 12, 12, 0.88);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.16);
+  }
+
+  .hobby-body-photo {
+    width: clamp(110px, 24vw, 150px);
+    height: clamp(110px, 24vw, 150px);
+    object-fit: cover;
+    border-radius: 10px;
+    float: left;
+    margin: 0.2rem 0.85rem 0.45rem 0;
+    border: 1px solid rgba(0, 0, 0, 0.08);
   }
 
   .hobby-body :global(p) {
@@ -198,5 +247,30 @@ const sortedEntries = entries.sort((a, b) => {
 
   .hobby-body :global(p:last-child) {
     margin-bottom: 0;
+  }
+
+  .hobby-body::after {
+    content: '';
+    display: block;
+    clear: both;
+  }
+
+  .hobby-body :global(a) {
+    color: #111;
+    text-decoration: underline;
+  }
+
+  :global(html.dark) .hobby-body :global(a) {
+    color: #fff;
+  }
+
+  @media (max-width: 640px) {
+    .hobby-body-photo {
+      float: none;
+      display: block;
+      margin: 0 0 0.75rem;
+      width: 100%;
+      height: 180px;
+    }
   }
 </style>

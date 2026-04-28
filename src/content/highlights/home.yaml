@@ -1,4 +1,6 @@
 what_makes_me_different:
+  - point: "Became Co-Chair of [LOGO:cxc] [LINK:https://cxc.uwdatascience.ca/]CxC[/LINK] (Canada's largest student-run data hackathon)"
+
   - point: "Became an incoming SWE @ [LOGO:medme] [LINK:https://www.ycombinator.com/companies/medme-health]Medme Health[/LINK] (YC 21)"
 
   - point: "Won <strong><em>[LINK:https://devpost.com/software/golden-guide-ugoa6h]Best Use of Gemini</em></strong>[/LINK] at QHacks [LOGO:qhacks] (Queen's Univeristy Hackathon)"
@@ -14,12 +16,10 @@ building:
     details:
       - "[IMAGE:peer-cv.png|https://peer-cv.vercel.app]"
 
-  - point: "[LOGO:uw_dsc] UW Data Science Events Coordinator: Planning and executing networking and technical events to enrich the student community"
+  - point: "[LOGO:hack the 6ix] [LINK:https://hackthe6ix.com]Hack the 6ix[/LINK]: Sponsorships Executive for Toronto's largest summer hackathon"
 
   - point: "[LOGO:techplusuw] Tech Plus UW: Product Manager"
     details:
       - "Spearheading the internal tooling system and the development of the club website."
   
-  - point: "[LOGO:uw_cube] [LINK:https://www.linkedin.com/company/uwcube/posts/?feedView=all]UW Cube[/LINK]: Product Experience Designer with clients at [LINK:https://www.tesoro.global/solutions]Tesoro[/LINK] — case study + wireframing a prototype."
-
   - point: "[LOGO:fintech] UW FinTech: Marketing campaigns and event outreach as Outreach Associate"

@@ -6,10 +6,10 @@ const isActive = (href: string) =>
   href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/');
 
 const navLinks = [
-  { href: '/projects', text: 'Projects' },
-  { href: '/about',    text: 'About'    },
-  { href: '/photos',   text: 'Photos'   },
-  { href: '/hobbies',  text: 'Hobbies'  },
+  { href: '/projects/', text: 'Projects' },
+  { href: '/about/',    text: 'About'    },
+  { href: '/photos/',   text: 'Photos'   },
+  { href: '/hobbies/',  text: 'Hobbies'  },
 ];
 ---
 
@@ -93,9 +93,11 @@ const navLinks = [
     z-index: 100;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     white-space: nowrap;
     pointer-events: auto;
+    width: min(var(--page-max-width), calc(100vw - 2rem));
   }
 
   /* ── Single unified bar ─────────────────────────────────────────────────── */
@@ -103,8 +105,10 @@ const navLinks = [
     height: 52px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 4px;
     gap: 4px;
+    width: 100%;
     background: rgba(var(--bg), 0.84);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
@@ -151,7 +155,9 @@ const navLinks = [
     padding: 0;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
+    flex: 1;
   }
 
   .pn-list > li {
@@ -165,8 +171,8 @@ const navLinks = [
     justify-content: center;
     padding: 0 20px;
     height: 44px;         /* explicit: bar 52px − 2×4px padding */
-    background: rgb(var(--fg));
-    color: rgb(var(--bg));
+    background: rgba(255, 255, 255, 0.72);
+    color: rgb(var(--fg));
     text-decoration: none;
     border-radius: 9999px;
     font-weight: 600;
@@ -235,12 +241,24 @@ const navLinks = [
 
   /* active pill: always black, suppress hover fill */
   .pn-pill.pn-active {
-    background: #000 !important;
-    color: #fff !important;
+    background: #0f172a !important;
+    color: #ffffff !important;
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.18), 0 0 0 1px rgba(15, 23, 42, 0.2);
+  }
+
+  :global(html.dark) .pn-pill {
+    background: rgb(var(--fg));
+    color: rgb(var(--bg));
   }
 
   .pn-pill.pn-active .pn-circle {
     display: none;
+  }
+
+  :global(html.light) .pn-pill.pn-active {
+    background: #111827 !important;
+    color: #ffffff !important;
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.26), 0 0 0 1px rgba(17, 24, 39, 0.28);
   }
 
   /* ── Theme toggle inside bar ────────────────────────────────────────────── */
@@ -334,7 +352,12 @@ const navLinks = [
   }
 
   .pn-mobile-link:hover     { opacity: 0.8; }
-  .pn-mobile-link.pn-active { opacity: 0.55; }
+  .pn-mobile-link.pn-active {
+    opacity: 1;
+    background: #111827;
+    color: #ffffff;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  }
 
   .pn-mobile-theme-row {
     display: flex;

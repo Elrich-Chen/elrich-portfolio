@@ -1,0 +1,390 @@
+---
+interface Props {
+  imageSrc: string;
+  altText?: string;
+  captionText?: string;
+  containerHeight?: string;
+  containerWidth?: string;
+  imageHeight?: string;
+  imageWidth?: string;
+  scaleOnHover?: number;
+  rotateAmplitude?: number;
+  showMobileWarning?: boolean;
+  showTooltip?: boolean;
+  displayOverlayContent?: boolean;
+}
+
+const {
+  imageSrc,
+  altText = 'Tilted card image',
+  captionText = '',
+  containerHeight = '300px',
+  containerWidth = '100%',
+  imageHeight = '300px',
+  imageWidth = '300px',
+  scaleOnHover = 1.1,
+  rotateAmplitude = 14,
+  showMobileWarning = true,
+  showTooltip = true,
+  displayOverlayContent = false,
+} = Astro.props;
+---
+
+<figure
+  class="tc-figure"
+  style={`height: ${containerHeight}; width: ${containerWidth};`}
+  data-scale={scaleOnHover}
+  data-amplitude={rotateAmplitude}
+  tabindex={showTooltip && captionText ? 0 : undefined}
+>
+  {showMobileWarning && (
+    <div class="tc-mobile-alert">This effect is not optimized for mobile. Check on desktop.</div>
+  )}
+
+  <div
+    class="tc-inner"
+    style={`width: ${imageWidth}; height: ${imageHeight};`}
+  >
+    <img
+      src={imageSrc}
+      alt={altText}
+      class="tc-img"
+      loading="lazy"
+      decoding="async"
+    />
+
+    {displayOverlayContent && (
+      <div class="tc-overlay">
+        <slot />
+      </div>
+    )}
+  </div>
+
+  {showTooltip && captionText && (
+    <figcaption class="tc-caption">{captionText}</figcaption>
+  )}
+</figure>
+
+<style>
+  .tc-figure {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    perspective: 800px;
+    overflow: visible;
+  }
+
+  .tc-mobile-alert {
+    position: absolute;
+    top: 1rem;
+    text-align: center;
+    font-size: 0.875rem;
+    display: none;
+    color: #999;
+  }
+
+  @media (max-width: 640px) {
+    .tc-mobile-alert {
+      display: block;
+    }
+    .tc-caption {
+      display: none !important;
+    }
+  }
+
+  .tc-inner {
+    position: relative;
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  .tc-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 15px;
+  }
+
+  .tc-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    transform: translateZ(30px);
+  }
+
+  .tc-caption {
+    pointer-events: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 4px;
+    background-color: #fff;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #2d2d2d;
+    opacity: 0;
+    z-index: 9999;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: opacity 0.15s ease;
+    transform-origin: center bottom;
+    transform: translateY(0);
+  }
+</style>
+
+<script>
+  // Spring-based animation helper
+  function createSpring(stiffness = 100, damping = 30, mass = 2) {
+    let value = 0;
+    let velocity = 0;
+    let target = 0;
+
+    function tick(dt: number) {
+      const springForce = -stiffness * (value - target);
+      const dampingForce = -damping * velocity;
+      const acceleration = (springForce + dampingForce) / mass;
+      velocity += acceleration * dt;
+      value += velocity * dt;
+      return value;
+    }
+
+    return {
+      setTarget(t: number) { target = t; },
+      setValue(v: number) { value = v; velocity = 0; },
+      tick,
+      get() { return value; },
+      getVelocity() { return velocity; },
+    };
+  }
+
+  type Cleanup = () => void;
+  type CardRegistry = WeakMap<HTMLElement, Cleanup>;
+  type TiltedCardState = {
+    registry: CardRegistry;
+    cleanupAll: () => void;
+    beforeSwapBound: boolean;
+  };
+
+  const STATE_KEY = '__tiltedCardState';
+
+  function getState(): TiltedCardState {
+    const scope = window as typeof window & { [STATE_KEY]?: TiltedCardState };
+    if (!scope[STATE_KEY]) {
+      const registry: CardRegistry = new WeakMap<HTMLElement, Cleanup>();
+      scope[STATE_KEY] = {
+        registry,
+        cleanupAll: () => {
+          const figures = Array.from(document.querySelectorAll<HTMLElement>('.tc-figure'));
+          figures.forEach((figure) => {
+            registry.get(figure)?.();
+            registry.delete(figure);
+          });
+        },
+        beforeSwapBound: false,
+      };
+    }
+    return scope[STATE_KEY]!;
+  }
+
+  function setupTiltedCard(figure: HTMLElement): Cleanup {
+    const inner = figure.querySelector<HTMLElement>('.tc-inner');
+    const caption = figure.querySelector<HTMLElement>('.tc-caption');
+    if (!inner) return () => {};
+
+    const scaleOnHover = parseFloat(figure.dataset.scale ?? '1.1');
+    const amplitude = parseFloat(figure.dataset.amplitude ?? '14');
+
+    // Springs for each animated property
+    const springRX = createSpring(100, 30, 2);
+    const springRY = createSpring(100, 30, 2);
+    const springScale = createSpring(200, 28, 1);
+    springScale.setValue(1);
+    springScale.setTarget(1);
+
+    // Caption: spring for rotation wobble, direct tracking for position
+    const springCRotate = createSpring(350, 30, 1);
+
+    let rafId: number | null = null;
+    let isHovered = false;
+    let isFocused = false;
+    let lastOffsetY = 0;
+    let lastTime = performance.now();
+    const viewportPadding = 12;
+    const tooltipGap = 12;
+
+    function positionCaption() {
+      if (!caption) return;
+
+      const figureRect = figure.getBoundingClientRect();
+      const captionRect = caption.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const desiredViewportLeft = figureRect.left + (figureRect.width - captionRect.width) / 2;
+      const clampedViewportLeft = Math.max(
+        viewportPadding,
+        Math.min(desiredViewportLeft, viewportWidth - captionRect.width - viewportPadding),
+      );
+      const localLeft = clampedViewportLeft - figureRect.left;
+
+      caption.style.left = `${localLeft}px`;
+      caption.style.top = `${-captionRect.height - tooltipGap}px`;
+      caption.style.transformOrigin = 'center bottom';
+    }
+
+    function showCaption() {
+      if (!caption) return;
+      caption.style.opacity = '1';
+      positionCaption();
+    }
+
+    function hideCaption() {
+      if (!caption) return;
+      caption.style.opacity = '0';
+    }
+
+    function animate() {
+      const now = performance.now();
+      const dt = Math.min((now - lastTime) / 1000, 0.05);
+      lastTime = now;
+
+      const rx = springRX.tick(dt);
+      const ry = springRY.tick(dt);
+      const sc = springScale.tick(dt);
+
+      inner.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg) scale(${sc})`;
+
+      if (caption) {
+        const cr = springCRotate.tick(dt);
+        caption.style.transform = `translateY(0) rotate(${cr}deg)`;
+        if (isHovered || isFocused) {
+          positionCaption();
+        }
+      }
+
+      const moving =
+        Math.abs(springRX.getVelocity()) > 0.001 ||
+        Math.abs(springRY.getVelocity()) > 0.001 ||
+        Math.abs(springScale.getVelocity()) > 0.001;
+
+      if (moving || isHovered) {
+        rafId = requestAnimationFrame(animate);
+      } else {
+        rafId = null;
+      }
+    }
+
+    function startLoop() {
+      if (!rafId) {
+        lastTime = performance.now();
+        rafId = requestAnimationFrame(animate);
+      }
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = figure.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left - rect.width / 2;
+      const offsetY = e.clientY - rect.top - rect.height / 2;
+
+      springRX.setTarget((offsetY / (rect.height / 2)) * -amplitude);
+      springRY.setTarget((offsetX / (rect.width / 2)) * amplitude);
+
+      const velocityY = offsetY - lastOffsetY;
+      springCRotate.setTarget(-velocityY * 0.6);
+      lastOffsetY = offsetY;
+
+      startLoop();
+    };
+    figure.addEventListener('mousemove', handleMouseMove, { passive: true });
+
+    const handleMouseEnter = () => {
+      isHovered = true;
+      springScale.setTarget(scaleOnHover);
+      if (caption) caption.style.transform = 'translateY(0)';
+      showCaption();
+      startLoop();
+    };
+    figure.addEventListener('mouseenter', handleMouseEnter);
+
+    const handleMouseLeave = () => {
+      isHovered = false;
+      springRX.setTarget(0);
+      springRY.setTarget(0);
+      springScale.setTarget(1);
+      springCRotate.setTarget(0);
+      if (!isFocused) hideCaption();
+      startLoop();
+    };
+    figure.addEventListener('mouseleave', handleMouseLeave);
+
+    const handleFocus = () => {
+      isFocused = true;
+      springScale.setTarget(scaleOnHover);
+      showCaption();
+      startLoop();
+    };
+    figure.addEventListener('focus', handleFocus);
+
+    const handleBlur = () => {
+      isFocused = false;
+      springRX.setTarget(0);
+      springRY.setTarget(0);
+      springScale.setTarget(1);
+      springCRotate.setTarget(0);
+      if (!isHovered) hideCaption();
+      startLoop();
+    };
+    figure.addEventListener('blur', handleBlur);
+
+    const handleResize = () => {
+      if (isHovered || isFocused) {
+        positionCaption();
+      }
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      figure.removeEventListener('mousemove', handleMouseMove);
+      figure.removeEventListener('mouseenter', handleMouseEnter);
+      figure.removeEventListener('mouseleave', handleMouseLeave);
+      figure.removeEventListener('focus', handleFocus);
+      figure.removeEventListener('blur', handleBlur);
+      window.removeEventListener('resize', handleResize);
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      inner.style.transform = '';
+      if (caption) {
+        caption.style.opacity = '0';
+        caption.style.transform = 'translateY(0)';
+      }
+    };
+  }
+
+  function initTiltedCards() {
+    const figures = Array.from(document.querySelectorAll<HTMLElement>('.tc-figure'));
+    if (!figures.length) return;
+
+    const state = getState();
+    if (!state.beforeSwapBound) {
+      document.addEventListener('astro:before-swap', state.cleanupAll);
+      state.beforeSwapBound = true;
+    }
+
+    const { registry } = state;
+    figures.forEach((figure) => {
+      registry.get(figure)?.();
+      registry.set(figure, setupTiltedCard(figure));
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTiltedCards, { once: true });
+  } else {
+    initTiltedCards();
+  }
+</script>

@@ -13,6 +13,7 @@
 interface Props {
   /** RGB triplet for all glow effects, e.g. "90, 138, 232" */
   glowColor?:       string;
+  enableBorderGlow?: boolean;
   enableSpotlight?: boolean;
   enableStars?:     boolean;
   enableTilt?:      boolean;
@@ -24,6 +25,7 @@ interface Props {
 
 const {
   glowColor       = '90, 138, 232',
+  enableBorderGlow = true,
   enableSpotlight = true,
   enableStars     = true,
   enableTilt      = false,
@@ -36,7 +38,9 @@ const {
 
 <div
   class="mb-grid"
+  style={`--mb-glow-rgb: ${glowColor};`}
   data-glow={glowColor}
+  data-border-glow={enableBorderGlow}
   data-spotlight={enableSpotlight}
   data-stars={enableStars}
   data-tilt={enableTilt}
@@ -51,11 +55,41 @@ const {
 <script>
   import { gsap } from 'gsap';
 
-  function boot() {
-    const grid = document.querySelector<HTMLElement>('.mb-grid');
-    if (!grid) return;
+  type Cleanup = () => void;
+  type GridRegistry = WeakMap<HTMLElement, Cleanup>;
+  type MagicBentoState = {
+    registry: GridRegistry;
+    cleanupAll: () => void;
+    beforeSwapBound: boolean;
+  };
+
+  const STATE_KEY = '__magicBentoState';
+
+  function getState(): MagicBentoState {
+    const scope = window as typeof window & { [STATE_KEY]?: MagicBentoState };
+    if (!scope[STATE_KEY]) {
+      const registry: GridRegistry = new WeakMap<HTMLElement, Cleanup>();
+      scope[STATE_KEY] = {
+        registry,
+        cleanupAll: () => {
+          const grids = Array.from(document.querySelectorAll<HTMLElement>('.mb-grid'));
+          grids.forEach(grid => {
+            registry.get(grid)?.();
+            registry.delete(grid);
+          });
+        },
+        beforeSwapBound: false,
+      };
+    }
+    return scope[STATE_KEY]!;
+  }
+
+  function setupGrid(grid: HTMLElement): Cleanup {
+    const cleanupTasks: Cleanup[] = [];
+    const registerCleanup = (task: Cleanup) => cleanupTasks.push(task);
 
     const GLOW      = grid.dataset.glow      ?? '90, 138, 232';
+    const BORDER    = grid.dataset.borderGlow !== 'false';
     const SPOTLIGHT = grid.dataset.spotlight !== 'false';
     const STARS     = grid.dataset.stars     !== 'false';
     const TILT      = grid.dataset.tilt      === 'true';
@@ -64,9 +98,27 @@ const {
     const SR        = parseInt(grid.dataset.sr ?? '320');
     const PC        = parseInt(grid.dataset.pc ?? '10');
 
-    const isMobile = window.innerWidth <= 768;
     const cards = Array.from(grid.querySelectorAll<HTMLElement>('.project-card'));
-    if (!cards.length) return;
+    if (!cards.length) return () => {};
+
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let reduceMotion = mediaQuery.matches;
+    const setReducedMotion = () => {
+      reduceMotion = mediaQuery.matches;
+      if (reduceMotion) {
+        cards.forEach(card => {
+          gsap.killTweensOf(card);
+          card.style.transform = '';
+          card.style.setProperty('--glow-intensity', '0');
+        });
+      }
+    };
+    setReducedMotion();
+    mediaQuery.addEventListener('change', setReducedMotion);
+    registerCleanup(() => mediaQuery.removeEventListener('change', setReducedMotion));
+
+    const isMobile = window.innerWidth <= 768;
+    const allowMotionEffects = !isMobile && !reduceMotion;
 
     // Initialise per-card CSS vars
     cards.forEach(c => {
@@ -76,10 +128,11 @@ const {
       c.style.setProperty('--glow-radius',    `${SR}px`);
     });
 
-    if (isMobile) return;
+    // Keep setup active on mobile so registered cleanup (e.g. media-query listener)
+    // still runs during remount/navigation.
 
     /* ── Global spotlight ─────────────────────────────────────────────── */
-    if (SPOTLIGHT) {
+    if (SPOTLIGHT && !reduceMotion) {
       const sl = document.createElement('div');
       Object.assign(sl.style, {
         position:     'fixed',
@@ -102,11 +155,16 @@ const {
         top:          '0',
       });
       document.body.appendChild(sl);
+      registerCleanup(() => {
+        gsap.killTweensOf(sl);
+        sl.remove();
+      });
 
       const proximity    = SR * 0.5;
       const fadeDistance = SR * 0.75;
 
-      document.addEventListener('mousemove', e => {
+      const handleMouseMove = (e: MouseEvent) => {
+        if (reduceMotion) return;
         const r = grid.getBoundingClientRect();
         const inside =
           e.clientX >= r.left && e.clientX <= r.right &&
@@ -135,7 +193,7 @@ const {
 
           card.style.setProperty('--glow-x', `${((e.clientX - cr.left) / cr.width) * 100}%`);
           card.style.setProperty('--glow-y', `${((e.clientY - cr.top)  / cr.height) * 100}%`);
-          card.style.setProperty('--glow-intensity', intensity.toFixed(3));
+          card.style.setProperty('--glow-intensity', BORDER ? intensity.toFixed(3) : '0');
         });
 
         gsap.to(sl, { left: e.clientX, top: e.clientY, duration: 0.1, ease: 'power2.out' });
@@ -145,12 +203,16 @@ const {
           minDist <= fadeDistance ? (fadeDistance - minDist) / (fadeDistance - proximity) * 0.8 :
           0;
         gsap.to(sl, { opacity: op, duration: op > 0 ? 0.15 : 0.5 });
-      }, { passive: true });
+      };
+      document.addEventListener('mousemove', handleMouseMove, { passive: true });
+      registerCleanup(() => document.removeEventListener('mousemove', handleMouseMove));
 
-      document.addEventListener('mouseleave', () => {
+      const handleMouseLeave = () => {
         gsap.to(sl, { opacity: 0, duration: 0.4 });
         cards.forEach(c => c.style.setProperty('--glow-intensity', '0'));
-      });
+      };
+      document.addEventListener('mouseleave', handleMouseLeave);
+      registerCleanup(() => document.removeEventListener('mouseleave', handleMouseLeave));
     }
 
     /* ── Per-card effects ─────────────────────────────────────────────── */
@@ -160,13 +222,14 @@ const {
       const timers: ReturnType<typeof setTimeout>[] = [];
 
       /* Stars */
-      if (STARS) {
+      if (STARS && !reduceMotion) {
         const spawn = () => {
           const { width, height } = card.getBoundingClientRect();
           for (let i = 0; i < PC; i++) {
             timers.push(setTimeout(() => {
               if (!hovered) return;
               const p = document.createElement('div');
+              p.dataset.mbFx = 'star';
               Object.assign(p.style, {
                 position:    'absolute',
                 width:       '4px',
@@ -209,13 +272,20 @@ const {
           alive.length = 0;
         };
 
-        card.addEventListener('mouseenter', () => { hovered = true;  spawn(); });
-        card.addEventListener('mouseleave', () => { hovered = false; clear(); });
+        const handleMouseEnter = () => { hovered = true; spawn(); };
+        const handleMouseLeave = () => { hovered = false; clear(); };
+        card.addEventListener('mouseenter', handleMouseEnter);
+        card.addEventListener('mouseleave', handleMouseLeave);
+        registerCleanup(() => {
+          card.removeEventListener('mouseenter', handleMouseEnter);
+          card.removeEventListener('mouseleave', handleMouseLeave);
+          clear();
+        });
       }
 
       /* Tilt + magnetism */
-      if (TILT || MAGNET) {
-        card.addEventListener('mousemove', e => {
+      if ((TILT || MAGNET) && allowMotionEffects) {
+        const handleCardMove = (e: MouseEvent) => {
           const cr = card.getBoundingClientRect();
           const mx = e.clientX - cr.left - cr.width  / 2;
           const my = e.clientY - cr.top  - cr.height / 2;
@@ -234,19 +304,27 @@ const {
               duration: 0.3, ease: 'power2.out',
             });
           }
-        }, { passive: true });
+        };
+        card.addEventListener('mousemove', handleCardMove, { passive: true });
 
-        card.addEventListener('mouseleave', () => {
+        const handleCardLeave = () => {
           gsap.to(card, {
             rotateX: 0, rotateY: 0, x: 0, y: 0,
             duration: 0.45, ease: 'power2.out',
           });
+        };
+        card.addEventListener('mouseleave', handleCardLeave);
+        registerCleanup(() => {
+          card.removeEventListener('mousemove', handleCardMove);
+          card.removeEventListener('mouseleave', handleCardLeave);
+          gsap.killTweensOf(card);
+          card.style.transform = '';
         });
       }
 
       /* Click ripple */
-      if (CLICK) {
-        card.addEventListener('click', e => {
+      if (CLICK && !reduceMotion) {
+        const handleClick = (e: MouseEvent) => {
           const cr  = card.getBoundingClientRect();
           const x   = e.clientX - cr.left;
           const y   = e.clientY - cr.top;
@@ -255,6 +333,7 @@ const {
             Math.hypot(x, y - cr.height), Math.hypot(x - cr.width, y - cr.height),
           );
           const rip = document.createElement('div');
+          rip.dataset.mbFx = 'ripple';
           Object.assign(rip.style, {
             position:    'absolute',
             width:       `${max * 2}px`,
@@ -275,15 +354,41 @@ const {
             { scale: 0, opacity: 1 },
             { scale: 1, opacity: 0, duration: 0.8, ease: 'power2.out', onComplete: () => rip.remove() }
           );
+        };
+        card.addEventListener('click', handleClick);
+        registerCleanup(() => {
+          card.removeEventListener('click', handleClick);
+          card.querySelectorAll<HTMLElement>('[data-mb-fx]').forEach(node => node.remove());
         });
       }
+    });
+    return () => {
+      cleanupTasks.forEach(task => task());
+      cards.forEach(c => c.style.setProperty('--glow-intensity', '0'));
+    };
+  }
+
+  function initMagicBentoGrid() {
+    const grids = Array.from(document.querySelectorAll<HTMLElement>('.mb-grid'));
+    if (!grids.length) return;
+
+    const state = getState();
+    if (!state.beforeSwapBound) {
+      document.addEventListener('astro:before-swap', state.cleanupAll);
+      state.beforeSwapBound = true;
+    }
+
+    const { registry } = state;
+    grids.forEach(grid => {
+      registry.get(grid)?.();
+      registry.set(grid, setupGrid(grid));
     });
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot, { once: true });
+    document.addEventListener('DOMContentLoaded', initMagicBentoGrid, { once: true });
   } else {
-    boot();
+    initMagicBentoGrid();
   }
 </script>
 
@@ -293,7 +398,7 @@ const {
   }
 
   /* Give each card the CSS vars, contain its overflow, and the border-glow ::after */
-  :global(.project-card) {
+  .mb-grid :global(.project-card) {
     position: relative;
     overflow: hidden;
     --glow-x:         50%;
@@ -303,7 +408,7 @@ const {
   }
 
   /* Border glow — uses the mask trick to paint only the border region */
-  :global(.project-card::after) {
+  .mb-grid :global(.project-card)::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -311,8 +416,8 @@ const {
     border-radius: inherit;
     background: radial-gradient(
       var(--glow-radius) circle at var(--glow-x) var(--glow-y),
-      rgba(90, 138, 232, calc(var(--glow-intensity) * 0.95)) 0%,
-      rgba(90, 138, 232, calc(var(--glow-intensity) * 0.50)) 30%,
+      rgba(var(--mb-glow-rgb), calc(var(--glow-intensity) * 0.95)) 0%,
+      rgba(var(--mb-glow-rgb), calc(var(--glow-intensity) * 0.50)) 30%,
       transparent 65%
     );
     -webkit-mask:
@@ -325,5 +430,22 @@ const {
     mask-composite: exclude;
     pointer-events: none;
     z-index: 3;
+  }
+
+  .mb-grid[data-border-glow='false'] :global(.project-card)::after {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mb-grid :global(.project-card),
+    .mb-grid :global(.project-card *) {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+
+    .mb-grid :global(.project-card)::after {
+      opacity: 0.2;
+    }
   }
 </style>

@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { Image } from 'astro:assets';
+import TiltedCard from '../components/TiltedCard.astro';
 import { getCollection } from 'astro:content';
 
 const allPhotos = await getCollection('photos');
@@ -10,39 +10,37 @@ const allPhotos = await getCollection('photos');
   <div class="mb-6">
     <a href="/" class="back-home-link">← Back to home</a>
   </div>
-  <h1 class="text-xl font-semibold mb-8">Photos</h1>
+  <h1 class="page-title text-xl font-semibold mb-8">Photos</h1>
 
   {allPhotos.length === 0 ? (
     <p class="text-neutral-600">No photos yet. Add your photos to src/content/photos/</p>
   ) : (
-    <div class="polaroid-gallery grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-12">
-      {allPhotos.map((photo, index) => (
-        <div class="polaroid-card group" data-tilt-index={index}>
-          <div class="polaroid-frame">
-            <div class="polaroid-image-container">
-              <Image
-                src={photo.data.image}
-                alt={photo.data.caption}
-                class="polaroid-image"
-                width={400}
-                height={400}
-                format="webp"
-                quality={80}
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-            <div class="polaroid-caption-area">
-              <p class="polaroid-caption">{photo.data.caption}</p>
-              <div class="polaroid-meta">
-                <span class="polaroid-date">{photo.data.date}</span>
-                {photo.data.location && (
-                  <>
-                    <span class="polaroid-separator">·</span>
-                    <span class="polaroid-location">{photo.data.location}</span>
-                  </>
-                )}
-              </div>
+    <div class="photo-grid">
+      {allPhotos.map((photo) => (
+        <div class="photo-cell">
+          <TiltedCard
+            imageSrc={photo.data.image}
+            altText={photo.data.caption}
+            captionText={[photo.data.caption, photo.data.location].filter(Boolean).join(' · ')}
+            containerHeight="100%"
+            containerWidth="100%"
+            imageHeight="100%"
+            imageWidth="100%"
+            rotateAmplitude={12}
+            scaleOnHover={1.06}
+            showMobileWarning={false}
+            showTooltip={true}
+          />
+          <div class="photo-meta">
+            <p class="photo-caption">{photo.data.caption}</p>
+            <div class="photo-sub">
+              <span>{photo.data.date}</span>
+              {photo.data.location && (
+                <>
+                  <span class="dot">·</span>
+                  <span>{photo.data.location}</span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -52,163 +50,75 @@ const allPhotos = await getCollection('photos');
 </Base>
 
 <style>
-  .polaroid-gallery {
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 2rem;
     padding-top: 1rem;
-  }
-
-  .polaroid-card {
-    perspective: 1000px;
-  }
-
-  .polaroid-frame {
-    background: white;
-    padding: 1rem;
     padding-bottom: 3rem;
-    box-shadow:
-      0 4px 6px rgba(0, 0, 0, 0.05),
-      0 10px 15px rgba(0, 0, 0, 0.05);
-    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 2px;
-    transform-style: preserve-3d;
-    will-change: transform;
-  }
-
-  .polaroid-card:hover .polaroid-frame {
-    box-shadow:
-      0 10px 20px rgba(0, 0, 0, 0.08),
-      0 20px 30px rgba(0, 0, 0, 0.06);
-  }
-
-  .polaroid-image-container {
     width: 100%;
-    aspect-ratio: 4/3;
-    overflow: hidden;
-    background: #f5f5f5;
-    margin-bottom: 0.75rem;
+    max-width: 1000px;
+    margin-inline: auto;
   }
 
-  .polaroid-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.3s ease;
+  .page-title {
+    color: #fff;
   }
 
-  .polaroid-card:hover .polaroid-image {
-    transform: scale(1.02);
+  @media (min-width: 640px) {
+    .photo-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
-  .polaroid-caption-area {
+  @media (min-width: 1024px) {
+    .photo-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2.25rem;
+    }
+  }
+
+  .photo-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .photo-cell :global(.tc-figure) {
+    height: auto !important;
+  }
+
+  .photo-cell :global(.tc-inner) {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1;
+  }
+
+  .photo-meta {
     text-align: center;
-    padding: 0 0.5rem;
   }
 
-  .polaroid-caption {
+  .photo-caption {
     font-family: 'Reenie Beanie', cursive;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    color: #fff;
     line-height: 1.3;
-    color: #333;
-    margin-bottom: 0.25rem;
-    min-height: 2rem;
+    margin-bottom: 0.2rem;
   }
 
-  .polaroid-meta {
-    font-size: 0.75rem;
-    color: #999;
+  .photo-sub {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    margin-top: 0.25rem;
-  }
-
-  .polaroid-date,
-  .polaroid-location {
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: #fff;
     font-weight: 500;
+    opacity: 0.9;
   }
 
-  .polaroid-separator {
-    color: #ccc;
-  }
-
-  /* Random slight rotations for polaroid effect */
-  .polaroid-card:nth-child(3n+1) .polaroid-frame {
-    transform: rotate(-1deg);
-  }
-
-  .polaroid-card:nth-child(3n+2) .polaroid-frame {
-    transform: rotate(1deg);
-  }
-
-  .polaroid-card:nth-child(3n+3) .polaroid-frame {
-    transform: rotate(-0.5deg);
-  }
-
-  /* Mobile adjustments */
-  @media (max-width: 768px) {
-    .polaroid-frame {
-      padding-bottom: 2.5rem;
-    }
-
-    .polaroid-caption {
-      font-size: 1.25rem;
-    }
+  .dot {
+    color: #fff;
+    opacity: 0.7;
   }
 </style>
-
-<script>
-  // Throttle utility function
-  function throttle<T extends (...args: any[]) => any>(func: T, delay: number) {
-    let lastCall = 0;
-    return function (this: any, ...args: Parameters<T>) {
-      const now = Date.now();
-      if (now - lastCall >= delay) {
-        lastCall = now;
-        func.apply(this, args);
-      }
-    };
-  }
-
-  // Add 3D tilt effect to polaroid cards on desktop only
-  if (window.innerWidth >= 1024) {
-    const cards = document.querySelectorAll('.polaroid-card');
-
-    cards.forEach((card) => {
-      const frame = card.querySelector('.polaroid-frame');
-      if (!frame) return;
-
-      const handleMouseMove = (e: MouseEvent) => {
-        const rect = (card as HTMLElement).getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-
-        const rotateX = ((y - centerY) / centerY) * -12;
-        const rotateY = ((x - centerX) / centerX) * 12;
-
-        (frame as HTMLElement).style.transform = `
-          perspective(1000px)
-          rotateX(${rotateX}deg)
-          rotateY(${rotateY}deg)
-          translateZ(10px)
-          scale(1.02)
-        `;
-      };
-
-      // Throttle mousemove to run max once per 16ms (~60fps)
-      card.addEventListener('mousemove', throttle(handleMouseMove, 16) as EventListener, { passive: true });
-
-      card.addEventListener('mouseleave', () => {
-        // Get the original rotation for this card
-        const index = card.getAttribute('data-tilt-index');
-        const rotations = ['-1deg', '1deg', '-0.5deg'];
-        const originalRotate = rotations[Number(index) % 3];
-
-        (frame as HTMLElement).style.transform = `rotate(${originalRotate})`;
-      });
-    });
-  }
-</script>

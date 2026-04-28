@@ -2,13 +2,17 @@
 import ThemeToggle from './ThemeToggle.astro';
 
 const { pathname } = Astro.url;
-const isActive = (href: string) => pathname === href;
+const normalizePath = (value: string) => {
+  if (value === '/') return '/';
+  return value.replace(/\/+$/, '');
+};
+const isActive = (href: string) => normalizePath(pathname) === normalizePath(href);
 
 const navLinks = [
-  { href: '/projects', text: 'Projects' },
-  { href: '/about', text: 'About' },
-  { href: '/photos', text: 'Photos' },
-  { href: '/hobbies', text: 'Hobbies' },
+  { href: '/projects/', text: 'Projects' },
+  { href: '/about/', text: 'About' },
+  { href: '/photos/', text: 'Photos' },
+  { href: '/hobbies/', text: 'Hobbies' },
 ];
 ---
 

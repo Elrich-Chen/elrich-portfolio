@@ -80,7 +80,7 @@ function formatStatsAndCompanies(text: string) {
 
   result = result.replace(/\[LOGO:([^\]]+)\]/gi, (_, logoName) => {
     const fileName = resolveLogoFileName(String(logoName).trim());
-    return `<img src="/logos/${fileName}.png" alt="${logoName}" width="20" height="20" loading="lazy" class="inline-block align-middle mx-1 logo-placeholder" onerror="this.style.display='none'" />`;
+    return `<img src="/logos/${fileName}.png" alt="${logoName}" width="20" height="20" loading="lazy" class="inline-block align-middle mx-1 logo-placeholder" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='/logos/${fileName}.svg';}else{this.style.display='none';}" />`;
   });
 
   const companyKeys = Object.keys(companyData).sort((a, b) => b.length - a.length);
@@ -169,7 +169,15 @@ const contactLinks = [
                       {parts.map((part: string, i: number) => {
                         if (i % 2 === 1) {
                           const n = resolveLogoFileName(part);
-                          return <img src={`/logos/${n}.png`} alt={part} width="20" height="20" loading="lazy" class="inline-block align-middle mx-1 logo-placeholder" onerror={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />;
+                          return <img src={`/logos/${n}.png`} alt={part} width="20" height="20" loading="lazy" class="inline-block align-middle mx-1 logo-placeholder" onerror={(e) => {
+                            const img = e.target as HTMLImageElement;
+                            if (!img.dataset.fallback) {
+                              img.dataset.fallback = '1';
+                              img.src = `/logos/${n}.svg`;
+                            } else {
+                              img.style.display = 'none';
+                            }
+                          }} />;
                         }
                         return <span set:html={formatStatsAndCompanies(part)}></span>;
                       })}
@@ -192,7 +200,7 @@ const contactLinks = [
 
     {highlights?.data?.building?.length > 0 && (
       <div class="scroll-stack-card" id="section-building">
-        <h2 class="panel-header">◆ Things I am working on:</h2>
+        <h2 class="panel-header">◆ Things in progress:</h2>
         <ul class="highlight-list">
           {highlights.data.building.map((item: any) => {
             const mainPoint = typeof item === 'string' ? item : (item.point || '');
@@ -210,7 +218,15 @@ const contactLinks = [
                       {parts.map((part: string, i: number) => {
                         if (i % 2 === 1) {
                           const n = resolveLogoFileName(part);
-                          return <img src={`/logos/${n}.png`} alt={part} width="20" height="20" loading="lazy" class="inline-block align-middle mx-1 logo-placeholder" onerror={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />;
+                          return <img src={`/logos/${n}.png`} alt={part} width="20" height="20" loading="lazy" class="inline-block align-middle mx-1 logo-placeholder" onerror={(e) => {
+                            const img = e.target as HTMLImageElement;
+                            if (!img.dataset.fallback) {
+                              img.dataset.fallback = '1';
+                              img.src = `/logos/${n}.svg`;
+                            } else {
+                              img.style.display = 'none';
+                            }
+                          }} />;
                         }
                         return <span set:html={formatStatsAndCompanies(part)}></span>;
                       })}
@@ -471,7 +487,7 @@ const contactLinks = [
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgb(var(--muted));
+    color: #fff;
     margin: 0 0 0.75rem;
   }
 
@@ -479,24 +495,30 @@ const contactLinks = [
     font-size: 3rem;
     font-weight: 700;
     margin: 0 0 1rem;
-    color: rgb(var(--fg));
+    color: #fff;
   }
 
   .contact-body {
     font-size: 1.35rem;
     line-height: 1.6;
-    color: rgb(var(--muted));
+    color: #fff;
     margin: 0 0 1.5rem;
   }
 
   .contact-inline-link {
-    color: rgb(var(--fg));
+    color: #fff;
     font-weight: 600;
     text-decoration: none;
     border-bottom: 1px solid rgba(var(--border), 0.3);
   }
 
   .contact-inline-link:hover { border-bottom-color: rgba(var(--border), 0.6); }
+
+  :global(html.light) .contact-eyebrow,
+  :global(html.light) .contact-body,
+  :global(html.light) .contact-inline-link {
+    color: #fff;
+  }
 
   .contact-cta {
     display: inline-flex;

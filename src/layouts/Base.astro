@@ -100,12 +100,12 @@ const contactLinks = [
     <PillNav />
     <div class="page-main">
       <div class="prose-measure">
-        <main class:list={['pb-32', { 'main-padded': !fullscreen }]}>
+        <main class:list={['pb-20', { 'main-padded': !fullscreen }]}>
           <slot />
         </main>
       </div>
       {showContactForm && (
-        <footer class="prose-measure pb-32" id="contact-card">
+        <footer class="prose-measure pb-20" id="contact-card">
           <div class="email-card">
             <div class="email-card-copy">
               <p class="email-card-eyebrow">◆ Email</p>
@@ -140,6 +140,9 @@ const contactLinks = [
         </footer>
       )}
     </div>
+    <footer class="site-copyright" aria-label="Copyright">
+      © {new Date().getFullYear()} Elrich Chen. All rights reserved.
+    </footer>
     <div id="dark-mode-toast" class="dark-mode-toast" role="status" aria-live="polite">
       <div class="dark-mode-toast-content">
         <span class="dark-mode-toast-label">Try dark mode?</span>
@@ -247,6 +250,11 @@ const contactLinks = [
         color: rgb(var(--muted));
         font-size: 0.98rem;
         line-height: 1.6;
+      }
+
+      :global(html.light) .email-card-eyebrow,
+      :global(html.light) .email-card-text {
+        color: #fff;
       }
 
       .email-card-inline {
@@ -360,6 +368,19 @@ const contactLinks = [
 
       .page-main {
         min-width: 0;
+      }
+
+      .site-copyright {
+        position: absolute;
+        left: 50%;
+        bottom: 0.6rem;
+        transform: translateX(-50%);
+        z-index: 12;
+        font-size: 0.72rem;
+        letter-spacing: 0.04em;
+        color: rgba(255, 255, 255, 0.8);
+        text-align: center;
+        white-space: nowrap;
       }
 
       /* nav is 52px tall, top: 1.25rem → clear it + a small gap */
