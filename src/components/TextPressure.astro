@@ -1,0 +1,249 @@
+---
+/**
+ * TextPressure — ported from React Bits / JuanFuentes codepen.
+ * Uses font-variation-settings to animate wght/wdth/ital based on cursor distance.
+ *
+ * Note: fontUrl is OPTIONAL. If the font is already loaded globally (e.g. Rubik),
+ * you can omit it and just supply fontFamily.
+ */
+interface Props {
+  text?: string;
+  fontFamily?: string;
+  fontUrl?: string;
+  flex?: boolean;
+  scale?: boolean;
+  alpha?: boolean;
+  stroke?: boolean;
+  width?: boolean;
+  weight?: boolean;
+  italic?: boolean;
+  textColor?: string;
+  strokeColor?: string;
+  className?: string;
+  minFontSize?: number;
+  disabled?: boolean;
+}
+
+const {
+  text        = 'Elrich Chen',
+  fontFamily  = 'Rubik',
+  fontUrl     = '',
+  flex        = true,
+  scale       = false,
+  alpha       = false,
+  stroke      = false,
+  width       = false,
+  weight      = true,
+  italic      = true,
+  textColor   = 'rgb(var(--fg))',
+  strokeColor = '#FF0000',
+  className   = '',
+  minFontSize = 36,
+  disabled    = false,
+} = Astro.props;
+
+const chars = text.split('');
+const uid   = `tp_${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<div
+  id={uid}
+  class="tp-container"
+  data-font-family={fontFamily}
+  data-font-url={fontUrl}
+  data-flex={String(flex)}
+  data-scale={String(scale)}
+  data-alpha={String(alpha)}
+  data-stroke={String(stroke)}
+  data-width={String(width)}
+  data-weight={String(weight)}
+  data-italic={String(italic)}
+  data-text-color={textColor}
+  data-stroke-color={strokeColor}
+  data-min-font-size={String(minFontSize)}
+>
+  {fontUrl && (
+    <style set:html={`@font-face { font-family: '${fontFamily}'; src: url('${fontUrl}'); font-style: normal; }`}></style>
+  )}
+
+  <h1
+    class:list={[
+      'tp-title',
+      className,
+      flex ? 'tp-flex' : '',
+      stroke ? 'tp-stroke' : '',
+    ]}
+    style={`font-family: ${fontFamily}; color: ${textColor};`}
+  >
+    {chars.map((char, i) => (
+      <span
+        class="tp-char"
+        data-char={char}
+        data-idx={i}
+        style={`color: ${stroke ? undefined : textColor};`}
+      >{char}</span>
+    ))}
+  </h1>
+</div>
+
+<style>
+  .tp-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+  }
+
+  .tp-title {
+    text-transform: uppercase;
+    margin: 0;
+    text-align: center;
+    user-select: none;
+    white-space: nowrap;
+    font-weight: 100;
+    width: 100%;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+  }
+
+  .tp-flex {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .tp-char {
+    display: inline-block;
+  }
+
+  .tp-stroke .tp-char {
+    position: relative;
+  }
+
+  /* ::after inherits --tp-stroke-color set on the container via JS */
+  .tp-stroke .tp-char::after {
+    content: attr(data-char);
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: transparent;
+    z-index: -1;
+    -webkit-text-stroke-width: 3px;
+    -webkit-text-stroke-color: var(--tp-stroke-color, #FF0000);
+  }
+</style>
+
+<script define:vars={{ uid, fontFamily, flex, scale, alpha, stroke, width, weight, italic, textColor, strokeColor, minFontSize, disabled }}>
+  (() => {
+    const container = document.getElementById(uid);
+    if (!container) return;
+
+    const titleEl = container.querySelector('.tp-title');
+    const spans   = Array.from(container.querySelectorAll('.tp-char'));
+
+    if (!titleEl || spans.length === 0) return;
+
+    // Set stroke color as a CSS custom property on the container so
+    // ::after pseudo-elements can inherit it via var(--tp-stroke-color)
+    if (stroke) {
+      container.style.setProperty('--tp-stroke-color', strokeColor);
+    }
+
+    const mouse  = { x: 0, y: 0 };
+    const cursor = { x: 0, y: 0 };
+
+    // Seed to the center of the component
+    const seedCenter = () => {
+      const r = container.getBoundingClientRect();
+      mouse.x = cursor.x = r.left + r.width / 2;
+      mouse.y = cursor.y = r.top  + r.height / 2;
+    };
+    seedCenter();
+
+    const onMouseMove = (e) => { cursor.x = e.clientX; cursor.y = e.clientY; };
+    const onTouchMove = (e) => { cursor.x = e.touches[0].clientX; cursor.y = e.touches[0].clientY; };
+
+    if (!disabled) {
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('touchmove', onTouchMove, { passive: true });
+    }
+
+    // Font sizing
+    let fontSize = minFontSize;
+    let scaleY   = 1;
+    let lineH    = 1;
+
+    const setSize = () => {
+      if (!container || !titleEl) return;
+      const cw = container.getBoundingClientRect().width;
+      const ch = container.getBoundingClientRect().height;
+
+      let fs = cw / (spans.length / 2);
+      fs = Math.max(fs, minFontSize);
+      fontSize = fs;
+      scaleY   = 1;
+      lineH    = 1;
+
+      titleEl.style.fontSize   = fs + 'px';
+      titleEl.style.lineHeight = '1';
+      titleEl.style.transform  = 'scale(1, 1)';
+
+      if (scale && ch > 0) {
+        requestAnimationFrame(() => {
+          const th = titleEl.getBoundingClientRect().height;
+          if (th > 0) {
+            scaleY = ch / th;
+            lineH  = scaleY;
+            titleEl.style.lineHeight = scaleY;
+            titleEl.style.transform  = `scale(1, ${scaleY})`;
+            titleEl.style.transformOrigin = 'center top';
+          }
+        });
+      }
+    };
+
+    let resizeTimer;
+    const debouncedSetSize = () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(setSize, 100); };
+    debouncedSetSize();
+    window.addEventListener('resize', debouncedSetSize);
+
+    // Distance helpers
+    const dist = (a, b) => Math.sqrt((b.x - a.x) ** 2 + (b.y - a.y) ** 2);
+    const getAttr = (d, maxD, minV, maxV) => Math.max(minV, maxV - Math.abs((maxV * d) / maxD) + minV);
+
+    // RAF loop
+    let raf;
+    const animate = () => {
+      mouse.x += (cursor.x - mouse.x) / 15;
+      mouse.y += (cursor.y - mouse.y) / 15;
+
+      const titleRect = titleEl.getBoundingClientRect();
+      const maxDist   = titleRect.width / 2;
+
+      spans.forEach((span) => {
+        const r = span.getBoundingClientRect();
+        const center = { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+        const d      = dist(mouse, center);
+
+        const wdth     = width  ? Math.floor(getAttr(d, maxDist, 5, 200))            : 100;
+        const wght     = weight ? Math.floor(getAttr(d, maxDist, 100, 800))           : 300;
+        const italVal  = italic ? getAttr(d, maxDist, 0, 1).toFixed(2)               : '0';
+        const alphaVal = alpha  ? getAttr(d, maxDist, 0, 1).toFixed(2)               : '1';
+
+        const fvs = `'wght' ${wght}, 'wdth' ${wdth}, 'ital' ${italVal}`;
+        if (span.style.fontVariationSettings !== fvs) span.style.fontVariationSettings = fvs;
+        if (alpha) span.style.opacity = alphaVal;
+      });
+
+      raf = requestAnimationFrame(animate);
+    };
+    animate();
+
+    // Cleanup on unmount (not strictly needed for Astro SSR pages, but good practice)
+    document.addEventListener('astro:before-swap', () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('resize', debouncedSetSize);
+    }, { once: true });
+  })();
+</script>

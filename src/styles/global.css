@@ -134,9 +134,22 @@ a {
   opacity: 0.9;
 }
 
+/* Back to home link — white in both themes */
+.back-home-link {
+  font-size: 0.875rem;
+  color: #ffffff !important;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+  opacity: 0.7;
+}
+
+.back-home-link:hover {
+  opacity: 1;
+}
+
 /* Navbar link styling with interactive effects */
 .nav-link {
-  @apply relative no-underline px-2 py-1 rounded transition-all duration-300;
+  @apply relative no-underline px-3 py-1 rounded transition-all duration-300;
   color: rgb(var(--fg));
   position: relative;
 }

@@ -1,0 +1,329 @@
+---
+/**
+ * MagicBentoGrid — vanilla JS port of the React Bits MagicBento component.
+ * Wraps any children (expected: .project-card elements) with:
+ *   - cursor-following spotlight across the grid
+ *   - per-card border glow driven by CSS custom properties
+ *   - GSAP particle stars on hover
+ *   - optional tilt / magnetism on mousemove
+ *   - ripple on click
+ *
+ * No React — pure Astro + GSAP.
+ */
+interface Props {
+  /** RGB triplet for all glow effects, e.g. "90, 138, 232" */
+  glowColor?:       string;
+  enableSpotlight?: boolean;
+  enableStars?:     boolean;
+  enableTilt?:      boolean;
+  enableMagnetism?: boolean;
+  clickEffect?:     boolean;
+  spotlightRadius?: number;
+  particleCount?:   number;
+}
+
+const {
+  glowColor       = '90, 138, 232',
+  enableSpotlight = true,
+  enableStars     = true,
+  enableTilt      = false,
+  enableMagnetism = true,
+  clickEffect     = true,
+  spotlightRadius = 320,
+  particleCount   = 10,
+} = Astro.props;
+---
+
+<div
+  class="mb-grid"
+  data-glow={glowColor}
+  data-spotlight={enableSpotlight}
+  data-stars={enableStars}
+  data-tilt={enableTilt}
+  data-magnetism={enableMagnetism}
+  data-click={clickEffect}
+  data-sr={spotlightRadius}
+  data-pc={particleCount}
+>
+  <slot />
+</div>
+
+<script>
+  import { gsap } from 'gsap';
+
+  function boot() {
+    const grid = document.querySelector<HTMLElement>('.mb-grid');
+    if (!grid) return;
+
+    const GLOW      = grid.dataset.glow      ?? '90, 138, 232';
+    const SPOTLIGHT = grid.dataset.spotlight !== 'false';
+    const STARS     = grid.dataset.stars     !== 'false';
+    const TILT      = grid.dataset.tilt      === 'true';
+    const MAGNET    = grid.dataset.magnetism !== 'false';
+    const CLICK     = grid.dataset.click     !== 'false';
+    const SR        = parseInt(grid.dataset.sr ?? '320');
+    const PC        = parseInt(grid.dataset.pc ?? '10');
+
+    const isMobile = window.innerWidth <= 768;
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>('.project-card'));
+    if (!cards.length) return;
+
+    // Initialise per-card CSS vars
+    cards.forEach(c => {
+      c.style.setProperty('--glow-x',         '50%');
+      c.style.setProperty('--glow-y',         '50%');
+      c.style.setProperty('--glow-intensity', '0');
+      c.style.setProperty('--glow-radius',    `${SR}px`);
+    });
+
+    if (isMobile) return;
+
+    /* ── Global spotlight ─────────────────────────────────────────────── */
+    if (SPOTLIGHT) {
+      const sl = document.createElement('div');
+      Object.assign(sl.style, {
+        position:     'fixed',
+        width:        '800px',
+        height:       '800px',
+        borderRadius: '50%',
+        pointerEvents:'none',
+        background:   `radial-gradient(circle,
+          rgba(${GLOW}, 0.15) 0%,
+          rgba(${GLOW}, 0.08) 15%,
+          rgba(${GLOW}, 0.03) 35%,
+          transparent 70%
+        )`,
+        zIndex:       '200',
+        opacity:      '0',
+        transform:    'translate(-50%, -50%)',
+        mixBlendMode: 'screen',
+        willChange:   'transform, opacity',
+        left:         '0',
+        top:          '0',
+      });
+      document.body.appendChild(sl);
+
+      const proximity    = SR * 0.5;
+      const fadeDistance = SR * 0.75;
+
+      document.addEventListener('mousemove', e => {
+        const r = grid.getBoundingClientRect();
+        const inside =
+          e.clientX >= r.left && e.clientX <= r.right &&
+          e.clientY >= r.top  && e.clientY <= r.bottom;
+
+        if (!inside) {
+          gsap.to(sl, { opacity: 0, duration: 0.4 });
+          cards.forEach(c => c.style.setProperty('--glow-intensity', '0'));
+          return;
+        }
+
+        let minDist = Infinity;
+        cards.forEach(card => {
+          const cr  = card.getBoundingClientRect();
+          const cx  = cr.left + cr.width  / 2;
+          const cy  = cr.top  + cr.height / 2;
+          const raw = Math.hypot(e.clientX - cx, e.clientY - cy) -
+                      Math.max(cr.width, cr.height) / 2;
+          const d   = Math.max(0, raw);
+          minDist   = Math.min(minDist, d);
+
+          const intensity =
+            d <= proximity    ? 1 :
+            d <= fadeDistance ? (fadeDistance - d) / (fadeDistance - proximity) :
+            0;
+
+          card.style.setProperty('--glow-x', `${((e.clientX - cr.left) / cr.width) * 100}%`);
+          card.style.setProperty('--glow-y', `${((e.clientY - cr.top)  / cr.height) * 100}%`);
+          card.style.setProperty('--glow-intensity', intensity.toFixed(3));
+        });
+
+        gsap.to(sl, { left: e.clientX, top: e.clientY, duration: 0.1, ease: 'power2.out' });
+
+        const op =
+          minDist <= proximity    ? 0.8 :
+          minDist <= fadeDistance ? (fadeDistance - minDist) / (fadeDistance - proximity) * 0.8 :
+          0;
+        gsap.to(sl, { opacity: op, duration: op > 0 ? 0.15 : 0.5 });
+      }, { passive: true });
+
+      document.addEventListener('mouseleave', () => {
+        gsap.to(sl, { opacity: 0, duration: 0.4 });
+        cards.forEach(c => c.style.setProperty('--glow-intensity', '0'));
+      });
+    }
+
+    /* ── Per-card effects ─────────────────────────────────────────────── */
+    cards.forEach(card => {
+      let hovered  = false;
+      const alive: HTMLElement[] = [];
+      const timers: ReturnType<typeof setTimeout>[] = [];
+
+      /* Stars */
+      if (STARS) {
+        const spawn = () => {
+          const { width, height } = card.getBoundingClientRect();
+          for (let i = 0; i < PC; i++) {
+            timers.push(setTimeout(() => {
+              if (!hovered) return;
+              const p = document.createElement('div');
+              Object.assign(p.style, {
+                position:    'absolute',
+                width:       '4px',
+                height:      '4px',
+                borderRadius:'50%',
+                background:  `rgba(${GLOW}, 1)`,
+                boxShadow:   `0 0 6px rgba(${GLOW}, 0.6)`,
+                pointerEvents:'none',
+                zIndex:      '10',
+                left:        `${Math.random() * width}px`,
+                top:         `${Math.random() * height}px`,
+              });
+              card.appendChild(p);
+              alive.push(p);
+              gsap.fromTo(p, { scale: 0, opacity: 0 }, {
+                scale: 1, opacity: 1, duration: 0.3, ease: 'back.out(1.7)',
+              });
+              gsap.to(p, {
+                x: (Math.random() - 0.5) * 80,
+                y: (Math.random() - 0.5) * 80,
+                rotation: Math.random() * 360,
+                duration: 2 + Math.random() * 2,
+                ease: 'none', repeat: -1, yoyo: true,
+              });
+              gsap.to(p, {
+                opacity: 0.25, duration: 1.5,
+                ease: 'power2.inOut', repeat: -1, yoyo: true,
+              });
+            }, i * 80));
+          }
+        };
+
+        const clear = () => {
+          timers.forEach(clearTimeout);
+          timers.length = 0;
+          alive.forEach(p => gsap.to(p, {
+            scale: 0, opacity: 0, duration: 0.25, ease: 'back.in(1.7)',
+            onComplete: () => p.remove(),
+          }));
+          alive.length = 0;
+        };
+
+        card.addEventListener('mouseenter', () => { hovered = true;  spawn(); });
+        card.addEventListener('mouseleave', () => { hovered = false; clear(); });
+      }
+
+      /* Tilt + magnetism */
+      if (TILT || MAGNET) {
+        card.addEventListener('mousemove', e => {
+          const cr = card.getBoundingClientRect();
+          const mx = e.clientX - cr.left - cr.width  / 2;
+          const my = e.clientY - cr.top  - cr.height / 2;
+
+          if (TILT) {
+            gsap.to(card, {
+              rotateX: (my / (cr.height / 2)) * -8,
+              rotateY: (mx / (cr.width  / 2)) *  8,
+              duration: 0.15, ease: 'power2.out',
+              transformPerspective: 900,
+            });
+          }
+          if (MAGNET) {
+            gsap.to(card, {
+              x: mx * 0.04, y: my * 0.04,
+              duration: 0.3, ease: 'power2.out',
+            });
+          }
+        }, { passive: true });
+
+        card.addEventListener('mouseleave', () => {
+          gsap.to(card, {
+            rotateX: 0, rotateY: 0, x: 0, y: 0,
+            duration: 0.45, ease: 'power2.out',
+          });
+        });
+      }
+
+      /* Click ripple */
+      if (CLICK) {
+        card.addEventListener('click', e => {
+          const cr  = card.getBoundingClientRect();
+          const x   = e.clientX - cr.left;
+          const y   = e.clientY - cr.top;
+          const max = Math.max(
+            Math.hypot(x, y), Math.hypot(x - cr.width, y),
+            Math.hypot(x, y - cr.height), Math.hypot(x - cr.width, y - cr.height),
+          );
+          const rip = document.createElement('div');
+          Object.assign(rip.style, {
+            position:    'absolute',
+            width:       `${max * 2}px`,
+            height:      `${max * 2}px`,
+            borderRadius:'50%',
+            background:  `radial-gradient(circle,
+              rgba(${GLOW}, 0.35) 0%,
+              rgba(${GLOW}, 0.15) 30%,
+              transparent 70%
+            )`,
+            left:        `${x - max}px`,
+            top:         `${y - max}px`,
+            pointerEvents:'none',
+            zIndex:      '1000',
+          });
+          card.appendChild(rip);
+          gsap.fromTo(rip,
+            { scale: 0, opacity: 1 },
+            { scale: 1, opacity: 0, duration: 0.8, ease: 'power2.out', onComplete: () => rip.remove() }
+          );
+        });
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once: true });
+  } else {
+    boot();
+  }
+</script>
+
+<style>
+  .mb-grid {
+    position: relative;
+  }
+
+  /* Give each card the CSS vars, contain its overflow, and the border-glow ::after */
+  :global(.project-card) {
+    position: relative;
+    overflow: hidden;
+    --glow-x:         50%;
+    --glow-y:         50%;
+    --glow-intensity: 0;
+    --glow-radius:    300px;
+  }
+
+  /* Border glow — uses the mask trick to paint only the border region */
+  :global(.project-card::after) {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    border-radius: inherit;
+    background: radial-gradient(
+      var(--glow-radius) circle at var(--glow-x) var(--glow-y),
+      rgba(90, 138, 232, calc(var(--glow-intensity) * 0.95)) 0%,
+      rgba(90, 138, 232, calc(var(--glow-intensity) * 0.50)) 30%,
+      transparent 65%
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 3;
+  }
+</style>

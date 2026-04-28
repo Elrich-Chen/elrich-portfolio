@@ -1,0 +1,497 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+
+const { pathname } = Astro.url;
+const isActive = (href: string) =>
+  href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/');
+
+const navLinks = [
+  { href: '/projects', text: 'Projects' },
+  { href: '/about',    text: 'About'    },
+  { href: '/photos',   text: 'Photos'   },
+  { href: '/hobbies',  text: 'Hobbies'  },
+];
+---
+
+<!-- Fixed pill nav — z:100, single unified bar -->
+<div class="pn-wrap">
+
+  <!-- Single unified bar (desktop) -->
+  <nav class="pn-bar pn-desktop" aria-label="Primary navigation">
+
+    <!-- Brand -->
+    <a href="/" class="pn-logo cursor-target" aria-label="Go to home">Elrich Chen</a>
+
+    <span class="pn-sep" aria-hidden="true"></span>
+
+    <!-- Nav links -->
+    <ul class="pn-list" role="menubar">
+      {navLinks.map((link) => (
+        <li role="none">
+          <a
+            role="menuitem"
+            href={link.href}
+            class:list={['pn-pill', 'cursor-target', { 'pn-active': isActive(link.href) }]}
+            aria-current={isActive(link.href) ? 'page' : undefined}
+          >
+            <span class="pn-circle" aria-hidden="true"></span>
+            <span class="pn-stack">
+              <span class="pn-text">{link.text}</span>
+              <span class="pn-text-hover" aria-hidden="true">{link.text}</span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <span class="pn-sep" aria-hidden="true"></span>
+
+    <!-- Theme toggle -->
+    <div class="pn-theme-wrap">
+      <ThemeToggle />
+    </div>
+
+  </nav>
+
+  <!-- Mobile: brand + hamburger -->
+  <a href="/" class="pn-logo pn-mobile" aria-label="Go to home">Elrich Chen</a>
+  <button
+    class="pn-burger pn-mobile"
+    aria-label="Toggle menu"
+    aria-expanded="false"
+  >
+    <span class="pn-bline"></span>
+    <span class="pn-bline"></span>
+  </button>
+
+</div>
+
+<!-- Mobile dropdown -->
+<div class="pn-mobile-menu pn-mobile" aria-hidden="true">
+  <ul class="pn-mobile-list">
+    {navLinks.map((link) => (
+      <li>
+        <a
+          href={link.href}
+          class:list={['pn-mobile-link', { 'pn-active': isActive(link.href) }]}
+        >{link.text}</a>
+      </li>
+    ))}
+    <li class="pn-mobile-theme-row">
+      <ThemeToggle />
+    </li>
+  </ul>
+</div>
+
+<style>
+  /* ── Fixed wrapper ──────────────────────────────────────────────────────── */
+  .pn-wrap {
+    position: fixed;
+    top: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    pointer-events: auto;
+  }
+
+  /* ── Single unified bar ─────────────────────────────────────────────────── */
+  .pn-bar {
+    height: 52px;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    gap: 4px;
+    background: rgba(var(--bg), 0.84);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: none;
+    border-radius: 9999px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+
+  :global(html.dark) .pn-bar {
+    box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+  }
+
+  /* ── Brand text ─────────────────────────────────────────────────────────── */
+  .pn-logo {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 20px;
+    height: 100%;
+    border-radius: 9999px;
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Reenie Beanie', cursive;
+    font-size: 1.5rem;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .pn-logo:hover { opacity: 0.7; }
+
+  /* ── Separator ──────────────────────────────────────────────────────────── */
+  .pn-sep {
+    width: 1px;
+    height: 22px;
+    background: rgba(var(--border), 0.25);
+    flex-shrink: 0;
+    margin: 0 2px;
+  }
+
+  /* ── Nav links list ─────────────────────────────────────────────────────── */
+  .pn-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pn-list > li {
+    display: flex;
+  }
+
+  /* ── Individual pill link ───────────────────────────────────────────────── */
+  .pn-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+    height: 44px;         /* explicit: bar 52px − 2×4px padding */
+    background: rgb(var(--fg));
+    color: rgb(var(--bg));
+    text-decoration: none;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    white-space: nowrap;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    line-height: 1;
+    box-sizing: border-box;
+  }
+
+  /* fill circle */
+  .pn-circle {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    border-radius: 50%;
+    background: rgb(var(--bg));
+    z-index: 1;
+    display: block;
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .pn-stack {
+    position: relative;
+    display: inline-block;
+    line-height: 1;
+    z-index: 2;
+    overflow: hidden;
+  }
+
+  .pn-text {
+    position: relative;
+    z-index: 2;
+    display: inline-block;
+    line-height: 1;
+    will-change: transform;
+  }
+
+  .pn-text-hover {
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: rgb(var(--fg));
+    z-index: 3;
+    display: inline-block;
+    will-change: transform, opacity;
+  }
+
+  .pn-pill.pn-active::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    background: rgb(var(--bg));
+    border-radius: 50%;
+    z-index: 5;
+  }
+
+  /* active pill: always black, suppress hover fill */
+  .pn-pill.pn-active {
+    background: #000 !important;
+    color: #fff !important;
+  }
+
+  .pn-pill.pn-active .pn-circle {
+    display: none;
+  }
+
+  /* ── Theme toggle inside bar ────────────────────────────────────────────── */
+  .pn-theme-wrap {
+    width: 42px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .pn-theme-wrap :global(.theme-toggle-btn) {
+    background: transparent !important;
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  /* ── Mobile hamburger ───────────────────────────────────────────────────── */
+  .pn-burger {
+    height: 52px;
+    width: 52px;
+    background: rgba(var(--bg), 0.84);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: none;
+    border-radius: 9999px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0;
+    flex-shrink: 0;
+  }
+
+  .pn-bline {
+    width: 18px;
+    height: 2px;
+    background: rgb(var(--fg));
+    border-radius: 1px;
+    transform-origin: center;
+    display: block;
+  }
+
+  /* ── Mobile dropdown ────────────────────────────────────────────────────── */
+  .pn-mobile-menu {
+    position: fixed;
+    top: calc(1.25rem + 52px + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(280px, calc(100vw - 2rem));
+    background: rgba(var(--bg), 0.96);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(var(--border), 0.18);
+    border-radius: 20px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.14);
+    z-index: 99;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  :global(html.dark) .pn-mobile-menu {
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  }
+
+  .pn-mobile-list {
+    list-style: none;
+    margin: 0;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .pn-mobile-link {
+    display: block;
+    padding: 11px 16px;
+    background: rgb(var(--fg));
+    color: rgb(var(--bg));
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border-radius: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    transition: opacity 0.15s ease;
+  }
+
+  .pn-mobile-link:hover     { opacity: 0.8; }
+  .pn-mobile-link.pn-active { opacity: 0.55; }
+
+  .pn-mobile-theme-row {
+    display: flex;
+    justify-content: center;
+    padding: 3px 0 1px;
+  }
+
+  /* ── Responsive ─────────────────────────────────────────────────────────── */
+  .pn-desktop { display: flex; }
+  .pn-mobile  { display: none; }
+
+  @media (max-width: 640px) {
+    .pn-desktop { display: none !important; }
+    .pn-mobile  { display: flex; }
+
+    .pn-wrap {
+      left: 1rem;
+      right: 1rem;
+      transform: none;
+      justify-content: space-between;
+      width: auto;
+    }
+
+    .pn-mobile-menu {
+      left: 1rem;
+      right: 1rem;
+      width: auto;
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  import gsap from 'gsap';
+
+  const EASE = 'power3.out';
+
+  /* ── Pill hover geometry + GSAP setup ──────────────────────────────────── */
+  function layoutPills() {
+    document.querySelectorAll<HTMLElement>('.pn-pill').forEach(pill => {
+      const circle = pill.querySelector<HTMLElement>('.pn-circle');
+      if (!circle) return;
+
+      const { width: w, height: h } = pill.getBoundingClientRect();
+      if (w === 0 || h === 0) return;
+
+      const R      = ((w * w) / 4 + h * h) / (2 * h);
+      const D      = Math.ceil(2 * R) + 2;
+      const delta  = Math.ceil(R - Math.sqrt(Math.max(0, R * R - (w * w) / 4))) + 1;
+      const originY = D - delta;
+
+      circle.style.width  = `${D}px`;
+      circle.style.height = `${D}px`;
+      circle.style.bottom = `-${delta}px`;
+
+      gsap.set(circle, { xPercent: -50, scale: 0, transformOrigin: `50% ${originY}px` });
+
+      const label = pill.querySelector<HTMLElement>('.pn-text');
+      const hover = pill.querySelector<HTMLElement>('.pn-text-hover');
+      if (label) gsap.set(label, { y: 0 });
+      if (hover) gsap.set(hover, { y: h + 12, opacity: 0 });
+    });
+  }
+
+  function attachPillListeners() {
+    document.querySelectorAll<HTMLElement>('.pn-pill').forEach(pill => {
+      if (pill.classList.contains('pn-active')) return; // keep active pill black
+
+      pill.addEventListener('mouseenter', () => {
+        const circle = pill.querySelector<HTMLElement>('.pn-circle');
+        const label  = pill.querySelector<HTMLElement>('.pn-text');
+        const hover  = pill.querySelector<HTMLElement>('.pn-text-hover');
+        const h = pill.getBoundingClientRect().height;
+
+        if (circle) gsap.to(circle, { scale: 1.2, xPercent: -50, duration: 0.3, ease: EASE, overwrite: 'auto' });
+        if (label)  gsap.to(label,  { y: -(h + 8),               duration: 0.3, ease: EASE, overwrite: 'auto' });
+        if (hover)  gsap.to(hover,  { y: 0, opacity: 1,           duration: 0.3, ease: EASE, overwrite: 'auto' });
+      });
+
+      pill.addEventListener('mouseleave', () => {
+        const circle = pill.querySelector<HTMLElement>('.pn-circle');
+        const label  = pill.querySelector<HTMLElement>('.pn-text');
+        const hover  = pill.querySelector<HTMLElement>('.pn-text-hover');
+        const h = pill.getBoundingClientRect().height;
+
+        if (circle) gsap.to(circle, { scale: 0, xPercent: -50,  duration: 0.2, ease: EASE, overwrite: 'auto' });
+        if (label)  gsap.to(label,  { y: 0,                      duration: 0.2, ease: EASE, overwrite: 'auto' });
+        if (hover)  gsap.to(hover,  { y: h + 12, opacity: 0,     duration: 0.2, ease: EASE, overwrite: 'auto' });
+      });
+    });
+  }
+
+  /* ── Mobile menu ───────────────────────────────────────────────────────── */
+  const burger     = document.querySelector<HTMLButtonElement>('.pn-burger');
+  const mobileMenu = document.querySelector<HTMLElement>('.pn-mobile-menu');
+
+  let isOpen = false;
+
+  function closeMobile() {
+    if (!burger || !mobileMenu) return;
+    isOpen = false;
+    burger.setAttribute('aria-expanded', 'false');
+    mobileMenu.setAttribute('aria-hidden', 'true');
+    const lines = burger.querySelectorAll<HTMLElement>('.pn-bline');
+    gsap.to(lines[0], { rotation: 0,  y: 0, duration: 0.25, ease: EASE });
+    gsap.to(lines[1], { rotation: 0,  y: 0, duration: 0.25, ease: EASE });
+    gsap.to(mobileMenu, {
+      opacity: 0, y: -8, duration: 0.2, ease: EASE,
+      onComplete: () => gsap.set(mobileMenu, { visibility: 'hidden', pointerEvents: 'none' }),
+    });
+  }
+
+  if (burger && mobileMenu) {
+    burger.addEventListener('click', () => {
+      isOpen = !isOpen;
+      burger.setAttribute('aria-expanded', String(isOpen));
+      mobileMenu.setAttribute('aria-hidden', String(!isOpen));
+      const lines = burger.querySelectorAll<HTMLElement>('.pn-bline');
+
+      if (isOpen) {
+        gsap.to(lines[0], { rotation:  45, y:  3, duration: 0.25, ease: EASE });
+        gsap.to(lines[1], { rotation: -45, y: -3, duration: 0.25, ease: EASE });
+        gsap.set(mobileMenu, { visibility: 'visible', pointerEvents: 'auto' });
+        gsap.fromTo(mobileMenu,
+          { opacity: 0, y: -8 },
+          { opacity: 1, y: 0, duration: 0.25, ease: EASE },
+        );
+      } else {
+        closeMobile();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (isOpen &&
+          !burger.contains(e.target as Node) &&
+          !mobileMenu.contains(e.target as Node)) {
+        closeMobile();
+      }
+    });
+
+    mobileMenu.querySelectorAll('a').forEach(link =>
+      link.addEventListener('click', closeMobile)
+    );
+  }
+
+  /* ── Resize ────────────────────────────────────────────────────────────── */
+  let resizeTimer: ReturnType<typeof setTimeout>;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(layoutPills, 100);
+  }, { passive: true });
+
+  /* ── Init ──────────────────────────────────────────────────────────────── */
+  if (document.fonts?.ready) {
+    document.fonts.ready.then(layoutPills).catch(() => layoutPills());
+  } else {
+    layoutPills();
+  }
+  attachPillListeners();
+</script>

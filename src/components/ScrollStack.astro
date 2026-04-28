@@ -1,0 +1,91 @@
+---
+interface Props {
+  itemDistance?:      number;   // gap (px) between cards in natural flow
+  itemStackDistance?: number;   // vertical offset (px) between stacked tops
+  stackPosition?:     string;   // distance from viewport top when stuck, e.g. '15%'
+}
+
+const {
+  itemDistance      = 64,
+  itemStackDistance = 16,
+  stackPosition     = '15%',
+} = Astro.props;
+---
+
+<div class="ss-container">
+  <slot />
+</div>
+
+<!-- Sticky top value must be set after we know viewport height -->
+<script define:vars={{ itemDistance, itemStackDistance, stackPosition }}>
+  function applySticky() {
+    const container = document.querySelector('.ss-container');
+    if (!container) return;
+    const cards = Array.from(container.querySelectorAll('.scroll-stack-card'));
+    if (!cards.length) return;
+
+    const viewH = window.innerHeight;
+    const stackPx = typeof stackPosition === 'string' && stackPosition.includes('%')
+      ? parseFloat(stackPosition) / 100 * viewH
+      : parseFloat(stackPosition);
+
+    cards.forEach((card, i) => {
+      card.style.top     = (stackPx + i * itemStackDistance) + 'px';
+      card.style.zIndex  = String(i + 1);
+      card.style.marginBottom = i < cards.length - 1 ? itemDistance + 'px' : '0';
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applySticky, { once: true });
+  } else {
+    applySticky();
+  }
+  window.addEventListener('resize', applySticky, { passive: true });
+</script>
+
+<style>
+  .ss-container {
+    position: relative;
+    width: 100vw;
+    left: 50%;
+    transform: translateX(-50%);
+    padding-top:    2rem;
+    padding-bottom: 50vh; /* keep last card pinned while reading */
+    z-index: 5;
+  }
+
+  :global(.scroll-stack-card) {
+    position: sticky;
+    /* top is set via JS after we know viewport height */
+    width: min(900px, 94vw);
+    margin-left:  auto;
+    margin-right: auto;
+    padding: 3rem 3.5rem;
+    border-radius: 24px;
+
+    background: rgba(255, 255, 255, 0.60);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    box-shadow:
+      0 2px 12px rgba(0, 0, 0, 0.06),
+      0 8px 36px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+
+    box-sizing: border-box;
+
+    /* Text contrast overrides */
+    --muted: 40 40 40;
+  }
+
+  :global(html.dark .scroll-stack-card) {
+    background: rgba(16, 14, 12, 0.70);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow:
+      0 2px 12px rgba(0, 0, 0, 0.45),
+      0 8px 40px rgba(0, 0, 0, 0.50),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    --muted: 210 210 210;
+  }
+</style>

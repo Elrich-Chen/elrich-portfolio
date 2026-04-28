@@ -1,8 +1,9 @@
 ---
-const { title = 'Elrich Chen', description = 'Builder. Engineer. Founder.', meta = [], showContactForm = false } = Astro.props;
-import Nav from '../components/Nav.astro';
-import PixelTrail from '../components/PixelTrail.astro';
+const { title = 'Elrich Chen', description = 'Builder. Engineer. Founder.', meta = [], showContactForm = false, fullscreen = false } = Astro.props;
+import PillNav from '../components/PillNav.astro';
+import TargetCursor from '../components/TargetCursor.astro';
 import Polaroid from '../components/Polaroid.astro';
+import Grainient from '../components/Grainient.astro';
 import '../styles/global.css';
 
 const contactLinks = [
@@ -55,26 +56,51 @@ const contactLinks = [
     <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript><link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet" /></noscript>
 
+    <!-- Performance: Preload Syne for hero display text -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap" />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap" rel="stylesheet" /></noscript>
+
     <!-- Performance: Async load signature font (non-critical) -->
     <link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript><link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap" rel="stylesheet" /></noscript>
     
   </head>
   <body class="overflow-x-hidden">
+    <div class="grainient-global">
+      <Grainient
+        color1="#5b8ae8"
+        color2="#2d4ab4"
+        color3="#c8d8f8"
+        color4="#f0f4ff"
+        color5="#c45810"
+        darkColor1="#1e4db7"
+        darkColor2="#0a1640"
+        darkColor3="#0f2060"
+        darkColor4="#060b1e"
+        darkColor5="#8b3a0a"
+        accentStrength={0.22}
+        timeSpeed={0.5}
+        warpStrength={1.8}
+        warpFrequency={5.0}
+        warpSpeed={3.5}
+        warpAmplitude={40.0}
+        rotationAmount={500.0}
+        grainAmount={0.08}
+        grainScale={2.0}
+        contrast={1.5}
+        saturation={1.0}
+        zoom={0.9}
+      />
+    </div>
     <div id="loading" class="fixed inset-0 bg-[rgb(var(--bg))] flex items-center justify-center z-50 transition-opacity duration-200">
       <span class="text-sm text-neutral-500">Loading</span>
     </div>
-    <PixelTrail />
+    <TargetCursor targetSelector="a, button, [role='button'], .cursor-target" spinDuration={2} hideDefaultCursor={true} parallaxOn={true} />
+    <PillNav />
     <div class="page-main">
       <div class="prose-measure">
-        <header class="py-6 border-b border-neutral-200 relative overflow-x-hidden">
-          <div class="header-inner">
-            <div class="header-nav">
-              <Nav />
-            </div>
-          </div>
-        </header>
-        <main class="pt-3 pb-32">
+        <main class:list={['pb-32', { 'main-padded': !fullscreen }]}>
           <slot />
         </main>
       </div>
@@ -174,6 +200,15 @@ const contactLinks = [
       });
     </script>
     <style>
+      .grainient-global {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+      }
+
       .email-card {
         display: flex;
         align-items: center;
@@ -260,33 +295,36 @@ const contactLinks = [
       .email-card-icons {
         display: flex;
         align-items: center;
-        gap: 0.6rem;
+        gap: 0.75rem;
         margin-top: 0.9rem;
       }
 
       .email-card-icon {
-        width: 34px;
-        height: 34px;
-        border-radius: 10px;
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         color: rgb(var(--fg));
-        border: 1px solid rgba(var(--border), 0.2);
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
         text-decoration: none;
-        transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
       }
 
       .email-card-icon:hover {
-        transform: translateY(-2px);
-        border-color: rgba(var(--border), 0.5);
-        background: rgba(var(--border), 0.08);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        background: rgba(255, 255, 255, 0.95);
       }
 
       .email-card-icon-svg {
         display: inline-flex;
-        width: 16px;
-        height: 16px;
+        width: 36px;
+        height: 24px;
       }
 
       .email-card-icon svg {
@@ -305,13 +343,15 @@ const contactLinks = [
       }
 
       :global(html.dark) .email-card-icon {
-        border-color: rgba(255, 255, 255, 0.2);
-        background: rgba(12, 12, 12, 0.4);
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.15);
       }
 
       :global(html.dark) .email-card-icon:hover {
-        border-color: rgba(255, 255, 255, 0.4);
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.16);
+        border-color: rgba(255, 255, 255, 0.35);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
       }
 
       :global(html.dark) .email-card-link:hover {
@@ -320,6 +360,11 @@ const contactLinks = [
 
       .page-main {
         min-width: 0;
+      }
+
+      /* nav is 52px tall, top: 1.25rem → clear it + a small gap */
+      .main-padded {
+        padding-top: calc(52px + 1.25rem + 1.5rem);
       }
 
       .header-inner {

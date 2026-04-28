@@ -1,0 +1,275 @@
+---
+interface Props {
+  targetSelector?: string;
+  spinDuration?: number;
+  hideDefaultCursor?: boolean;
+  hoverDuration?: number;
+  parallaxOn?: boolean;
+}
+
+const {
+  targetSelector    = '.cursor-target',
+  spinDuration      = 2,
+  hideDefaultCursor = true,
+  hoverDuration     = 0.2,
+  parallaxOn        = true,
+} = Astro.props;
+---
+
+<div
+  id="tc-wrapper"
+  class="tc-wrapper"
+  data-target={targetSelector}
+  data-spin={spinDuration}
+  data-hide={String(hideDefaultCursor)}
+  data-hover={hoverDuration}
+  data-parallax={String(parallaxOn)}
+>
+  <div id="tc-dot" class="tc-dot"></div>
+  <div class="tc-corner tc-tl"></div>
+  <div class="tc-corner tc-tr"></div>
+  <div class="tc-corner tc-br"></div>
+  <div class="tc-corner tc-bl"></div>
+</div>
+
+<style>
+  .tc-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: difference;
+  }
+
+  .tc-dot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 5px;
+    height: 5px;
+    background: #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    will-change: transform;
+  }
+
+  .tc-corner {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border: 3px solid #fff;
+    will-change: transform;
+  }
+
+  .tc-tl { transform: translate(-150%, -150%); border-right: none;   border-bottom: none; }
+  .tc-tr { transform: translate(50%,  -150%);  border-left: none;    border-bottom: none; }
+  .tc-br { transform: translate(50%,   50%);   border-left: none;    border-top: none;    }
+  .tc-bl { transform: translate(-150%, 50%);   border-right: none;   border-top: none;    }
+</style>
+
+<script>
+  import gsap from 'gsap';
+
+  const wrapper = document.getElementById('tc-wrapper') as HTMLElement;
+  if (!wrapper) throw new Error('TargetCursor: missing wrapper');
+
+  const d               = wrapper.dataset;
+  const targetSelector  = d.target  ?? '.cursor-target';
+  const spinDuration    = parseFloat(d.spin  ?? '2');
+  const hideDefaultCursor = d.hide  === 'true';
+  const hoverDuration   = parseFloat(d.hover ?? '0.2');
+  const parallaxOn      = d.parallax === 'true';
+
+  /* ── Mobile guard ──────────────────────────────────────────────────────── */
+  const isMobile = (() => {
+    const touch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const small = window.innerWidth <= 768;
+    const ua    = (navigator.userAgent || '').toLowerCase();
+    return (touch && small) || /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/.test(ua);
+  })();
+
+  if (isMobile) {
+    wrapper.style.display = 'none';
+  } else {
+    const dotEl   = document.getElementById('tc-dot') as HTMLElement;
+    const corners = Array.from(wrapper.querySelectorAll<HTMLElement>('.tc-corner'));
+
+    const BORDER   = 3;
+    const CSIZE    = 12;
+
+    if (hideDefaultCursor) document.body.style.cursor = 'none';
+
+    /* Start centered */
+    gsap.set(wrapper, {
+      x: window.innerWidth  / 2,
+      y: window.innerHeight / 2,
+    });
+
+    /* ── Spin timeline ─────────────────────────────────────────────────── */
+    let spinTl = gsap.timeline({ repeat: -1 })
+      .to(wrapper, { rotation: '+=360', duration: spinDuration, ease: 'none' });
+
+    /* ── Parallax ticker state ─────────────────────────────────────────── */
+    const activeStrength   = { current: 0 };
+    let   targetCorners    = null;   // [{x,y}, ...]
+    let   tickerActive     = false;
+
+    function tickerFn() {
+      if (!targetCorners) return;
+      const str = activeStrength.current;
+      if (str === 0) return;
+
+      const cx = gsap.getProperty(wrapper, 'x');
+      const cy = gsap.getProperty(wrapper, 'y');
+
+      corners.forEach((corner, i) => {
+        const curX = gsap.getProperty(corner, 'x');
+        const curY = gsap.getProperty(corner, 'y');
+        const tgX  = targetCorners[i].x - cx;
+        const tgY  = targetCorners[i].y - cy;
+        const fX   = curX + (tgX - curX) * str;
+        const fY   = curY + (tgY - curY) * str;
+        const dur  = str >= 0.99 ? (parallaxOn ? 0.2 : 0) : 0.05;
+
+        gsap.to(corner, {
+          x: fX, y: fY,
+          duration: dur,
+          ease: dur === 0 ? 'none' : 'power1.out',
+          overwrite: 'auto',
+        });
+      });
+    }
+
+    /* ── Mouse move ────────────────────────────────────────────────────── */
+    window.addEventListener('mousemove', e => {
+      gsap.to(wrapper, { x: e.clientX, y: e.clientY, duration: 0.1, ease: 'power3.out' });
+    }, { passive: true });
+
+    /* ── Click pulse ───────────────────────────────────────────────────── */
+    window.addEventListener('mousedown', () => {
+      if (dotEl)  gsap.to(dotEl,   { scale: 0.6, duration: 0.15 });
+      gsap.to(wrapper, { scale: 0.9, duration: 0.15 });
+    });
+    window.addEventListener('mouseup', () => {
+      if (dotEl)  gsap.to(dotEl,   { scale: 1, duration: 0.2 });
+      gsap.to(wrapper, { scale: 1, duration: 0.2 });
+    });
+
+    /* ── Helper: retract corners ───────────────────────────────────────── */
+    function retractCorners() {
+      const positions = [
+        { x: -CSIZE * 1.5, y: -CSIZE * 1.5 },
+        { x:  CSIZE * 0.5, y: -CSIZE * 1.5 },
+        { x:  CSIZE * 0.5, y:  CSIZE * 0.5 },
+        { x: -CSIZE * 1.5, y:  CSIZE * 0.5 },
+      ];
+      corners.forEach((c, i) =>
+        gsap.to(c, { x: positions[i].x, y: positions[i].y, duration: 0.3, ease: 'power3.out' })
+      );
+    }
+
+    /* ── Helper: resume spin ───────────────────────────────────────────── */
+    function resumeSpin() {
+      const rot = (gsap.getProperty(wrapper, 'rotation') % 360);
+      spinTl.kill();
+      spinTl = gsap.timeline({ repeat: -1 })
+        .to(wrapper, { rotation: '+=360', duration: spinDuration, ease: 'none' });
+      gsap.to(wrapper, {
+        rotation: rot + 360,
+        duration: spinDuration * (1 - rot / 360),
+        ease: 'none',
+        onComplete: () => spinTl.restart(),
+      });
+    }
+
+    /* ── Target hover logic ────────────────────────────────────────────── */
+    let activeTarget      = null;
+    let currentLeave      = null;
+    let resumeTimer       = null;
+
+    function cleanupTarget(el) {
+      if (currentLeave) el.removeEventListener('mouseleave', currentLeave);
+      currentLeave = null;
+    }
+
+    window.addEventListener('mouseover', e => {
+      /* Walk up from the nearest Element ancestor to find a target */
+      let el: Element | null =
+        e.target instanceof Element ? e.target : (e.target as Node)?.parentElement ?? null;
+      let target: Element | null = null;
+      while (el && el !== document.body) {
+        if (el.matches(targetSelector)) { target = el; break; }
+        el = el.parentElement;
+      }
+      if (!target || activeTarget === target) return;
+      if (activeTarget) cleanupTarget(activeTarget);
+      if (resumeTimer)  { clearTimeout(resumeTimer); resumeTimer = null; }
+
+      activeTarget = target;
+      corners.forEach(c => gsap.killTweensOf(c));
+
+      gsap.killTweensOf(wrapper, 'rotation');
+      spinTl.pause();
+      gsap.set(wrapper, { rotation: 0 });
+
+      const rect = target.getBoundingClientRect();
+      const cx   = gsap.getProperty(wrapper, 'x');
+      const cy   = gsap.getProperty(wrapper, 'y');
+
+      targetCorners = [
+        { x: rect.left  - BORDER,          y: rect.top    - BORDER          },
+        { x: rect.right + BORDER - CSIZE,  y: rect.top    - BORDER          },
+        { x: rect.right + BORDER - CSIZE,  y: rect.bottom + BORDER - CSIZE  },
+        { x: rect.left  - BORDER,          y: rect.bottom + BORDER - CSIZE  },
+      ];
+
+      if (!tickerActive) { gsap.ticker.add(tickerFn); tickerActive = true; }
+
+      gsap.to(activeStrength, { current: 1, duration: hoverDuration, ease: 'power2.out' });
+
+      corners.forEach((c, i) =>
+        gsap.to(c, {
+          x: targetCorners[i].x - cx,
+          y: targetCorners[i].y - cy,
+          duration: 0.2, ease: 'power2.out',
+        })
+      );
+
+      const leaveHandler = () => {
+        gsap.ticker.remove(tickerFn); tickerActive = false;
+        targetCorners = null;
+        gsap.set(activeStrength, { current: 0, overwrite: true });
+        activeTarget = null;
+
+        corners.forEach(c => gsap.killTweensOf(c));
+        retractCorners();
+
+        resumeTimer = setTimeout(() => {
+          if (!activeTarget) resumeSpin();
+          resumeTimer = null;
+        }, 50);
+
+        cleanupTarget(target);
+      };
+
+      currentLeave = leaveHandler;
+      target.addEventListener('mouseleave', leaveHandler);
+    }, { passive: true });
+
+    /* ── Scroll: re-check if still over target ─────────────────────────── */
+    window.addEventListener('scroll', () => {
+      if (!activeTarget) return;
+      const mx  = gsap.getProperty(wrapper, 'x');
+      const my  = gsap.getProperty(wrapper, 'y');
+      const hit = document.elementFromPoint(mx, my);
+      if (!hit || (hit !== activeTarget && !hit.closest(targetSelector))) {
+        currentLeave?.();
+      }
+    }, { passive: true });
+  }
+</script>

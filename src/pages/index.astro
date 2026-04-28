@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Basketball from '../components/Basketball.astro';
+import ScrollStack from '../components/ScrollStack.astro';
 import { getEntry, getCollection } from 'astro:content';
 
 const highlights    = await getEntry('highlights', 'home');
@@ -124,7 +125,8 @@ const contactLinks = [
 ];
 ---
 
-<Base title="Elrich Chen" description="CS @ UWaterloo | AI automations for DoneMaker | Aspiring Backend Engineer">
+<Base title="Elrich Chen" description="CS @ UWaterloo | AI automations for DoneMaker | Aspiring Backend Engineer" fullscreen={true}>
+
 
   <!-- Fixed basketball canvas — sits at z:15 for hero, drops to z:4 for content sections -->
   <Basketball />
@@ -133,7 +135,13 @@ const contactLinks = [
   <section id="section-hero" class="scroll-section hero-section">
     <div class="hero-content">
       <h1 class="hero-name">Elrich Chen</h1>
-      <p class="hero-tagline">CS @ UWaterloo &middot; Builder &middot; Engineer</p>
+      <div class="hero-tagline">
+        <a href="https://uwaterloo.ca/future-students/programs/computer-science" target="_blank" rel="noopener noreferrer" class="tagline-link">CS @ UWaterloo</a>
+        <span class="tagline-dot">·</span>
+        <span class="tagline-plain">Builder</span>
+        <span class="tagline-dot">·</span>
+        <a href="https://www.ycombinator.com/companies/medme-health" target="_blank" rel="noopener noreferrer" class="tagline-link">SWE @ MedMe Health (YC W21)</a>
+      </div>
       <div class="hero-scroll-hint" aria-hidden="true">
         <span class="hint-label">scroll</span>
         <span class="hint-arrow">↓</span>
@@ -141,10 +149,11 @@ const contactLinks = [
     </div>
   </section>
 
-  <!-- ── RECENTLY I (LEFT) ──────────────────────────────────────────────────── -->
-  {highlights?.data?.what_makes_me_different?.length > 0 && (
-    <section id="section-recent" class="scroll-section">
-      <div class="content-panel panel-left">
+  <!-- ── BODY: stacked transparent cards ──────────────────────────────────── -->
+  <ScrollStack>
+
+    {highlights?.data?.what_makes_me_different?.length > 0 && (
+      <div class="scroll-stack-card" id="section-recent">
         <h2 class="panel-header">◆ Recently, I:</h2>
         <ul class="highlight-list">
           {highlights.data.what_makes_me_different.map((item: any) => {
@@ -179,13 +188,10 @@ const contactLinks = [
           })}
         </ul>
       </div>
-    </section>
-  )}
+    )}
 
-  <!-- ── BUILDING (RIGHT) ──────────────────────────────────────────────────── -->
-  {highlights?.data?.building?.length > 0 && (
-    <section id="section-building" class="scroll-section">
-      <div class="content-panel panel-right">
+    {highlights?.data?.building?.length > 0 && (
+      <div class="scroll-stack-card" id="section-building">
         <h2 class="panel-header">◆ Things I am working on:</h2>
         <ul class="highlight-list">
           {highlights.data.building.map((item: any) => {
@@ -223,180 +229,72 @@ const contactLinks = [
           })}
         </ul>
       </div>
-    </section>
-  )}
+    )}
 
-  <!-- ── LET'S CONNECT 1 (LEFT) ─────────────────────────────────────────────── -->
-  <section id="section-connect1" class="scroll-section">
-    <div class="content-panel panel-left contact-panel">
-      <p class="contact-eyebrow">◆ Email</p>
-      <h2 class="contact-heading">Let's connect.</h2>
-      <p class="contact-body">
-        Reach me directly at
-        <a href="mailto:elrichchen123@gmail.com" class="contact-inline-link">elrichchen123@gmail.com</a>.
-      </p>
-      <a href="mailto:elrichchen123@gmail.com" class="contact-cta">Send an email</a>
-      <div class="contact-icons">
-        {contactLinks.map((link) => (
-          <a
-            href={link.href}
-            aria-label={link.label}
-            class="contact-icon"
-            target={link.href.startsWith('mailto:') ? undefined : '_blank'}
-            rel={link.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-          >
-            <span class="contact-icon-svg" set:html={link.icon}></span>
-          </a>
-        ))}
+    {testimonials.length > 0 && (
+      <div class="scroll-stack-card" id="section-clients">
+        <p class="panel-header">◆ Client References</p>
+        <div class="quotes-list">
+          {testimonials.map((t) => (
+            <div class="quote-block">
+              {t.data.project && <p class="quote-project">{t.data.project}</p>}
+              <p class="quote-text">"{t.data.text}"</p>
+              <p class="quote-author">— {t.data.author}, {t.data.title} · {t.data.company}</p>
+            </div>
+          ))}
+        </div>
       </div>
+    )}
+
+  </ScrollStack>
+
+  <!-- ── LET'S CONNECT — standalone footer section ─────────────────────────── -->
+  <section id="section-connect1" class="connect-section">
+    <p class="contact-eyebrow">◆ Email</p>
+    <h2 class="contact-heading">Let's connect.</h2>
+    <p class="contact-body">
+      Reach me directly at
+      <a href="mailto:elrichchen123@gmail.com" class="contact-inline-link">elrichchen123@gmail.com</a>.
+    </p>
+    <a href="mailto:elrichchen123@gmail.com" class="contact-cta">Send an email</a>
+    <div class="contact-icons">
+      {contactLinks.map((link) => (
+        <a
+          href={link.href}
+          aria-label={link.label}
+          class="contact-icon"
+          target={link.href.startsWith('mailto:') ? undefined : '_blank'}
+          rel={link.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+        >
+          <span class="contact-icon-svg" set:html={link.icon}></span>
+        </a>
+      ))}
     </div>
   </section>
 
-  <!-- ── CLIENT REFERENCES (LEFT-ANCHORED HEADER + FULL-WIDTH CAROUSEL) ────── -->
-  {testimonials.length > 0 && (
-    <section id="section-clients" class="scroll-section clients-section">
-      <div class="clients-inner">
-        <div class="clients-header panel-left">
-          <p class="clients-eyebrow">◆ Client References</p>
-          <p class="clients-note">Highlights from early-stage startups I've partnered with.</p>
-        </div>
-        <div class="carousel-viewport" role="region" aria-label="Client testimonials carousel">
-          <div class="carousel-track">
-            <div class="carousel-group">
-              {carouselItems.map((t) => (
-                <div class="testimonial-card flip-card" data-flip-card>
-                  <button class="flip-trigger" type="button" aria-pressed="false" aria-label="Flip testimonial"></button>
-                  <div class="flip-inner">
-                    <div class="flip-face flip-front">
-                      <span class="flip-hint" aria-hidden="true">Flip to read</span>
-                      <div class="testimonial-content">
-                        <div class="preview-top">
-                          <p class="preview-label">Tech stack</p>
-                          <p class="preview-tech">{t.data.techStack?.join(' • ') ?? 'Tech stack inside'}</p>
-                        </div>
-                        <div class="preview-meta">
-                          <span class="preview-person">{t.data.author}</span>
-                          <span class="preview-company">{t.data.company}</span>
-                        </div>
-                        {t.data.project && <p class="preview-project">{t.data.project}</p>}
-                      </div>
-                    </div>
-                    <div class="flip-face flip-back">
-                      <span class="flip-hint" aria-hidden="true">Flip to close</span>
-                      <div class="testimonial-content">
-                        <p class="testimonial-text">"{t.data.text}"</p>
-                        <div class="testimonial-author">
-                          {t.data.companyLogo && (
-                            <img src={`/logos/${t.data.companyLogo}.png`} alt={t.data.company}
-                              class="company-logo" width="32" height="32" loading="lazy"
-                              onerror={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />
-                          )}
-                          <div class="author-details">
-                            <div class="author-name">{t.data.author}</div>
-                            <div class="author-title">{t.data.title}, {t.data.company}</div>
-                            {t.data.project && <div class="author-project">{t.data.project}</div>}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div class="carousel-group" aria-hidden="true">
-              {carouselItems.map((t) => (
-                <div class="testimonial-card flip-card" data-flip-card>
-                  <button class="flip-trigger" type="button" aria-pressed="false" aria-label="Flip testimonial"></button>
-                  <div class="flip-inner">
-                    <div class="flip-face flip-front">
-                      <span class="flip-hint" aria-hidden="true">Flip to read</span>
-                      <div class="testimonial-content">
-                        <div class="preview-top">
-                          <p class="preview-label">Tech stack</p>
-                          <p class="preview-tech">{t.data.techStack?.join(' • ') ?? 'Tech stack inside'}</p>
-                        </div>
-                        <div class="preview-meta">
-                          <span class="preview-person">{t.data.author}</span>
-                          <span class="preview-company">{t.data.company}</span>
-                        </div>
-                        {t.data.project && <p class="preview-project">{t.data.project}</p>}
-                      </div>
-                    </div>
-                    <div class="flip-face flip-back">
-                      <span class="flip-hint" aria-hidden="true">Flip to close</span>
-                      <div class="testimonial-content">
-                        <p class="testimonial-text">"{t.data.text}"</p>
-                        <div class="testimonial-author">
-                          {t.data.companyLogo && (
-                            <img src={`/logos/${t.data.companyLogo}.png`} alt={t.data.company}
-                              class="company-logo" width="32" height="32" loading="lazy"
-                              onerror={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />
-                          )}
-                          <div class="author-details">
-                            <div class="author-name">{t.data.author}</div>
-                            <div class="author-title">{t.data.title}, {t.data.company}</div>
-                            {t.data.project && <div class="author-project">{t.data.project}</div>}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )}
-
-  <!-- ── LET'S CONNECT 2 (RIGHT) ───────────────────────────────────────────── -->
-  <section id="section-connect2" class="scroll-section">
-    <div class="content-panel panel-right contact-panel">
-      <p class="contact-eyebrow">◆ Get in touch</p>
-      <h2 class="contact-heading">Work with me.</h2>
-      <p class="contact-body">
-        Open to internships, collaborations, and freelance projects.
-      </p>
-      <a href="mailto:elrichchen123@gmail.com" class="contact-cta">elrichchen123@gmail.com →</a>
-      <div class="contact-icons">
-        {contactLinks.map((link) => (
-          <a
-            href={link.href}
-            aria-label={link.label}
-            class="contact-icon"
-            target={link.href.startsWith('mailto:') ? undefined : '_blank'}
-            rel={link.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-          >
-            <span class="contact-icon-svg" set:html={link.icon}></span>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>
 
 </Base>
 
 <style>
-  /* ── Scroll sections: full-bleed, min 100vh ─────────────────────────────── */
+  /* ── Scroll sections ─────────────────────────────────────────────────────── */
   .scroll-section {
     width: 100vw;
     position: relative;
     left: 50%;
     transform: translateX(-50%);
-    min-height: 100vh;
     display: flex;
     align-items: center;
-    padding: 4rem 0;
+    padding: 3rem 0;
+    z-index: 5;
   }
 
-  /* ── Hero ──────────────────────────────────────────────────────────────── */
+  /* ── Hero stays full viewport height ─────────────────────────────────────── */
   .hero-section {
+    min-height: 100vh;
     justify-content: center;
     flex-direction: column;
     text-align: center;
-    /* z-index intentionally NOT set — falls inside prose-measure z:10,
-       which is below canvas z:15 during hero, so ball renders in front */
+    padding: 0;
   }
 
   .hero-content {
@@ -404,27 +302,74 @@ const contactLinks = [
     flex-direction: column;
     align-items: center;
     gap: 1rem;
-    pointer-events: none;
     user-select: none;
   }
 
+  /* Allow mouse events through to the name so TextPressure cursor tracking works,
+     but disable them on the tagline / scroll-hint decorations */
+  .hero-tagline,
+  .hero-scroll-hint {
+    pointer-events: none;
+  }
+
   .hero-name {
+    font-family: 'Syne', sans-serif;
     font-size: clamp(3.5rem, 14vw, 10rem);
-    font-weight: 900;
-    letter-spacing: -0.04em;
-    line-height: 0.9;
-    text-transform: uppercase;
-    color: rgb(var(--fg));
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
     margin: 0;
+    text-align: center;
+    text-transform: uppercase;
+    color: #ffffff;
+    user-select: none;
   }
 
   .hero-tagline {
-    font-size: clamp(0.8rem, 2vw, 1rem);
-    letter-spacing: 0.2em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.45rem 1.25rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    font-size: clamp(1.1rem, 2.6vw, 1.45rem);
+    letter-spacing: 0.13em;
     text-transform: uppercase;
-    color: rgb(var(--muted));
+    color: rgb(var(--fg));
     font-weight: 500;
-    margin: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+  }
+
+  .tagline-link {
+    color: rgb(var(--fg));
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(var(--fg), 0.35);
+    pointer-events: auto;
+    transition: text-decoration-color 0.2s ease;
+  }
+
+  .tagline-link:hover {
+    text-decoration-color: rgba(var(--fg), 0.9);
+  }
+
+  .tagline-plain {
+    color: rgb(var(--fg));
+  }
+
+  .tagline-dot {
+    opacity: 0.3;
+  }
+
+  :global(.dark) .hero-tagline {
+    background: rgba(var(--bg), 0.72);
+    border-color: rgba(var(--border), 0.14);
   }
 
   .hero-scroll-hint {
@@ -440,12 +385,12 @@ const contactLinks = [
     font-size: 0.65rem;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: rgb(var(--muted));
+    color: #fff;
   }
 
   .hint-arrow {
     font-size: 1.2rem;
-    color: rgb(var(--muted));
+    color: #fff;
     animation: hint-bounce 1.8s ease-in-out infinite;
   }
 
@@ -458,40 +403,17 @@ const contactLinks = [
     .hero-scroll-hint { animation: none; }
   }
 
-  /* ── Content panels ────────────────────────────────────────────────────── */
-  .content-panel {
-    position: relative;
-    z-index: 10; /* within prose-measure stacking context → always above canvas z:4 */
-    max-width: min(460px, 90vw);
-    padding: 2rem 1.75rem;
-    background: rgba(var(--bg), 0.88);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(var(--border), 0.14);
-    border-radius: 18px;
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.08);
-  }
-
-  :global(html.dark) .content-panel {
-    background: rgba(var(--bg), 0.9);
-    border-color: rgba(var(--border), 0.2);
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4);
-  }
-
-  /* Horizontal placement */
-  .panel-left  { margin-left:  clamp(1.5rem, 7vw, 6rem); margin-right: auto; }
-  .panel-right { margin-right: clamp(1.5rem, 7vw, 6rem); margin-left:  auto; }
 
   /* ── Panel headers ─────────────────────────────────────────────────────── */
   .panel-header {
-    font-size: 0.7rem;
+    font-size: 1.6rem;
     font-weight: 700;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: rgb(var(--fg));
-    margin: 0 0 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid rgba(var(--border), 0.12);
+    margin: 0 0 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(var(--border), 0.15);
   }
 
   /* ── Highlight lists (reuse global.css classes) ─────────────────────── */
@@ -501,26 +423,26 @@ const contactLinks = [
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 1.5rem;
   }
 
   .highlight-item-group { }
 
   .bullet-point {
     display: inline-block;
-    width: 5px;
-    height: 5px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     background: rgb(var(--fg));
-    margin-top: 0.45em;
-    margin-right: 0.6rem;
+    margin-top: 0.5em;
+    margin-right: 0.75rem;
     flex-shrink: 0;
     opacity: 0.5;
   }
 
   .highlight-main-point {
-    font-size: 0.88rem;
-    line-height: 1.55;
+    font-size: 1.35rem;
+    line-height: 1.6;
     color: rgb(var(--fg));
   }
 
@@ -536,8 +458,8 @@ const contactLinks = [
   }
 
   .highlight-sub-item {
-    font-size: 0.8rem;
-    line-height: 1.5;
+    font-size: 1.15rem;
+    line-height: 1.6;
     color: rgb(var(--muted));
   }
 
@@ -545,26 +467,26 @@ const contactLinks = [
   .contact-panel { gap: 0; }
 
   .contact-eyebrow {
-    font-size: 0.65rem;
+    font-size: 1rem;
     font-weight: 700;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: rgb(var(--muted));
-    margin: 0 0 0.5rem;
+    margin: 0 0 0.75rem;
   }
 
   .contact-heading {
-    font-size: 1.5rem;
+    font-size: 3rem;
     font-weight: 700;
-    margin: 0 0 0.75rem;
+    margin: 0 0 1rem;
     color: rgb(var(--fg));
   }
 
   .contact-body {
-    font-size: 0.9rem;
-    line-height: 1.55;
+    font-size: 1.35rem;
+    line-height: 1.6;
     color: rgb(var(--muted));
-    margin: 0 0 1.25rem;
+    margin: 0 0 1.5rem;
   }
 
   .contact-inline-link {
@@ -605,244 +527,118 @@ const contactLinks = [
   .contact-icons {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     flex-wrap: wrap;
   }
 
   .contact-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: rgb(var(--fg));
-    border: 1px solid rgba(var(--border), 0.18);
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     text-decoration: none;
-    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   }
 
   .contact-icon:hover {
-    transform: translateY(-2px);
-    border-color: rgba(var(--border), 0.45);
-    background: rgba(var(--border), 0.06);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 0.95);
   }
 
   .contact-icon-svg {
     display: inline-flex;
-    width: 15px;
-    height: 15px;
+    width: 24px;
+    height: 24px;
   }
 
   .contact-icon svg { width: 100%; height: 100%; }
 
   :global(html.dark) .contact-icon {
-    border-color: rgba(255,255,255,0.18);
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
   }
 
-  /* ── Clients section ───────────────────────────────────────────────────── */
-  .clients-section {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1.5rem;
-    padding: 5rem 0;
-    overflow: hidden;
+  :global(html.dark) .contact-icon:hover {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
   }
 
-  .clients-inner {
-    width: 100%;
+  /* ── Standalone connect section ─────────────────────────────────────────── */
+  .connect-section {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .clients-header {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
+    align-items: center;
+    text-align: center;
+    padding: 5rem 1.5rem 6rem;
     position: relative;
-    z-index: 10;
+    z-index: 5;
+    --muted: 40 40 40;
   }
 
-  .clients-eyebrow {
-    font-size: 0.75rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
+  :global(html.dark) .connect-section {
+    --muted: 210 210 210;
+  }
+
+  .connect-section .contact-eyebrow { margin-bottom: 0.5rem; }
+  .connect-section .contact-heading { margin-bottom: 0.75rem; }
+  .connect-section .contact-body    { margin-bottom: 1.25rem; }
+  .connect-section .contact-icons   { margin-top: 0.25rem; justify-content: center; }
+
+  /* ── Client References ─────────────────────────────────────────────────── */
+  /* ── Client references — plain quotes ───────────────────────────────────── */
+  .quotes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    margin-top: 1.25rem;
+  }
+
+  .quote-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .quote-project {
+    font-size: 0.9rem;
     font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(var(--muted));
+    margin: 0;
+  }
+
+  .quote-text {
+    font-size: 1.35rem;
+    line-height: 1.8;
+    color: rgb(var(--fg));
+    font-style: italic;
+    margin: 0;
+  }
+
+  .quote-author {
+    font-size: 1.35rem;
+    font-weight: 600;
     color: rgb(var(--fg));
     margin: 0;
   }
 
-  .clients-note {
-    font-size: 0.85rem;
-    color: rgb(var(--muted));
-    margin: 0;
-    max-width: 38ch;
-  }
-
-  /* ── Testimonials carousel (preserved from original) ──────────────────── */
-  .carousel-viewport {
-    --carousel-gap: 1.5rem;
-    --carousel-duration: 200s;
-    overflow: visible;
-    width: 100%;
-    position: relative;
-    z-index: 10;
-  }
-
-  .carousel-track {
-    display: flex;
-    width: max-content;
-    animation: carousel-scroll var(--carousel-duration) linear infinite;
-    will-change: transform;
-  }
-
-  .carousel-group {
-    display: flex;
-    gap: var(--carousel-gap);
-    padding-right: var(--carousel-gap);
-  }
-
-  .testimonial-card {
-    position: relative;
-    border-radius: 16px;
-    width: clamp(280px, 30vw, 420px);
-    min-height: 380px;
-    perspective: 1400px;
-    transform-style: preserve-3d;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-  }
-
-  .flip-trigger {
-    position: absolute;
-    inset: 0;
-    z-index: 4;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    border-radius: 16px;
-  }
-
-  .flip-trigger:focus-visible {
-    outline: 2px solid rgba(59, 130, 246, 0.8);
-    outline-offset: 4px;
-  }
-
-  .flip-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transform-style: preserve-3d;
-    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-
-  .testimonial-card.is-flipped .flip-inner { transform: rotateY(180deg); }
-
-  .flip-face {
-    position: absolute;
-    inset: 0;
-    border-radius: 16px;
-    padding: 1.6rem 1.5rem;
-    background: linear-gradient(135deg, rgba(255,255,255,0.88) 0%, rgba(226,238,255,0.7) 100%);
-    border: 1px solid rgba(59,130,246,0.28);
-    box-shadow: 0 18px 36px rgba(15,23,42,0.18), inset 0 1px 1px rgba(255,255,255,0.7);
-    backdrop-filter: blur(24px) saturate(180%);
-    backface-visibility: hidden;
-    overflow: hidden;
-  }
-
-  :global(html.dark) .flip-face {
-    background: linear-gradient(135deg, rgba(18,21,30,0.85) 0%, rgba(16,20,30,0.7) 100%);
-    border: 1px solid rgba(96,165,250,0.25);
-    box-shadow: 0 18px 40px rgba(0,0,0,0.55), inset 0 1px 1px rgba(255,255,255,0.05);
-  }
-
-  .flip-back { transform: rotateY(180deg); }
-
-  .flip-hint {
-    position: absolute;
-    top: 1rem;
-    right: 1.2rem;
-    font-size: 0.65rem;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    font-weight: 700;
-    color: rgba(var(--muted), 0.8);
-    opacity: 0;
-    transform: translateY(-6px);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    pointer-events: none;
-  }
-
-  .testimonial-card:hover .flip-hint,
-  .testimonial-card:focus-within .flip-hint { opacity: 1; transform: translateY(0); }
-
-  .testimonial-content {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    gap: 1rem;
-    height: 100%;
-  }
-
-  .flip-front .testimonial-content { grid-template-rows: auto 1fr auto; }
-  .flip-back  .testimonial-content { grid-template-rows: minmax(0,1fr) auto; }
-
-  .preview-top    { display: flex; flex-direction: column; gap: 0.4rem; }
-  .preview-label  { margin: 0; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; color: rgb(var(--muted)); }
-  .preview-tech   { margin: 0; font-size: 1rem; font-weight: 600; color: rgb(var(--fg)); line-height: 1.4; }
-  .preview-meta   { display: flex; flex-direction: column; gap: 0.2rem; }
-  .preview-person { font-size: 0.95rem; font-weight: 600; color: rgb(var(--fg)); }
-  .preview-company{ font-size: 0.85rem; color: rgb(var(--muted)); }
-  .preview-project{ margin: 0; font-size: 0.85rem; color: rgb(var(--muted)); line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
-
-  .testimonial-text { font-size: 0.9rem; line-height: 1.6; color: rgb(var(--fg)); font-style: italic; margin: 0; align-self: flex-start; }
-
-  .testimonial-author { display: flex; align-items: center; gap: 0.75rem; padding-top: 1rem; margin-top: auto; border-top: 1px solid rgba(var(--border), 0.1); }
-  .company-logo   { border-radius: 6px; flex-shrink: 0; object-fit: contain; padding-bottom: 1rem; }
-  .author-details { display: flex; flex-direction: column; gap: 0.1rem; }
-  .author-name    { font-weight: 600; font-size: 0.9rem; color: rgb(var(--fg)); }
-  .author-title   { font-size: 0.8rem; color: rgb(var(--muted)); }
-  .author-project { font-size: 0.72rem; color: rgb(var(--muted)); opacity: 0.8; }
-
-  .testimonial-card:hover { transform: translateY(-4px); }
-
-  @keyframes carousel-scroll {
-    to { transform: translateX(-50%); }
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .carousel-track { animation: none; }
-    .hint-arrow     { animation: none; }
+    .hint-arrow { animation: none; }
   }
 
   @media (max-width: 640px) {
-    .carousel-viewport { overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 0.5rem; }
-    .carousel-track     { animation: none; }
-    .carousel-group[aria-hidden="true"] { display: none; }
-    .testimonial-card   { min-width: 240px; min-height: 340px; scroll-snap-align: start; }
     .panel-left  { margin-left:  1.25rem; }
     .panel-right { margin-right: 1.25rem; }
   }
 </style>
-
-<script>
-  // Flip card interaction
-  const initFlipCards = () => {
-    document.querySelectorAll('[data-flip-card]').forEach((card) => {
-      const trigger = card.querySelector('.flip-trigger');
-      if (!trigger) return;
-      trigger.addEventListener('click', () => {
-        const isFlipped = card.classList.toggle('is-flipped');
-        trigger.setAttribute('aria-pressed', String(isFlipped));
-      });
-    });
-  };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initFlipCards, { once: true });
-  } else {
-    initFlipCards();
-  }
-</script>

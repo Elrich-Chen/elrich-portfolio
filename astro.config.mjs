@@ -13,6 +13,14 @@ export default defineConfig({
     inlineStylesheets: 'auto',
   },
   vite: {
+    optimizeDeps: {
+      include: [
+        'three',
+        'three/addons/loaders/GLTFLoader.js',
+        'gsap',
+        'gsap/ScrollTrigger',
+      ],
+    },
     build: {
       cssCodeSplit: true,
       minify: 'esbuild',
