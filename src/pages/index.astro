@@ -454,6 +454,10 @@ const contactLinks = [
     50%       { transform: translateY(8px); }
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .hero-scroll-hint { animation: none; }
+  }
+
   /* ── Content panels ────────────────────────────────────────────────────── */
   .content-panel {
     position: relative;

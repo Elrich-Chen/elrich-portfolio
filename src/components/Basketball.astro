@@ -38,9 +38,6 @@
     // --- Renderer ---
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
     // --- Scene + Camera ---
     const scene = new THREE.Scene();
     let W = window.innerWidth;
@@ -55,7 +52,6 @@
 
     const keyLight = new THREE.DirectionalLight(0xffffff, 3.5);
     keyLight.position.set(5, 8, 5);
-    keyLight.castShadow = true;
     scene.add(keyLight);
 
     // Top spotlight for sharp highlight on the ball
@@ -78,7 +74,7 @@
 
     // Proxy object — GSAP animates this; rAF reads it and applies to mesh.
     // This prevents GSAP/requestAnimationFrame conflicts on the same property.
-    const pos = { x: 0, y: 0, z_rot: 0 };
+    const pos = { x: 0, bobY: 0, targetY: 0, z_rot: 0 };
 
     // --- Load GLB ---
     const loader = new GLTFLoader();
@@ -104,7 +100,7 @@
 
         // --- Vertical bob (independent of scroll) ---
         gsap.to(pos, {
-          y: 0.2,
+          bobY: 0.2,
           duration: 1.8,
           ease: 'sine.inOut',
           yoyo: true,
@@ -113,10 +109,10 @@
 
         // --- Diagonal per-section ScrollTriggers ---
         // Each consecutive pair of SCENES creates a scrubbed transition.
-        SCENES.forEach((scene, i) => {
+        SCENES.forEach((sceneEntry, i) => {
           if (i === 0) return; // hero is the starting position, no trigger needed
           const prev = SCENES[i - 1];
-          const el = document.getElementById(scene.id);
+          const el = document.getElementById(sceneEntry.id);
           if (!el) return;
 
           ScrollTrigger.create({
@@ -125,12 +121,11 @@
             end:   'top 15%',
             scrub: 1.5,
             onUpdate(self) {
-              pos.x     = gsap.utils.interpolate(prev.x, scene.x, self.progress);
-              // y bob is additive; only override the non-bob portion via a separate tween
-              // Instead, tween pos.x and z_rot directly; the bob is separate:
-              pos.z_rot = gsap.utils.interpolate(
-                prev.x > scene.x ? -0.2 : 0.2,  // tilt away from direction of travel
-                scene.x > prev.x ? -0.2 : 0.2,
+              pos.x       = gsap.utils.interpolate(prev.x, sceneEntry.x, self.progress);
+              pos.targetY = gsap.utils.interpolate(prev.y, sceneEntry.y, self.progress);
+              pos.z_rot   = gsap.utils.interpolate(
+                prev.x > sceneEntry.x ? -0.2 : 0.2,
+                sceneEntry.x > prev.x ? -0.2 : 0.2,
                 self.progress
               );
 
@@ -146,10 +141,10 @@
             start: 'top 15%',
             end:   'bottom bottom',
             onEnter() {
-              gsap.to(pos, { x: scene.x, z_rot: scene.x > 0 ? -0.2 : 0.2, duration: 0.4, ease: 'power2.out' });
+              gsap.to(pos, { x: sceneEntry.x, targetY: sceneEntry.y, z_rot: sceneEntry.x > 0 ? -0.2 : 0.2, duration: 0.4, ease: 'power2.out' });
             },
             onLeaveBack() {
-              gsap.to(pos, { x: prev.x, z_rot: prev.x > 0 ? -0.2 : 0.2, duration: 0.4, ease: 'power2.out' });
+              gsap.to(pos, { x: prev.x, targetY: prev.y, z_rot: prev.x > 0 ? -0.2 : 0.2, duration: 0.4, ease: 'power2.out' });
             },
           });
         });
@@ -193,7 +188,7 @@
         mesh.rotation.y  = spinAngle;   // rAF owns Y rotation
         mesh.rotation.z  = pos.z_rot;   // tilt from GSAP
         mesh.position.x  = pos.x;       // x from GSAP section triggers
-        mesh.position.y  = pos.y;       // y from GSAP bob
+        mesh.position.y  = pos.targetY + pos.bobY;
       }
       renderer.render(scene, camera);
     }
