@@ -751,6 +751,7 @@ const socialLinks = [
       prepMobileStates();
       let ignoreClickUntil = 0;
       let ignoreDocCloseUntil = 0;
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
       const handleToggle = (event?: Event) => {
         event?.preventDefault();
         event?.stopPropagation?.();
@@ -813,24 +814,26 @@ const socialLinks = [
         // On iOS, `touchend` can be followed by a synthetic `click`.
         // Prevent double-toggling so the menu reliably stays open.
         ignoreClickUntil = Date.now() + 500;
-        ignoreDocCloseUntil = Date.now() + 350;
+        ignoreDocCloseUntil = Date.now() + 1200;
         handleToggle(event);
       };
 
       toggleBtn.addEventListener('click', handleClick, { signal });
       toggleBtn.addEventListener('touchend', handleTouchEnd, { signal, passive: false });
 
-      document.addEventListener('click', (e) => {
-        if (Date.now() < ignoreDocCloseUntil) return;
-        if (
-          isOpen &&
-          !toggleBtn.contains(e.target as Node) &&
-          !preLayersWrap?.contains(e.target as Node) &&
-          !mobileMenu.contains(e.target as Node)
-        ) {
-          closeMobile();
-        }
-      }, { signal });
+      if (!isIOS) {
+        document.addEventListener('click', (e) => {
+          if (Date.now() < ignoreDocCloseUntil) return;
+          if (
+            isOpen &&
+            !toggleBtn.contains(e.target as Node) &&
+            !preLayersWrap?.contains(e.target as Node) &&
+            !mobileMenu.contains(e.target as Node)
+          ) {
+            closeMobile();
+          }
+        }, { signal });
+      }
 
       mobileMenu.querySelectorAll<HTMLAnchorElement>('a').forEach(link => {
         link.addEventListener('click', () => {
