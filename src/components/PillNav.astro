@@ -335,6 +335,11 @@ const socialLinks = [
     font-size: 0.7rem;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    margin-left: auto;
+    position: relative;
+    z-index: calc(var(--layer-nav) + 1);
+    border: 1px solid rgba(var(--border), 0.2);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
   }
 
   .pn-toggle-text-wrap {
@@ -560,6 +565,13 @@ const socialLinks = [
       font-size: 1.35rem;
     }
 
+    .pn-logo.pn-mobile {
+      max-width: calc(100vw - 8.25rem);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .pn-pill {
       padding: 0 14px;
       font-size: 0.74rem;
@@ -594,6 +606,12 @@ const socialLinks = [
       min-width: 80px;
       padding: 0 0.9rem;
       font-size: 0.66rem;
+    }
+
+    .pn-logo.pn-mobile {
+      max-width: calc(100vw - 7.7rem);
+      padding: 0 12px;
+      font-size: 1.2rem;
     }
 
     .pn-mobile-inner {
