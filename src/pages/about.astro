@@ -304,6 +304,11 @@ const techStack = {
     bottom: 5px;
   }
 
+  .polaroid-wrapper:focus-within .click-indicator {
+    opacity: 1;
+    bottom: 5px;
+  }
+
   .polaroid-item[data-index="0"] {
     z-index: 1;
   }
@@ -399,8 +404,8 @@ const techStack = {
   }
 
   .social-icon {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     border-radius: 10px;
     display: inline-flex;
     align-items: center;
@@ -646,6 +651,119 @@ const techStack = {
 
     .about-sidebar :global(.polaroid) {
       max-width: 240px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .about-shell {
+      padding-bottom: 1.5rem;
+    }
+
+    .profile-card {
+      padding: 1.2rem 1rem;
+      gap: 1rem;
+    }
+
+    .polaroid-wrapper {
+      width: min(210px, 100%);
+      min-height: 300px;
+      margin-bottom: 0.3rem;
+    }
+
+    .about-sidebar :global(.polaroid) {
+      max-width: 210px;
+    }
+
+    .click-indicator {
+      opacity: 1;
+      bottom: 5px;
+      font-size: 0.72rem;
+      padding: 0.28rem 0.62rem;
+    }
+
+    .stats-grid {
+      gap: 0.6rem;
+    }
+
+    .stat-item {
+      padding: 0.65rem 0.5rem;
+    }
+
+    .stat-value {
+      font-size: 1rem;
+    }
+
+    .stat-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+    }
+
+    .social-row {
+      gap: 0.55rem;
+    }
+
+    .social-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+    }
+
+    .social-icon-svg {
+      width: 19px;
+      height: 19px;
+    }
+
+    .about-cards {
+      gap: 1rem;
+      padding-bottom: 1.25rem;
+    }
+
+    .about-card {
+      border-radius: 16px;
+      padding: 1.2rem 1rem;
+    }
+
+    .card-eyebrow {
+      margin-bottom: 0.55rem;
+      letter-spacing: 0.16em;
+    }
+
+    .tldr-hook {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .tldr-body,
+    .highlights-link {
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    .edu-grid {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .edu-card {
+      padding: 0.9rem;
+    }
+
+    .stack-badges {
+      gap: 0.4rem;
+    }
+
+    .stack-badge {
+      padding: 0.34rem 0.62rem;
+      font-size: 0.73rem;
+    }
+
+    .beyond-grid {
+      grid-template-columns: 1fr;
+      gap: 0.7rem;
+    }
+
+    .beyond-photo img {
+      height: 150px;
     }
   }
 

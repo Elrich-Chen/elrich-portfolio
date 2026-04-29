@@ -38,10 +38,7 @@ const contactLinks = [
 <html lang="en" class="bg-[rgb(var(--bg))] text-[rgb(var(--fg))]">
   <head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />
@@ -70,6 +67,7 @@ const contactLinks = [
     
   </head>
   <body class="overflow-x-hidden">
+    <div class="safari-opaque-bg" aria-hidden="true"></div>
     <div class="grainient-global">
       <Grainient
         color1="#5b8ae8"
@@ -103,7 +101,7 @@ const contactLinks = [
     <PillNav />
     <div class="page-main">
       <div class="prose-measure">
-        <main class:list={['pb-20', { 'main-padded': !fullscreen }]}>
+        <main class:list={['pb-20', { 'main-padded': !fullscreen, 'main-fullscreen': fullscreen }]}>
           <slot />
         </main>
       </div>
@@ -206,10 +204,23 @@ const contactLinks = [
       });
     </script>
     <style>
+      /* Safari pinch-zoom mitigation: ensure an always-opaque backdrop.
+         iOS Safari can temporarily drop/clear transparent fixed layers during pinch,
+         revealing black behind the page. This layer stays fixed + opaque. */
+      .safari-opaque-bg {
+        position: fixed;
+        inset: 0;
+        z-index: calc(var(--layer-bg) - 1);
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        background: rgb(var(--bg)) !important;
+      }
+
       .grainient-global {
         position: fixed;
         inset: 0;
-        z-index: 0;
+        z-index: var(--layer-bg);
         width: 100vw;
         height: 100vh;
         pointer-events: none;
@@ -372,24 +383,34 @@ const contactLinks = [
 
       .page-main {
         min-width: 0;
+        padding-bottom: calc(var(--safe-bottom) + 2.25rem);
       }
 
       .site-copyright {
-        position: absolute;
-        left: 50%;
-        bottom: 0.6rem;
-        transform: translateX(-50%);
-        z-index: 12;
+        position: sticky;
+        left: 0;
+        bottom: var(--safe-bottom);
+        transform: none;
+        z-index: var(--layer-copyright);
         font-size: 0.72rem;
         letter-spacing: 0.04em;
         color: rgba(255, 255, 255, 0.8);
         text-align: center;
-        white-space: nowrap;
+        white-space: normal;
+        width: max-content;
+        max-width: calc(100vw - 2rem);
+        margin: 0 auto;
+        padding-bottom: 0.25rem;
+        pointer-events: none;
       }
 
-      /* nav is 52px tall, top: 1.25rem → clear it + a small gap */
       .main-padded {
-        padding-top: calc(52px + 1.25rem + 1.5rem);
+        padding-top: var(--nav-clearance);
+      }
+
+      .main-fullscreen {
+        /* Keep fullscreen pages visually full-height without clipping under fixed nav. */
+        padding-top: calc(var(--nav-top-offset) + var(--nav-height) + 0.4rem);
       }
 
       .header-inner {
@@ -419,8 +440,8 @@ const contactLinks = [
       .dark-mode-toast {
         position: fixed;
         right: clamp(1rem, 4vw, 2rem);
-        top: clamp(1rem, 4vw, 2rem);
-        z-index: 40;
+        top: calc(var(--nav-top-offset) + var(--nav-height) + var(--nav-dropdown-gap) + 0.15rem);
+        z-index: var(--layer-toast);
         opacity: 0;
         transform: translateY(-10px);
         pointer-events: none;
@@ -496,6 +517,44 @@ const contactLinks = [
           width: 100%;
           display: flex;
           justify-content: flex-start;
+        }
+      }
+
+      @media (max-width: 1024px) {
+        .dark-mode-toast {
+          right: var(--nav-mobile-inline);
+          left: var(--nav-mobile-inline);
+          top: calc(var(--nav-top-offset) + var(--nav-height) + var(--nav-dropdown-gap));
+        }
+
+        .dark-mode-toast-content {
+          width: 100%;
+          justify-content: space-between;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .main-fullscreen {
+          padding-top: calc(var(--nav-top-offset) + var(--nav-height) + 0.2rem);
+        }
+
+        .site-copyright {
+          position: static;
+          transform: none;
+          display: block;
+          margin: 1rem auto 0;
+          font-size: 0.68rem;
+          width: max-content;
+          max-width: calc(100vw - 1.5rem);
+        }
+
+        .dark-mode-toast-label {
+          font-size: 0.78rem;
+          letter-spacing: 0.01em;
+        }
+
+        .dark-mode-toast-cta {
+          font-size: 0.7rem;
         }
       }
     </style>

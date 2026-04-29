@@ -29,10 +29,18 @@ const {
       ? parseFloat(stackPosition) / 100 * viewH
       : parseFloat(stackPosition);
 
+    const isIphone = window.matchMedia('(max-width: 480px)').matches;
+    const isTablet = window.matchMedia('(max-width: 1024px)').matches;
+    const navClearance = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-clearance')) || 96;
+    const stackStep = isIphone ? 9 : isTablet ? 12 : itemStackDistance;
+    const flowGap = isIphone ? 26 : isTablet ? 42 : itemDistance;
+    const stickyTopBase = navClearance + (isIphone ? 6 : isTablet ? 10 : 14);
+    const stickyTop = Math.max(stickyTopBase, stackPx);
+
     cards.forEach((card, i) => {
-      card.style.top     = (stackPx + i * itemStackDistance) + 'px';
+      card.style.top     = (stickyTop + i * stackStep) + 'px';
       card.style.zIndex  = String(i + 1);
-      card.style.marginBottom = i < cards.length - 1 ? itemDistance + 'px' : '0';
+      card.style.marginBottom = i < cards.length - 1 ? flowGap + 'px' : '0';
     });
   }
 
@@ -50,7 +58,7 @@ const {
     width: 100vw;
     left: 50%;
     transform: translateX(-50%);
-    padding-top:    2rem;
+    padding-top:    1.75rem;
     padding-bottom: 50vh; /* keep last card pinned while reading */
     z-index: 5;
   }
@@ -87,5 +95,31 @@ const {
       0 8px 40px rgba(0, 0, 0, 0.50),
       inset 0 1px 0 rgba(255, 255, 255, 0.05);
     --muted: 210 210 210;
+  }
+
+  @media (max-width: 1024px) {
+    .ss-container {
+      padding-top: 1.25rem;
+      padding-bottom: 40vh;
+    }
+
+    :global(.scroll-stack-card) {
+      width: min(900px, calc(100vw - 1.5rem));
+      padding: 2.2rem 1.9rem;
+      border-radius: 20px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .ss-container {
+      padding-top: 1rem;
+      padding-bottom: 32vh;
+    }
+
+    :global(.scroll-stack-card) {
+      width: calc(100vw - 1rem);
+      padding: 1.2rem 0.95rem 1.3rem;
+      border-radius: 16px;
+    }
   }
 </style>
