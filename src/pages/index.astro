@@ -361,8 +361,12 @@ const contactLinks = [
     color: rgb(var(--fg));
     font-weight: 500;
     pointer-events: none;
-    white-space: nowrap;
-    flex-wrap: nowrap;
+    white-space: normal;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+    max-width: min(92vw, 34rem);
   }
 
   .tagline-link {
@@ -670,10 +674,35 @@ const contactLinks = [
 
   @media (max-width: 480px) {
     .hero-name {
-      font-size: clamp(2.35rem, 15.2vw, 3.6rem);
+      font-size: clamp(2rem, 12vw, 3rem);
       line-height: 0.92;
       letter-spacing: -0.02em;
       max-width: min(94vw, 9ch);
+    }
+
+    .hero-tagline {
+      gap: 0.35rem 0.55rem;
+      padding: 0.4rem 0.85rem;
+      font-size: clamp(0.72rem, 3vw, 0.9rem);
+      letter-spacing: 0.08em;
+      line-height: 1.35;
+      max-width: min(94vw, 20rem);
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      white-space: normal;
+    }
+
+    .tagline-link {
+      white-space: normal;
+    }
+
+    .tagline-plain {
+      white-space: normal;
+    }
+
+    .tagline-dot {
+      display: none;
     }
   }
 </style>
