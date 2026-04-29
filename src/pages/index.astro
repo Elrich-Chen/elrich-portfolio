@@ -306,11 +306,11 @@ const contactLinks = [
 
   /* ── Hero stays full viewport height ─────────────────────────────────────── */
   .hero-section {
-    min-height: 100vh;
+    min-height: calc(100svh - var(--nav-clearance));
     justify-content: center;
     flex-direction: column;
     text-align: center;
-    padding: 0;
+    padding: calc(var(--nav-clearance) * 0.22) 0 0;
   }
 
   .hero-content {
@@ -319,6 +319,8 @@ const contactLinks = [
     align-items: center;
     gap: 1rem;
     user-select: none;
+    width: min(100%, calc(100vw - 1.4rem));
+    margin-inline: auto;
   }
 
   /* Allow mouse events through to the name so TextPressure cursor tracking works,
@@ -357,8 +359,11 @@ const contactLinks = [
     color: rgb(var(--fg));
     font-weight: 500;
     pointer-events: none;
-    white-space: nowrap;
-    flex-wrap: nowrap;
+    white-space: normal;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 100%;
+    text-wrap: balance;
   }
 
   .tagline-link {
@@ -662,5 +667,116 @@ const contactLinks = [
   @media (max-width: 640px) {
     .panel-left  { margin-left:  1.25rem; }
     .panel-right { margin-right: 1.25rem; }
+  }
+
+  @media (max-width: 1024px) {
+    .hero-name {
+      font-size: clamp(2.65rem, 12.5vw, 6.4rem);
+    }
+
+    .hero-tagline {
+      padding: 0.45rem 0.9rem;
+      font-size: clamp(0.9rem, 2.35vw, 1.2rem);
+      letter-spacing: 0.08em;
+      row-gap: 0.3rem;
+      column-gap: 0.45rem;
+    }
+
+    .panel-header {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .highlight-main-point,
+    .quote-text,
+    .quote-author {
+      font-size: 1.04rem;
+      line-height: 1.55;
+    }
+
+    .highlight-sub-item,
+    .contact-body {
+      font-size: 1rem;
+      line-height: 1.55;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hero-tagline {
+      row-gap: 0.35rem;
+      column-gap: 0.45rem;
+      max-width: calc(100vw - 1rem);
+    }
+
+    .tagline-dot {
+      display: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-content {
+      gap: 0.55rem;
+      width: calc(100vw - 0.75rem);
+    }
+
+    .hero-name {
+      font-size: clamp(1.95rem, 11.5vw, 3.1rem);
+      line-height: 0.96;
+      letter-spacing: -0.015em;
+    }
+
+    .hero-tagline {
+      row-gap: 0.25rem;
+      column-gap: 0.35rem;
+      padding: 0.38rem 0.56rem;
+      font-size: clamp(0.58rem, 2.35vw, 0.69rem);
+      letter-spacing: 0.05em;
+      line-height: 1.2;
+      max-width: calc(100vw - 0.75rem);
+    }
+
+    .tagline-dot {
+      display: none;
+    }
+
+    .tagline-link,
+    .tagline-plain {
+      white-space: normal;
+      overflow-wrap: anywhere;
+      text-wrap: balance;
+    }
+
+    .panel-header {
+      font-size: 1.05rem;
+      letter-spacing: 0.04em;
+    }
+
+    .highlight-list {
+      gap: 1rem;
+    }
+
+    .highlight-main-point,
+    .quote-text,
+    .quote-author {
+      font-size: 0.92rem;
+      line-height: 1.52;
+    }
+
+    .highlight-sub-item {
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+
+    .contact-heading {
+      font-size: 2rem;
+    }
+
+    .contact-body {
+      font-size: 0.95rem;
+    }
+
+    .connect-section {
+      padding: 4rem 1rem 5rem;
+    }
   }
 </style>

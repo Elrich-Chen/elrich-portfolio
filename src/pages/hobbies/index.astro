@@ -137,8 +137,8 @@ const getRandomPhotoForEntry = (seed: string) => {
   }
 
   .hobby-tag {
-    font-size: 0.65rem;
-    padding: 0.2rem 0.55rem;
+    font-size: 0.7rem;
+    padding: 0.24rem 0.58rem;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.18);
     color: #fff;
@@ -182,8 +182,8 @@ const getRandomPhotoForEntry = (seed: string) => {
     position: absolute;
     top: -0.2rem;
     right: 0;
-    width: 30px;
-    height: 30px;
+    width: 44px;
+    height: 44px;
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
@@ -271,6 +271,72 @@ const getRandomPhotoForEntry = (seed: string) => {
       margin: 0 0 0.75rem;
       width: 100%;
       height: 180px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hobby-grid {
+      gap: 0.9rem;
+    }
+
+    .hobby-card {
+      border-radius: 14px;
+      padding: 1rem 0.95rem;
+    }
+
+    .hobby-summary-toggle {
+      gap: 0.3rem;
+      padding-right: 2.85rem;
+    }
+
+    .hobby-title {
+      font-size: 1rem;
+      line-height: 1.35;
+    }
+
+    .hobby-date {
+      margin-top: 0.25rem;
+      font-size: 0.69rem;
+      letter-spacing: 0.1em;
+    }
+
+    .hobby-summary {
+      margin-top: 0.55rem;
+      font-size: 0.9rem;
+      line-height: 1.55;
+    }
+
+    .hobby-tags-bottom {
+      margin-top: 0.5rem;
+      gap: 0.3rem;
+    }
+
+    .hobby-tag {
+      font-size: 0.68rem;
+      padding: 0.22rem 0.52rem;
+    }
+
+    .hobby-toggle {
+      width: 44px;
+      height: 44px;
+      top: -0.15rem;
+    }
+
+    .hobby-toggle svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .hobby-body {
+      margin-top: 0.75rem;
+      padding: 0.8rem;
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    .hobby-body-photo {
+      height: 165px;
+      margin-bottom: 0.65rem;
     }
   }
 </style>

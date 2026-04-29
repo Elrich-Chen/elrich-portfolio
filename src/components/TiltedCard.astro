@@ -74,6 +74,7 @@ const {
     justify-content: center;
     perspective: 800px;
     overflow: visible;
+    cursor: default;
   }
 
   .tc-mobile-alert {
@@ -89,8 +90,18 @@ const {
     .tc-mobile-alert {
       display: block;
     }
+  }
+
+  @media (hover: none), (pointer: coarse) {
     .tc-caption {
-      display: none !important;
+      position: static;
+      opacity: 1;
+      margin-top: 0.5rem;
+      width: fit-content;
+      max-width: 100%;
+      white-space: normal;
+      transform: none !important;
+      pointer-events: auto;
     }
   }
 
