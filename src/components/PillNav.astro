@@ -749,8 +749,11 @@ const socialLinks = [
 
     if (toggleBtn && mobileMenu) {
       prepMobileStates();
+      let ignoreClickUntil = 0;
+      let ignoreDocCloseUntil = 0;
       const handleToggle = (event?: Event) => {
         event?.preventDefault();
+        event?.stopPropagation?.();
         isOpen = !isOpen;
         toggleBtn.setAttribute('aria-expanded', String(isOpen));
         mobileMenu.setAttribute('aria-hidden', String(!isOpen));
@@ -801,10 +804,24 @@ const socialLinks = [
         }
       };
 
-      toggleBtn.addEventListener('click', handleToggle, { signal });
-      toggleBtn.addEventListener('touchend', handleToggle, { signal, passive: false });
+      const handleClick = (event: MouseEvent) => {
+        if (Date.now() < ignoreClickUntil) return;
+        handleToggle(event);
+      };
+
+      const handleTouchEnd = (event: TouchEvent) => {
+        // On iOS, `touchend` can be followed by a synthetic `click`.
+        // Prevent double-toggling so the menu reliably stays open.
+        ignoreClickUntil = Date.now() + 500;
+        ignoreDocCloseUntil = Date.now() + 350;
+        handleToggle(event);
+      };
+
+      toggleBtn.addEventListener('click', handleClick, { signal });
+      toggleBtn.addEventListener('touchend', handleTouchEnd, { signal, passive: false });
 
       document.addEventListener('click', (e) => {
+        if (Date.now() < ignoreDocCloseUntil) return;
         if (
           isOpen &&
           !toggleBtn.contains(e.target as Node) &&
