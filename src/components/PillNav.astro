@@ -122,10 +122,10 @@ const socialLinks = [
   /* ── Fixed wrapper ──────────────────────────────────────────────────────── */
   .pn-wrap {
     position: fixed;
-    top: var(--nav-top-offset);
+    top: var(--nav-top-offset, 1.25rem);
     left: 50%;
     transform: translateX(-50%);
-    z-index: var(--layer-nav);
+    z-index: var(--layer-nav, 100);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -137,7 +137,7 @@ const socialLinks = [
 
   /* ── Single unified bar ─────────────────────────────────────────────────── */
   .pn-bar {
-    height: var(--nav-height);
+    height: var(--nav-height, 52px);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -314,7 +314,7 @@ const socialLinks = [
 
   /* ── Mobile menu toggle ─────────────────────────────────────────────────── */
   .pn-toggle {
-    height: var(--nav-height);
+    height: var(--nav-height, 52px);
     min-width: 84px;
     background: rgba(var(--bg), 0.84);
     backdrop-filter: blur(16px);
@@ -400,7 +400,7 @@ const socialLinks = [
     right: 0;
     width: min(100vw, 420px);
     height: 100svh;
-    z-index: calc(var(--layer-nav) - 3);
+    z-index: calc(var(--layer-nav, 100) - 3);
     pointer-events: none;
     visibility: hidden;
   }
@@ -429,7 +429,7 @@ const socialLinks = [
     background: rgba(var(--bg), 0.96);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    z-index: calc(var(--layer-nav) - 2);
+    z-index: calc(var(--layer-nav, 100) - 2);
     visibility: hidden;
     transform: none;
     pointer-events: none;
@@ -440,7 +440,9 @@ const socialLinks = [
     min-height: 100%;
     display: flex;
     flex-direction: column;
-    padding: calc(var(--nav-top-offset) + var(--nav-height) + 1rem) 1.25rem 1.2rem;
+    padding: calc(
+      var(--nav-top-offset, 1.25rem) + var(--nav-height, 52px) + 1rem
+    ) 1.25rem 1.2rem;
     gap: 1.2rem;
   }
 
@@ -584,8 +586,8 @@ const socialLinks = [
     .pn-mobile  { display: flex; }
 
     .pn-wrap {
-      left: var(--nav-mobile-inline);
-      right: var(--nav-mobile-inline);
+      left: var(--nav-mobile-inline, 0.75rem);
+      right: var(--nav-mobile-inline, 0.75rem);
       transform: none;
       justify-content: space-between;
       width: auto;
@@ -615,7 +617,9 @@ const socialLinks = [
     }
 
     .pn-mobile-inner {
-      padding: calc(var(--nav-top-offset) + var(--nav-height) + 0.8rem) 1rem 0.95rem;
+      padding: calc(
+        var(--nav-top-offset, 1.25rem) + var(--nav-height, 52px) + 0.8rem
+      ) 1rem 0.95rem;
     }
 
     .pn-mobile-link {
