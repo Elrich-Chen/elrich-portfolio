@@ -49,6 +49,8 @@ html.light {
 html {
   @apply scroll-smooth;
   transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: rgb(var(--bg));
+  min-height: 100%;
 }
 
 /* Text cursor (caret) color based on theme */
@@ -59,6 +61,7 @@ html {
 /* Optimized gradient background with dark mode support */
 body {
   background: linear-gradient(135deg, rgb(var(--bg)) 0%, rgba(var(--bg), 0.95) 50%, rgb(var(--bg)) 100%);
+  background-color: rgb(var(--bg));
   /* background-attachment: fixed; - REMOVED: causes scroll jank in Safari */
   color: rgb(var(--fg));
   @apply antialiased;

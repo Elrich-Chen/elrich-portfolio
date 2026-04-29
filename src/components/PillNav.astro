@@ -333,6 +333,8 @@ const socialLinks = [
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.7rem;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .pn-toggle-text-wrap {
@@ -464,6 +466,8 @@ const socialLinks = [
     text-transform: uppercase;
     padding-left: 0.59em;
     padding-right: 5.25em;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .pn-mobile-item-label {
@@ -727,7 +731,8 @@ const socialLinks = [
 
     if (toggleBtn && mobileMenu) {
       prepMobileStates();
-      toggleBtn.addEventListener('click', () => {
+      const handleToggle = (event?: Event) => {
+        event?.preventDefault();
         isOpen = !isOpen;
         toggleBtn.setAttribute('aria-expanded', String(isOpen));
         mobileMenu.setAttribute('aria-hidden', String(!isOpen));
@@ -776,7 +781,10 @@ const socialLinks = [
         } else {
           closeMobile();
         }
-      }, { signal });
+      };
+
+      toggleBtn.addEventListener('click', handleToggle, { signal });
+      toggleBtn.addEventListener('touchend', handleToggle, { signal, passive: false });
 
       document.addEventListener('click', (e) => {
         if (
