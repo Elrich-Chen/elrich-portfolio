@@ -286,6 +286,27 @@ const contactLinks = [
     </div>
   </section>
 
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Track email CTA clicks (primary conversion event)
+      document.querySelectorAll('a[href^="mailto:"]').forEach((el) => {
+        el.addEventListener('click', () => {
+          window.posthog?.capture('contact_email_clicked', {
+            location: el.classList.contains('contact-cta') ? 'cta_button' : 'inline_link'
+          });
+        });
+      });
+
+      // Track social icon clicks
+      document.querySelectorAll('.contact-icon').forEach((el) => {
+        el.addEventListener('click', () => {
+          window.posthog?.capture('social_link_clicked', {
+            platform: el.getAttribute('aria-label') || 'unknown'
+          });
+        });
+      });
+    });
+  </script>
 
 </Base>
 

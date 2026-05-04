@@ -71,6 +71,21 @@ const getRandomPhotoForEntry = (seed: string) => {
   </div>
 </Base>
 
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.hobby-details').forEach((details) => {
+      details.addEventListener('toggle', () => {
+        if (details.open) {
+          const title = details.querySelector('.hobby-title')?.textContent?.trim() || 'unknown';
+          window.posthog?.capture('hobby_expanded', {
+            hobby_title: title
+          });
+        }
+      });
+    });
+  });
+</script>
+
 <style>
   .page-title {
     color: #fff;

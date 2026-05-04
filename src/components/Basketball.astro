@@ -10,9 +10,6 @@
   import * as THREE from 'three';
   import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
   import gsap from 'gsap';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-  gsap.registerPlugin(ScrollTrigger);
 
   function initBasketball() {
     const canvas = document.getElementById('bball-canvas') as HTMLCanvasElement | null;
@@ -51,6 +48,8 @@
 
     // --- Proxy object (GSAP writes, rAF reads) ---
     const pos = { x: 0, targetY: 0, bobY: 0, scale: 1.0, z_rot: 0 };
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const heroEl = document.getElementById('section-hero');
 
     // --- Compute world-space top-right corner at z=0 ---
     function getCornerPos() {
@@ -65,6 +64,49 @@
     let baseScale = 1;
     let spinAngle  = 0;
     let scrollVelocity = 0;
+    let lastScrollY = window.scrollY;
+    let lastScrollT = performance.now();
+    let scrollRaf = 0;
+    let animationRaf = 0;
+    let disposed = false;
+
+    function clamp(value: number, min: number, max: number) {
+      return Math.min(Math.max(value, min), max);
+    }
+
+    function applyScrollState() {
+      scrollRaf = 0;
+      if (disposed) return;
+      if (!heroEl) return;
+
+      const now = performance.now();
+      const y = window.scrollY;
+      const dt = Math.max(now - lastScrollT, 16);
+      scrollVelocity = reducedMotion.matches ? 0 : Math.min(Math.abs(y - lastScrollY) / dt / 1.4, 2.5);
+      lastScrollY = y;
+      lastScrollT = now;
+
+      const heroBottom = heroEl.getBoundingClientRect().bottom;
+      const start = H * 0.75;
+      const end = H * 0.15;
+      const progress = clamp((start - heroBottom) / (start - end), 0, 1);
+      const corner = getCornerPos();
+
+      // Derive from actual scroll position so fast scrolls cannot miss the small-corner state.
+      pos.x = gsap.utils.interpolate(0, corner.x, progress);
+      pos.targetY = gsap.utils.interpolate(0, corner.y, progress);
+      pos.scale = gsap.utils.interpolate(1.0, 0.2, progress);
+      pos.z_rot = gsap.utils.interpolate(0, 0.25, progress);
+    }
+
+    function requestScrollState() {
+      if (disposed) return;
+      if (scrollRaf) return;
+      scrollRaf = requestAnimationFrame(applyScrollState);
+    }
+
+    requestScrollState();
+    window.addEventListener('scroll', requestScrollState, { passive: true });
 
     // --- Load GLB ---
     const loader = new GLTFLoader();
@@ -83,44 +125,18 @@
         mesh.scale.setScalar(baseScale);
         scene.add(mesh);
 
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
         // Gentle idle bob
-        gsap.to(pos, {
-          bobY: 0.18,
-          duration: 1.8,
-          ease: 'sine.inOut',
-          yoyo: true,
-          repeat: -1,
-        });
+        if (!reducedMotion.matches) {
+          gsap.to(pos, {
+            bobY: 0.18,
+            duration: 1.8,
+            ease: 'sine.inOut',
+            yoyo: true,
+            repeat: -1,
+          });
+        }
 
-        // --- Hero exit: ball shrinks & flies to top-right ---
-        const heroEl = document.getElementById('section-hero');
-        if (!heroEl) return;
-
-        ScrollTrigger.create({
-          trigger: heroEl,
-          start: 'bottom 75%',
-          end:   'bottom 15%',
-          scrub: 1.4,
-          onUpdate(self) {
-            const corner = getCornerPos();
-            pos.x       = gsap.utils.interpolate(0,          corner.x, self.progress);
-            pos.targetY = gsap.utils.interpolate(0,          corner.y, self.progress);
-            pos.scale   = gsap.utils.interpolate(1.0,        0.2,      self.progress);
-            pos.z_rot   = gsap.utils.interpolate(0,          0.25,     self.progress);
-            scrollVelocity = Math.min(Math.abs(self.getVelocity()) / 600, 2.5);
-          },
-          onLeave() {
-            // Snap to corner if user scrolls very fast
-            const corner = getCornerPos();
-            gsap.to(pos, { x: corner.x, targetY: corner.y, scale: 0.2, duration: 0.35, ease: 'power2.out' });
-          },
-          onEnterBack() {
-            // Restore to center when scrolling back to top
-            gsap.to(pos, { x: 0, targetY: 0, scale: 1.0, z_rot: 0, duration: 0.45, ease: 'power2.out' });
-          },
-        });
+        applyScrollState();
       },
       undefined,
       (err) => console.error('[Basketball] GLTFLoader error:', err)
@@ -128,17 +144,20 @@
 
     // --- Resize ---
     function onResize() {
+      if (disposed) return;
       W = window.innerWidth;
       H = window.innerHeight;
       camera.aspect = W / H;
       camera.updateProjectionMatrix();
       renderer.setSize(W, H, false);
+      requestScrollState();
     }
     window.addEventListener('resize', onResize, { passive: true });
 
     // --- Animation loop ---
     function animate() {
-      requestAnimationFrame(animate);
+      if (disposed) return;
+      animationRaf = requestAnimationFrame(animate);
       if (mesh) {
         spinAngle      += 0.008 + scrollVelocity * 0.025;
         scrollVelocity *= 0.92;
@@ -153,6 +172,18 @@
       renderer.render(scene, camera);
     }
     animate();
+
+    function cleanup() {
+      disposed = true;
+      window.removeEventListener('scroll', requestScrollState);
+      window.removeEventListener('resize', onResize);
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      if (animationRaf) cancelAnimationFrame(animationRaf);
+      gsap.killTweensOf(pos);
+      renderer.dispose();
+    }
+
+    document.addEventListener('astro:before-swap', cleanup, { once: true });
   }
 
   if (document.readyState === 'loading') {

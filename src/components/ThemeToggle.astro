@@ -116,6 +116,10 @@
       html.classList.add('dark');
       localStorage.setItem('theme', 'dark');
     }
+
+    (window as any).posthog?.capture('theme_switched', {
+      theme: isDark ? 'light' : 'dark'
+    });
   }
 
   // Initialize immediately (before DOMContentLoaded to prevent flash)

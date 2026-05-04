@@ -4,6 +4,7 @@ import PillNav from '../components/PillNav.astro';
 import TargetCursor from '../components/TargetCursor.astro';
 import Polaroid from '../components/Polaroid.astro';
 import Grainient from '../components/Grainient.astro';
+import PostHog from '../components/posthog.astro';
 import '../styles/global.css';
 
 const contactLinks = [
@@ -64,7 +65,7 @@ const contactLinks = [
     <!-- Performance: Async load signature font (non-critical) -->
     <link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript><link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap" rel="stylesheet" /></noscript>
-    
+    <PostHog />
   </head>
   <body class="overflow-x-hidden">
     <div class="safari-opaque-bg" aria-hidden="true"></div>
@@ -193,6 +194,7 @@ const contactLinks = [
         const hideToast = () => toast.classList.remove('is-visible');
 
         cta?.addEventListener('click', () => {
+          window.posthog?.capture('dark_mode_toast_accepted');
           const toggle = document.getElementById('theme-toggle');
           if (toggle instanceof HTMLButtonElement) {
             toggle.click();
@@ -201,6 +203,15 @@ const contactLinks = [
         });
 
         dismiss?.addEventListener('click', hideToast);
+      });
+
+      // Track resume link clicks (high-intent hiring signal)
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('a[aria-label="Resume"]').forEach((el) => {
+          el.addEventListener('click', () => {
+            window.posthog?.capture('resume_clicked');
+          });
+        });
       });
     </script>
     <style>

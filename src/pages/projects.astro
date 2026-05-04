@@ -134,6 +134,21 @@ const sortedProjects = rendered.sort((a, b) => {
   </div>
 </Base>
 
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.icon-link').forEach((el) => {
+      el.addEventListener('click', () => {
+        const card = el.closest('article');
+        const projectName = card?.querySelector('.card-title')?.textContent?.trim() || 'unknown';
+        window.posthog?.capture('project_link_clicked', {
+          project_name: projectName,
+          href: el.getAttribute('href') || ''
+        });
+      });
+    });
+  });
+</script>
+
 <style>
   .projects-container {
     width: 100%;
