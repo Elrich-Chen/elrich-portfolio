@@ -159,7 +159,7 @@
       if (disposed) return;
       animationRaf = requestAnimationFrame(animate);
       if (mesh) {
-        spinAngle      += 0.008 + scrollVelocity * 0.025;
+        spinAngle      += 0.0045 + scrollVelocity * 0.014;
         scrollVelocity *= 0.92;
 
         mesh.rotation.y = spinAngle;

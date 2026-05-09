@@ -18,6 +18,8 @@ const {
 
 <!-- Sticky top value must be set after we know viewport height -->
 <script define:vars={{ itemDistance, itemStackDistance, stackPosition }}>
+  let stickyRaf = 0;
+
   function applySticky() {
     const container = document.querySelector('.ss-container');
     if (!container) return;
@@ -44,12 +46,24 @@ const {
     });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', applySticky, { once: true });
-  } else {
-    applySticky();
+  function requestSticky() {
+    if (stickyRaf) return;
+    stickyRaf = requestAnimationFrame(() => {
+      stickyRaf = 0;
+      applySticky();
+    });
   }
-  window.addEventListener('resize', applySticky, { passive: true });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', requestSticky, { once: true });
+  } else {
+    requestSticky();
+  }
+  window.addEventListener('resize', requestSticky, { passive: true });
+  document.addEventListener('astro:before-swap', () => {
+    if (stickyRaf) cancelAnimationFrame(stickyRaf);
+    window.removeEventListener('resize', requestSticky);
+  }, { once: true });
 </script>
 
 <style>
@@ -72,23 +86,27 @@ const {
     padding: 3rem 3.5rem;
     border-radius: 24px;
 
-    background: rgba(255, 255, 255, 0.60);
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(12px) saturate(145%);
+    -webkit-backdrop-filter: blur(12px) saturate(145%);
     border: 1px solid rgba(255, 255, 255, 0.55);
     box-shadow:
-      0 2px 12px rgba(0, 0, 0, 0.06),
-      0 8px 36px rgba(0, 0, 0, 0.08),
+      0 2px 10px rgba(0, 0, 0, 0.05),
+      0 8px 28px rgba(0, 0, 0, 0.07),
       inset 0 1px 0 rgba(255, 255, 255, 0.7);
 
     box-sizing: border-box;
+    backface-visibility: hidden;
+    contain: paint style;
+    isolation: isolate;
+    transform: translate3d(0, 0, 0);
 
     /* Text contrast overrides */
     --muted: 40 40 40;
   }
 
   :global(html.dark .scroll-stack-card) {
-    background: rgba(16, 14, 12, 0.70);
+    background: rgba(16, 14, 12, 0.88);
     border-color: rgba(255, 255, 255, 0.12);
     box-shadow:
       0 2px 12px rgba(0, 0, 0, 0.45),
