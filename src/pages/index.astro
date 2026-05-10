@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import Basketball from '../components/Basketball.astro';
+import HeroAsciiBackdrop from '../components/HeroAsciiBackdrop.astro';
 import ScrollStack from '../components/ScrollStack.astro';
 import { getEntry, getCollection } from 'astro:content';
 
@@ -190,27 +190,27 @@ const contactLinks = [
 
 <Base title="Elrich Chen" description="CS @ UWaterloo | AI automations for DoneMaker | Aspiring Backend Engineer" fullscreen={true} homeLoading={true}>
 
+  <!-- One WebGL ASCII layer for the whole page (fixed); Grainient stays underneath -->
+  <HeroAsciiBackdrop videoSrc="/videos/po.mp4" />
 
-  <!-- Fixed basketball canvas — sits at z:15 for hero, drops to z:4 for content sections -->
-  <Basketball />
-
-  <!-- ── HERO ──────────────────────────────────────────────────────────────── -->
-  <section id="section-hero" class="scroll-section hero-section">
-    <div class="hero-content">
-      <h1 class="hero-name">Elrich Chen</h1>
-      <div class="hero-tagline">
-        <a href="https://uwaterloo.ca/future-students/programs/computer-science" target="_blank" rel="noopener noreferrer" class="tagline-link">CS @ UWaterloo</a>
-        <span class="tagline-dot">·</span>
-        <span class="tagline-plain">Builder</span>
-        <span class="tagline-dot">·</span>
-        <a href="https://www.ycombinator.com/companies/medme-health" target="_blank" rel="noopener noreferrer" class="tagline-link">SWE @ MedMe Health (YC W21)</a>
+  <div class="home-ascii-first-screen">
+    <section id="section-hero" class="hero-atop-ascii-section" aria-label="Introduction">
+      <div class="hero-atop-inner">
+        <h1 class="hero-name">Elrich Chen</h1>
+        <div class="hero-tagline">
+          <a href="https://uwaterloo.ca/future-students/programs/computer-science" target="_blank" rel="noopener noreferrer" class="tagline-link">CS @ UWaterloo</a>
+          <span class="tagline-dot">·</span>
+          <span class="tagline-plain">Builder</span>
+          <span class="tagline-dot">·</span>
+          <a href="https://www.ycombinator.com/companies/medme-health" target="_blank" rel="noopener noreferrer" class="tagline-link">SWE @ MedMe Health (YC W21)</a>
+        </div>
+        <div class="hero-scroll-hint" aria-hidden="true">
+          <span class="hint-label">scroll</span>
+          <span class="hint-arrow">↓</span>
+        </div>
       </div>
-      <div class="hero-scroll-hint" aria-hidden="true">
-        <span class="hint-label">scroll</span>
-        <span class="hint-arrow">↓</span>
-      </div>
-    </div>
-  </section>
+    </section>
+  </div>
 
   <!-- ── BODY: stacked transparent cards ──────────────────────────────────── -->
   <ScrollStack>
@@ -508,23 +508,80 @@ const contactLinks = [
     z-index: 5;
   }
 
-  /* ── Hero stays full viewport height ─────────────────────────────────────── */
-  .hero-section {
-    min-height: calc(100svh - var(--nav-clearance));
-    justify-content: center;
+  /* Hero block over the fixed page-wide ASCII backdrop (backdrop is sibling, not clipped here). */
+  .home-ascii-first-screen {
+    /*
+     * Nav clearance lives on `main.main-fullscreen` in Base.astro.
+     * Old pattern used a negative margin that pulled this card up so its top hugged the
+     * navbar; inner `padding-top` did not inset the ASCII layer because it is `position:absolute`
+     * and paints over the padding box → no visible gap above the video.
+     * Positive margin stacks below fullscreen padding for a clear grain strip under the pill nav.
+     */
+    --hero-ascii-after-nav-gap: clamp(7.5rem, 8vw + 6rem, 20rem);
+    position: relative;
+    width: 100vw;
+    max-width: none;
+    left: 50%;
+    transform: translateX(-50%);
+    box-sizing: border-box;
+    margin-top: var(--hero-ascii-after-nav-gap);
+    padding-top: 0;
+    min-height: clamp(22rem, 62dvh, 38rem);
+    display: flex;
     flex-direction: column;
-    text-align: center;
-    padding: calc(var(--nav-clearance) * 0.22) 0 0;
+    position: relative;
+    z-index: 2;
   }
 
-  .hero-content {
+  @media (min-width: 900px) {
+    .home-ascii-first-screen {
+      min-height: clamp(26rem, 52dvh, 44rem);
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .home-ascii-first-screen {
+      min-height: clamp(26rem, 50dvh, 42rem);
+    }
+  }
+
+  @media (min-width: 1536px) {
+    .home-ascii-first-screen {
+      min-height: clamp(26rem, 48dvh, 40rem);
+    }
+  }
+
+  @media (min-width: 1920px) {
+    .home-ascii-first-screen {
+      min-height: clamp(26rem, 46dvh, 38rem);
+    }
+  }
+
+  .hero-atop-ascii-section {
+    position: relative;
+    z-index: 5;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex: 1 1 auto;
+    min-height: 0;
+    /* Shorter hero block → slightly less vertical padding so copy + ASCII stay balanced */
+    padding: clamp(1.85rem, 7dvh, 4.75rem) clamp(1rem, 4vw, 1.5rem) clamp(1.25rem, 4dvh, 2.25rem);
+    user-select: none;
+  }
+
+  .hero-atop-inner {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1rem;
-    user-select: none;
-    width: min(100%, calc(100vw - 1.4rem));
+    width: min(100%, calc(100vw - 2rem));
+    max-width: 72rem;
     margin-inline: auto;
+    position: relative;
   }
 
   /* Allow mouse events through to the name so TextPressure cursor tracking works,
@@ -535,8 +592,12 @@ const contactLinks = [
   }
 
   .hero-name {
+    position: relative;
+    z-index: 1;
     font-family: 'Syne', sans-serif;
-    font-size: clamp(3.5rem, 14vw, 10rem);
+    /* Single line: old 14vw made “ELRICH CHEN” wider than the viewport */
+    white-space: nowrap;
+    font-size: clamp(1.45rem, 2.85vw + 0.95rem, 5.35rem);
     font-weight: 800;
     letter-spacing: -0.03em;
     line-height: 1;
@@ -545,6 +606,9 @@ const contactLinks = [
     text-transform: uppercase;
     color: #ffffff;
     user-select: none;
+    text-shadow:
+      0 0.06em 0.28em rgba(0, 0, 0, 0.72),
+      0 0.02em 0.06em rgba(0, 0, 0, 0.9);
   }
 
   .hero-tagline {
@@ -602,20 +666,20 @@ const contactLinks = [
     flex-direction: column;
     align-items: center;
     gap: 0.3rem;
-    margin-top: 2rem;
-    opacity: 0.45;
+    margin-top: 0.5rem;
+    opacity: 0.55;
   }
 
   .hint-label {
     font-size: 0.65rem;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: #fff;
+    color: rgba(255, 255, 255, 0.65);
   }
 
   .hint-arrow {
     font-size: 1.2rem;
-    color: #fff;
+    color: rgba(255, 255, 255, 0.55);
     animation: hint-bounce 1.8s ease-in-out infinite;
   }
 
@@ -1082,10 +1146,6 @@ const contactLinks = [
   }
 
   @media (max-width: 1024px) {
-    .hero-name {
-      font-size: clamp(2.65rem, 12.5vw, 6.4rem);
-    }
-
     .hero-tagline {
       padding: 0.45rem 0.9rem;
       font-size: clamp(0.9rem, 2.35vw, 1.2rem);
@@ -1131,15 +1191,9 @@ const contactLinks = [
   }
 
   @media (max-width: 480px) {
-    .hero-content {
+    .hero-atop-inner {
       gap: 0.55rem;
       width: calc(100vw - 0.75rem);
-    }
-
-    .hero-name {
-      font-size: clamp(1.95rem, 11.5vw, 3.1rem);
-      line-height: 0.96;
-      letter-spacing: -0.015em;
     }
 
     .hero-tagline {

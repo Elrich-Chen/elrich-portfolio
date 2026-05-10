@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import HeroAsciiBackdrop from '../../components/HeroAsciiBackdrop.astro';
 import { getCollection } from 'astro:content';
 const posts = await getCollection('hobbies');
 const photos = await getCollection('photos');
@@ -27,47 +28,50 @@ const getRandomPhotoForEntry = (seed: string) => {
 ---
 
 <Base title="Hobbies – Elrich Chen">
-  <div class="mb-6">
-    <a href="/" class="back-home-link">← Back to home</a>
-  </div>
-  <h1 class="page-title text-xl font-semibold mb-4">Hobbies</h1>
+  <HeroAsciiBackdrop videoSrc="/videos/homeland.mp4" />
+  <div class="hobbies-content-shell">
+    <div class="mb-6">
+      <a href="/" class="back-home-link">← Back to home</a>
+    </div>
+    <h1 class="page-title text-xl font-semibold mb-4">Hobbies</h1>
 
-  <div class="hobby-grid">
-    {sortedEntries.map(({ entry, Content }) => (
-      <details class="hobby-card hobby-details">
-        <summary class="hobby-summary-toggle">
-          <div class="hobby-head">
-            <div>
-              <h2 class="hobby-title">{entry.data.title}</h2>
-              <p class="hobby-date">{entry.data.date}</p>
+    <div class="hobby-grid">
+      {sortedEntries.map(({ entry, Content }) => (
+        <details class="hobby-card hobby-details">
+          <summary class="hobby-summary-toggle">
+            <div class="hobby-head">
+              <div>
+                <h2 class="hobby-title">{entry.data.title}</h2>
+                <p class="hobby-date">{entry.data.date}</p>
+              </div>
             </div>
+            {entry.data.summary && <p class="hobby-summary">{entry.data.summary}</p>}
+            {entry.data.tags?.length > 0 && (
+              <div class="hobby-tags hobby-tags-bottom">
+                {entry.data.tags.map((tag: string) => (
+                  <span class="hobby-tag">{tag}</span>
+                ))}
+              </div>
+            )}
+            <span class="hobby-toggle" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 8l4 4 4-4" />
+              </svg>
+            </span>
+          </summary>
+          <div class="hobby-body">
+            <img
+              src={getRandomPhotoForEntry(entry.slug)}
+              alt={`Hobby visual for ${entry.data.title}`}
+              class="hobby-body-photo"
+              loading="lazy"
+              decoding="async"
+            />
+            <Content />
           </div>
-          {entry.data.summary && <p class="hobby-summary">{entry.data.summary}</p>}
-          {entry.data.tags?.length > 0 && (
-            <div class="hobby-tags hobby-tags-bottom">
-              {entry.data.tags.map((tag: string) => (
-                <span class="hobby-tag">{tag}</span>
-              ))}
-            </div>
-          )}
-          <span class="hobby-toggle" aria-hidden="true">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M6 8l4 4 4-4" />
-            </svg>
-          </span>
-        </summary>
-        <div class="hobby-body">
-          <img
-            src={getRandomPhotoForEntry(entry.slug)}
-            alt={`Hobby visual for ${entry.data.title}`}
-            class="hobby-body-photo"
-            loading="lazy"
-            decoding="async"
-          />
-          <Content />
-        </div>
-      </details>
-    ))}
+        </details>
+      ))}
+    </div>
   </div>
 </Base>
 
@@ -87,6 +91,11 @@ const getRandomPhotoForEntry = (seed: string) => {
 </script>
 
 <style>
+  .hobbies-content-shell {
+    position: relative;
+    z-index: 3;
+  }
+
   .page-title {
     color: #fff;
   }

@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import HeroAsciiBackdrop from '../components/HeroAsciiBackdrop.astro';
 import Polaroid from '../components/Polaroid.astro';
 
 const stats = [
@@ -66,11 +67,13 @@ const techStack = {
 ---
 
 <Base title="About – Elrich Chen">
-  <div class="mb-6">
-    <a href="/" class="back-home-link">← Back to home</a>
-  </div>
+  <HeroAsciiBackdrop videoSrc="/videos/shifu.mp4" />
+  <div class="about-content-shell">
+    <div class="mb-6">
+      <a href="/" class="back-home-link">← Back to home</a>
+    </div>
 
-  <div class="about-shell">
+    <div class="about-shell">
     <div class="about-grid">
       <aside class="about-sidebar">
         <div class="profile-card">
@@ -210,10 +213,16 @@ const techStack = {
         </section>
       </div>
     </div>
+    </div>
   </div>
 </Base>
 
 <style>
+  .about-content-shell {
+    position: relative;
+    z-index: 3;
+  }
+
   .about-shell {
     padding-bottom: 2.5rem;
   }

@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import HeroAsciiBackdrop from '../components/HeroAsciiBackdrop.astro';
 import MagicBentoGrid from '../components/MagicBentoGrid.astro';
 import { getCollection } from 'astro:content';
 
@@ -21,25 +22,27 @@ const sortedProjects = projects.sort((a, b) => {
 ---
 
 <Base title="Projects – Elrich Chen">
-  <div class="mb-6">
-    <a href="/" class="back-home-link">← Back to home</a>
-  </div>
-  <h1 class="page-title text-xl font-semibold mb-8">Projects</h1>
+  <HeroAsciiBackdrop videoSrc="/videos/closepo.mp4" />
+  <div class="projects-content-shell">
+    <div class="mb-6">
+      <a href="/" class="back-home-link">← Back to home</a>
+    </div>
+    <h1 class="page-title text-xl font-semibold mb-8">Projects</h1>
 
-  <div class="projects-container pb-24">
-    <MagicBentoGrid
-      glowColor="90, 138, 232"
-      enableBorderGlow={true}
-      enableSpotlight={true}
-      enableStars={true}
-      enableTilt={false}
-      enableMagnetism={true}
-      clickEffect={true}
-      spotlightRadius={360}
-      particleCount={12}
-    >
-    <div class="projects-grid">
-      {sortedProjects.map((p, index) => {
+    <div class="projects-container pb-24">
+      <MagicBentoGrid
+        glowColor="90, 138, 232"
+        enableBorderGlow={true}
+        enableSpotlight={true}
+        enableStars={true}
+        enableTilt={false}
+        enableMagnetism={true}
+        clickEffect={true}
+        spotlightRadius={360}
+        particleCount={12}
+      >
+      <div class="projects-grid">
+        {sortedProjects.map((p, index) => {
         const highlights = p.data.highlights ?? [];
         const visibleHighlightCount = p.data.featured ? 3 : 2;
         const visibleHighlights = highlights.slice(0, visibleHighlightCount);
@@ -152,9 +155,10 @@ const sortedProjects = projects.sort((a, b) => {
             </div>
           </article>
         );
-      })}
+        })}
+      </div>
+      </MagicBentoGrid>
     </div>
-    </MagicBentoGrid>
   </div>
 </Base>
 
@@ -174,6 +178,11 @@ const sortedProjects = projects.sort((a, b) => {
 </script>
 
 <style>
+  .projects-content-shell {
+    position: relative;
+    z-index: 3;
+  }
+
   .projects-container {
     width: 100%;
     max-width: 1120px;
@@ -182,6 +191,10 @@ const sortedProjects = projects.sort((a, b) => {
 
   .page-title {
     color: rgb(var(--fg));
+  }
+
+  :global(html.light) .page-title {
+    color: #ffffff;
   }
 
   .projects-grid {

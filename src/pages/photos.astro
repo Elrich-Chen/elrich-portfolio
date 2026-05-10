@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import HeroAsciiBackdrop from '../components/HeroAsciiBackdrop.astro';
 import TiltedCard from '../components/TiltedCard.astro';
 import { getCollection } from 'astro:content';
 
@@ -7,50 +8,58 @@ const allPhotos = await getCollection('photos');
 ---
 
 <Base title="Photos – Elrich Chen">
-  <div class="mb-6">
-    <a href="/" class="back-home-link">← Back to home</a>
-  </div>
-  <h1 class="page-title text-xl font-semibold mb-8">Photos</h1>
-  <p class="photo-intro">Drag or tap photos to explore the gallery.</p>
+  <HeroAsciiBackdrop videoSrc="/videos/tiger.mp4" />
+  <div class="photos-content-shell">
+    <div class="mb-6">
+      <a href="/" class="back-home-link">← Back to home</a>
+    </div>
+    <h1 class="page-title text-xl font-semibold mb-8">Photos</h1>
+    <p class="photo-intro">Drag or tap photos to explore the gallery.</p>
 
-  {allPhotos.length === 0 ? (
-    <p class="text-neutral-600">No photos yet. Add your photos to src/content/photos/</p>
-  ) : (
-    <div class="photo-grid">
-      {allPhotos.map((photo) => (
-        <div class="photo-cell">
-          <TiltedCard
-            imageSrc={photo.data.image}
-            altText={photo.data.caption}
-            captionText={[photo.data.caption, photo.data.location].filter(Boolean).join(' · ')}
-            containerHeight="100%"
-            containerWidth="100%"
-            imageHeight="100%"
-            imageWidth="100%"
-            rotateAmplitude={12}
-            scaleOnHover={1.06}
-            showMobileWarning={false}
-            showTooltip={true}
-          />
-          <div class="photo-meta">
-            <p class="photo-caption">{photo.data.caption}</p>
-            <div class="photo-sub">
-              <span>{photo.data.date}</span>
-              {photo.data.location && (
-                <>
-                  <span class="dot">·</span>
-                  <span>{photo.data.location}</span>
-                </>
-              )}
+    {allPhotos.length === 0 ? (
+      <p class="text-neutral-600">No photos yet. Add your photos to src/content/photos/</p>
+    ) : (
+      <div class="photo-grid">
+        {allPhotos.map((photo) => (
+          <div class="photo-cell">
+            <TiltedCard
+              imageSrc={photo.data.image}
+              altText={photo.data.caption}
+              captionText={[photo.data.caption, photo.data.location].filter(Boolean).join(' · ')}
+              containerHeight="100%"
+              containerWidth="100%"
+              imageHeight="100%"
+              imageWidth="100%"
+              rotateAmplitude={12}
+              scaleOnHover={1.06}
+              showMobileWarning={false}
+              showTooltip={true}
+            />
+            <div class="photo-meta">
+              <p class="photo-caption">{photo.data.caption}</p>
+              <div class="photo-sub">
+                <span>{photo.data.date}</span>
+                {photo.data.location && (
+                  <>
+                    <span class="dot">·</span>
+                    <span>{photo.data.location}</span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
-    </div>
-  )}
+        ))}
+      </div>
+    )}
+  </div>
 </Base>
 
 <style>
+  .photos-content-shell {
+    position: relative;
+    z-index: 3;
+  }
+
   .photo-grid {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
