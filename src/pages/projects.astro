@@ -30,7 +30,7 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
     <div class="mb-6">
       <a href="/" class="back-home-link">← Back to home</a>
     </div>
-    <h1 class="page-title text-xl font-semibold mb-8">Projects</h1>
+    <h1 class="page-title text-base font-semibold mb-5">Projects</h1>
 
     <div class="projects-container pb-24">
       <MagicBentoGrid
@@ -47,7 +47,7 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
       <div class="featured-projects-grid">
         {featuredProjects.map((p, index) => {
         const highlights = p.data.highlights ?? [];
-        const visibleHighlightCount = p.data.featured ? 3 : 2;
+        const visibleHighlightCount = 2;
         const visibleHighlights = highlights.slice(0, visibleHighlightCount);
         const hiddenHighlights = highlights.slice(visibleHighlightCount);
         const categoryLabel = p.data.category ?? 'Project';
@@ -70,7 +70,6 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
             <div class="card-content">
               <div class="card-eyebrow" aria-label="Project details">
                 <span class="eyebrow-category">{categoryLabel}</span>
-                {p.data.year && <span class="eyebrow-item">{p.data.year}</span>}
                 {p.data.deployed && <span class="status-badge">Live</span>}
               </div>
 
@@ -134,20 +133,12 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
                 </div>
               )}
 
-              {(p.data.role || p.data.duration) && (
+              {p.data.duration && (
                 <div class="card-meta">
-                  {p.data.role && (
-                    <span class="meta-item">
-                      <span class="meta-label">Role</span>
-                      <span>{p.data.role}</span>
-                    </span>
-                  )}
-                  {p.data.duration && (
-                    <span class="meta-item">
-                      <span class="meta-label">Timeline</span>
-                      <span>{p.data.duration}</span>
-                    </span>
-                  )}
+                  <span class="meta-item">
+                    <span class="meta-label">Timeline</span>
+                    <span>{p.data.duration}</span>
+                  </span>
                 </div>
               )}
 
@@ -211,7 +202,6 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
                       <div class="card-content">
                         <div class="card-eyebrow" aria-label="Project details">
                           <span class="eyebrow-category">{categoryLabel}</span>
-                          {p.data.year && <span class="eyebrow-item">{p.data.year}</span>}
                           {p.data.deployed && <span class="status-badge">Live</span>}
                         </div>
 
@@ -275,20 +265,12 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
                           </div>
                         )}
 
-                        {(p.data.role || p.data.duration) && (
+                        {p.data.duration && (
                           <div class="card-meta">
-                            {p.data.role && (
-                              <span class="meta-item">
-                                <span class="meta-label">Role</span>
-                                <span>{p.data.role}</span>
-                              </span>
-                            )}
-                            {p.data.duration && (
-                              <span class="meta-item">
-                                <span class="meta-label">Timeline</span>
-                                <span>{p.data.duration}</span>
-                              </span>
-                            )}
+                            <span class="meta-item">
+                              <span class="meta-label">Timeline</span>
+                              <span>{p.data.duration}</span>
+                            </span>
                           </div>
                         )}
 
@@ -449,7 +431,7 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
 
   .projects-container {
     width: 100%;
-    max-width: 56rem;
+    max-width: 42rem;
     margin-inline: auto;
   }
 
@@ -473,9 +455,9 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
   }
 
   .featured-projects-grid > .project-card {
-    flex: 1 1 22rem;
+    flex: 1 1 18rem;
     min-width: 0;
-    max-width: 28rem;
+    max-width: 22rem;
   }
 
   @media (max-width: 767px) {
@@ -503,8 +485,8 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
     top: 50%;
     transform: translateY(-50%);
     z-index: 6;
-    width: 3rem;
-    height: 3rem;
+    width: 1.8rem;
+    height: 1.8rem;
     border-radius: 999px;
     border: 1.5px solid rgba(0, 0, 0, 0.08);
     background: #ffffff;
@@ -513,28 +495,28 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.32);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     padding: 0;
   }
 
   .carousel-arrow svg {
-    width: 22px;
-    height: 22px;
+    width: 14px;
+    height: 14px;
     display: block;
   }
 
   .carousel-arrow--prev {
-    left: 0.6rem;
+    left: 0.4rem;
   }
 
   .carousel-arrow--next {
-    right: 0.6rem;
+    right: 0.4rem;
   }
 
   .carousel-arrow:hover {
     transform: translateY(-50%) scale(1.07);
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.42);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.38);
     background: #ffffff;
   }
 
@@ -545,29 +527,29 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
 
   @media (min-width: 1024px) {
     .carousel-arrow {
-      width: 3.4rem;
-      height: 3.4rem;
+      width: 2rem;
+      height: 2rem;
     }
     .carousel-arrow svg {
-      width: 26px;
-      height: 26px;
+      width: 16px;
+      height: 16px;
     }
     .carousel-arrow--prev {
-      left: -1.25rem;
+      left: -0.75rem;
     }
     .carousel-arrow--next {
-      right: -1.25rem;
+      right: -0.75rem;
     }
   }
 
   @media (max-width: 480px) {
     .carousel-arrow {
-      width: 2.6rem;
-      height: 2.6rem;
+      width: 1.55rem;
+      height: 1.55rem;
     }
     .carousel-arrow svg {
-      width: 20px;
-      height: 20px;
+      width: 12px;
+      height: 12px;
     }
   }
 
@@ -600,7 +582,7 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
 
   .carousel-slide .project-card {
     width: 100%;
-    min-height: 30rem;
+    min-height: 19rem;
     height: 100%;
   }
 
@@ -795,16 +777,16 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
 
   /* Card Content */
   .card-content {
-    padding: 0.75rem 0.82rem;
+    padding: 0.6rem 0.7rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.4rem;
     flex: 1;
   }
 
   .card-hero {
     width: 100%;
-    height: 132px;
+    height: 108px;
     overflow: hidden;
     background: rgba(var(--border), 0.04);
     border-bottom: 1px solid var(--card-border);
@@ -821,9 +803,9 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 0.45rem;
+    gap: 0.4rem;
     color: var(--card-subtle);
-    font-size: 0.72rem;
+    font-size: 0.64rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -884,9 +866,9 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
   }
 
   .card-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
+    width: 28px;
+    height: 28px;
+    border-radius: 9px;
     background: var(--card-badge-bg);
     border: 1px solid var(--card-border);
     display: inline-flex;
@@ -903,7 +885,7 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
   }
 
   .card-title {
-    font-size: 0.94rem;
+    font-size: 0.85rem;
     font-weight: 700;
     line-height: 1.3;
     color: var(--card-fg);
@@ -912,23 +894,11 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
     overflow-wrap: anywhere;
   }
 
-  @media (min-width: 768px) {
-    .project-card.featured .card-content {
-      padding: 0.88rem 0.95rem;
-      gap: 0.62rem;
-    }
-
-    .project-card.featured .card-title {
-      font-size: 1.06rem;
-    }
-
-    .project-card.featured .card-tagline {
-      font-size: 0.96rem;
-    }
-  }
+  /* Featured cards use the same tight padding/font as carousel cards;
+     no breakpoint upgrade so they stay compact. */
 
   .icon-link {
-    min-height: 40px;
+    min-height: 34px;
     max-width: 100%;
     border-radius: 999px;
     background: var(--card-accent);
@@ -936,13 +906,13 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
+    gap: 0.35rem;
     color: white;
     flex: 0 0 auto;
-    font-size: 0.78rem;
+    font-size: 0.7rem;
     font-weight: 700;
     line-height: 1;
-    padding: 0.55rem 0.8rem;
+    padding: 0.45rem 0.7rem;
     white-space: nowrap;
     transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
     text-decoration: none;
@@ -957,7 +927,7 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
 
   /* Tagline */
   .card-tagline {
-    font-size: 0.84rem;
+    font-size: 0.76rem;
     color: var(--card-muted);
     font-weight: 500;
     line-height: 1.5;
@@ -974,12 +944,12 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
 
   .tag-pill {
     display: inline-block;
-    padding: 0.24rem 0.55rem;
+    padding: 0.2rem 0.48rem;
     background: var(--card-badge-bg);
     border: 1px solid var(--card-border);
     color: var(--card-muted);
     border-radius: 999px;
-    font-size: 0.74rem;
+    font-size: 0.66rem;
     font-weight: 600;
     letter-spacing: 0.01em;
     transition: all 0.2s ease;
@@ -995,11 +965,11 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
   .highlights-block {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
-    padding: 0.58rem 0.62rem;
+    gap: 0.32rem;
+    padding: 0.46rem 0.52rem;
     background: rgba(var(--border), 0.035);
     border: 1px solid var(--card-border);
-    border-radius: 14px;
+    border-radius: 12px;
   }
 
   :global(html.dark) .highlights-block {
@@ -1022,15 +992,15 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
   .card-details-summary {
     cursor: pointer;
     list-style: none;
-    font-size: 0.82rem;
+    font-size: 0.74rem;
     font-weight: 700;
     color: var(--card-accent);
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.3rem;
     width: fit-content;
-    min-height: 44px;
-    padding: 0.2rem 0;
+    min-height: 36px;
+    padding: 0.18rem 0;
     border-bottom: 1px solid currentColor;
     transition: color 0.2s ease, border-color 0.2s ease;
   }
@@ -1064,10 +1034,10 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
   }
 
   .card-highlights li {
-    font-size: 0.86rem;
+    font-size: 0.76rem;
     color: var(--card-fg);
-    line-height: 1.5;
-    padding-left: 1rem;
+    line-height: 1.45;
+    padding-left: 0.85rem;
     position: relative;
   }
 
@@ -1082,9 +1052,9 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
   /* Metadata */
   .card-meta {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 0.55rem;
-    font-size: 0.78rem;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.45rem;
+    font-size: 0.7rem;
     color: var(--card-muted);
     padding-top: 0.1rem;
     margin-top: auto;
@@ -1093,16 +1063,16 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
   .meta-item {
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
-    padding: 0.55rem 0.65rem;
+    gap: 0.12rem;
+    padding: 0.42rem 0.52rem;
     background: rgba(var(--border), 0.035);
     border: 1px solid var(--card-border);
-    border-radius: 12px;
+    border-radius: 10px;
   }
 
   .meta-label {
     color: var(--card-subtle);
-    font-size: 0.66rem;
+    font-size: 0.6rem;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
