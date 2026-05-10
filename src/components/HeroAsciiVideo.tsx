@@ -3,6 +3,7 @@ import { VideoAscii } from 'react-video-ascii';
 
 type HeroAsciiVideoProps = {
   videoSrc?: string;
+  loop?: boolean;
 };
 
 /**
@@ -29,9 +30,15 @@ const SAFE_MIN_DIM = 72;
  * Remounts after the tab/window was hidden (e.g. minimized): WebGL2 contexts are often torn
  * down; `react-video-ascii` does not recover from context loss, which shows as a black canvas.
  */
-export default function HeroAsciiVideo({ videoSrc = '/videos/jellyfish.mp4' }: HeroAsciiVideoProps) {
+export default function HeroAsciiVideo({
+  videoSrc = '/videos/jellyfish.mp4',
+  loop = false,
+}: HeroAsciiVideoProps) {
   const src = useMemo(() => videoSrc, [videoSrc]);
   const shellRef = useRef<HTMLDivElement>(null);
+  const activeVideoRef = useRef<HTMLVideoElement | null>(null);
+  /** Synced from video-binding effect so replay can clear “held at last frame” before `play`. */
+  const frozenAtEndRef = useRef(false);
   const [cols, setCols] = useState(96);
   const [instanceKey, setInstanceKey] = useState(0);
   const remount = useCallback(() => setInstanceKey((n) => n + 1), []);
@@ -113,7 +120,6 @@ export default function HeroAsciiVideo({ videoSrc = '/videos/jellyfish.mp4' }: H
     const host = shellRef.current;
     if (!host) return;
     let activeVideo: HTMLVideoElement | null = null;
-    let frozenAtEnd = false;
 
     const bindVideo = (video: HTMLVideoElement) => {
       if (activeVideo === video) return;
@@ -123,17 +129,21 @@ export default function HeroAsciiVideo({ videoSrc = '/videos/jellyfish.mp4' }: H
         activeVideo.removeEventListener('play', keepFrozen);
       }
       activeVideo = video;
-      frozenAtEnd = false;
-      activeVideo.loop = false;
+      activeVideoRef.current = video;
+      frozenAtEndRef.current = false;
+      activeVideo.loop = loop;
       activeVideo.playbackRate = 0.88;
-      activeVideo.addEventListener('ended', freezeAtLastFrame);
-      activeVideo.addEventListener('timeupdate', freezeNearEnd);
-      activeVideo.addEventListener('play', keepFrozen);
+      if (!loop) {
+        activeVideo.addEventListener('ended', freezeAtLastFrame);
+        activeVideo.addEventListener('timeupdate', freezeNearEnd);
+        activeVideo.addEventListener('play', keepFrozen);
+      }
     };
 
     const freezeAtLastFrame = () => {
-      if (!activeVideo || frozenAtEnd) return;
-      frozenAtEnd = true;
+      if (loop) return;
+      if (!activeVideo || frozenAtEndRef.current) return;
+      frozenAtEndRef.current = true;
       const lastFrameTime =
         Number.isFinite(activeVideo.duration) && activeVideo.duration > 0
           ? Math.max(0, activeVideo.duration - 0.04)
@@ -143,6 +153,7 @@ export default function HeroAsciiVideo({ videoSrc = '/videos/jellyfish.mp4' }: H
     };
 
     const freezeNearEnd = () => {
+      if (loop) return;
       if (!activeVideo) return;
       if (!Number.isFinite(activeVideo.duration) || activeVideo.duration <= 0) return;
       if (activeVideo.currentTime >= activeVideo.duration - 0.06) {
@@ -151,7 +162,13 @@ export default function HeroAsciiVideo({ videoSrc = '/videos/jellyfish.mp4' }: H
     };
 
     const keepFrozen = () => {
-      if (!activeVideo || !frozenAtEnd) return;
+      if (loop) return;
+      if (!activeVideo || !frozenAtEndRef.current) return;
+      // Replay: we seek to 0 and call play() — do not re-freeze on that play event.
+      if (activeVideo.currentTime < 0.35) {
+        frozenAtEndRef.current = false;
+        return;
+      }
       activeVideo.pause();
       activeVideo.currentTime = Math.max(0, (activeVideo.duration || 0) - 0.04);
     };
@@ -172,8 +189,35 @@ export default function HeroAsciiVideo({ videoSrc = '/videos/jellyfish.mp4' }: H
         activeVideo.removeEventListener('timeupdate', freezeNearEnd);
         activeVideo.removeEventListener('play', keepFrozen);
       }
+      activeVideoRef.current = null;
     };
-  }, [instanceKey, src]);
+  }, [instanceKey, loop, src]);
+
+  const handleReplay = useCallback(() => {
+    const shell = shellRef.current;
+    let video = activeVideoRef.current;
+    if (!video && shell) {
+      const v = shell.querySelector('video');
+      if (v instanceof HTMLVideoElement) {
+        activeVideoRef.current = v;
+        video = v;
+      }
+    }
+    if (!video) return;
+    frozenAtEndRef.current = false;
+    video.loop = loop;
+    video.currentTime = 0;
+    const playResult = video.play();
+    if (playResult && typeof playResult.catch === 'function') {
+      playResult.catch(() => {});
+    }
+  }, [loop]);
+
+  useEffect(() => {
+    const onExternalReplay = () => handleReplay();
+    window.addEventListener('ascii-video-replay', onExternalReplay);
+    return () => window.removeEventListener('ascii-video-replay', onExternalReplay);
+  }, [handleReplay]);
 
   return (
     <div ref={shellRef} className="hero-ascii-size-guard">

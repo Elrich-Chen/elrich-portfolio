@@ -13,6 +13,7 @@ highlights:
   - Built a Next.js SSR frontend with TailwindCSS for performance and SEO
 role: Full-Stack Developer
 deployed: true
+featured: true
 order: 1
 wide: true
 ---

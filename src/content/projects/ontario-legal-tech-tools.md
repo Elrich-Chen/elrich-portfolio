@@ -12,7 +12,6 @@ highlights:
   - Wrote comprehensive documentation improving adoption among legal staff
 role: Software Engineer
 duration: Ongoing
-featured: true
 ---
 
 Engineered legal software tools for personal injury law startup helping lawyers process cases efficiently. Redesigned homepage with UI/UX principles and wrote documentation for 2 tools to improve adoption among non-technical legal staff.

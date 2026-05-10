@@ -1,16 +1,72 @@
 ---
 import HeroAsciiVideo from './HeroAsciiVideo';
-const { videoSrc = '/videos/jellyfish.mp4' } = Astro.props;
+const { videoSrc = '/videos/jellyfish.mp4', loop = false } = Astro.props;
 ---
 
-<!-- Single island: fixed under main content (+Grainient below), spans the viewport while you scroll -->
+<!-- Fixed ASCII layer: decorative only (aria-hidden). Replay lives outside so it stays accessible. -->
 <div class="home-ascii-global-root" aria-hidden="true">
   <div class="hero-name-ascii-shell">
     <div class="hero-name-ascii-mount">
-      <HeroAsciiVideo videoSrc={videoSrc} client:media="(prefers-reduced-motion: no-preference)" />
+      <HeroAsciiVideo videoSrc={videoSrc} loop={loop} client:media="(prefers-reduced-motion: no-preference)" />
     </div>
   </div>
 </div>
+
+<button
+  type="button"
+  class="ascii-replay-dock cursor-target"
+  aria-label="Reload ASCII animation"
+>
+  <!-- Reload-style circular arrows (not a play triangle) -->
+  <svg
+    class="ascii-replay-dock__glyph"
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <path
+      d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"
+      stroke="currentColor"
+      stroke-width="2.1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M3 3v5h5"
+      stroke="currentColor"
+      stroke-width="2.1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"
+      stroke="currentColor"
+      stroke-width="2.1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M21 21v-5h-5"
+      stroke="currentColor"
+      stroke-width="2.1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+</button>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.ascii-replay-dock').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        window.dispatchEvent(new CustomEvent('ascii-video-replay'));
+      });
+    });
+  });
+</script>
 
 <style>
   /* Above Grainient (layer 0); keep z below home columns/hero (.home-ascii-first-screen is higher). */
@@ -61,6 +117,75 @@ const { videoSrc = '/videos/jellyfish.mp4' } = Astro.props;
   @media (prefers-reduced-motion: reduce) {
     .home-ascii-global-root {
       display: none;
+    }
+
+    .ascii-replay-dock {
+      display: none;
+    }
+  }
+
+  /* Sits just under the pill nav, aligned to the nav bar’s right edge — compact tile, not a pill */
+  .ascii-replay-dock {
+    position: fixed;
+    z-index: calc(var(--layer-nav, 60) - 1);
+    pointer-events: auto;
+    cursor: pointer;
+
+    top: calc(var(--nav-top-offset, 1.25rem) + var(--nav-height, 52px) + 0.32rem);
+    right: max(0.65rem, calc((100vw - min(var(--page-max-width), calc(100vw - 2rem))) / 2));
+    left: auto;
+
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+    border: 1px solid rgba(255, 255, 255, 0.26);
+    background: rgba(8, 8, 8, 0.52);
+    color: rgba(255, 255, 255, 0.92);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.22);
+    transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+  }
+
+  .ascii-replay-dock:hover {
+    border-color: rgba(255, 255, 255, 0.42);
+    background: rgba(12, 12, 12, 0.68);
+    transform: translateY(1px);
+  }
+
+  .ascii-replay-dock:active {
+    transform: translateY(0);
+  }
+
+  .ascii-replay-dock__glyph {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 1024px) {
+    .ascii-replay-dock {
+      /* Same row band as the mobile nav — tuck slightly inward from the screen edge */
+      right: max(0.6rem, var(--nav-mobile-inline, 0.75rem));
+    }
+  }
+
+  @media (max-width: 480px) {
+    .ascii-replay-dock {
+      width: 2.05rem;
+      height: 2.05rem;
+      border-radius: 8px;
+      top: calc(var(--nav-top-offset, 0.75rem) + var(--nav-height, 52px) + 0.28rem);
+    }
+
+    .ascii-replay-dock__glyph {
+      width: 17px;
+      height: 17px;
     }
   }
 </style>

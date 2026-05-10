@@ -12,7 +12,6 @@ highlights:
   - Reduced documentation time by 70% for data science teams
 role: Creator & Maintainer
 duration: 3 months
-featured: true
 ---
 
 Built in-place documentation generator for data scientists using TypeScript and Jupyter AI to eliminate context switching. Enables seamless doc creation without leaving the notebook environment.

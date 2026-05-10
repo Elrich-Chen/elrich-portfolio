@@ -12,7 +12,6 @@ highlights:
   - Conducted structured QA testing of audio, visual, and interactive modules to validate semantic clarity and accessibility compliance
 role: Full-Stack Developer & Accessibility Engineer
 duration: 36 hours (HTV 2025)
-featured: true
 order: 4
 ---
 

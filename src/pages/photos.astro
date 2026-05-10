@@ -19,22 +19,26 @@ const allPhotos = await getCollection('photos');
     {allPhotos.length === 0 ? (
       <p class="text-neutral-600">No photos yet. Add your photos to src/content/photos/</p>
     ) : (
-      <div class="photo-grid">
+      <div
+        class="photo-grid grid w-full max-w-screen-2xl mx-auto grid-cols-2 gap-2 md:grid-cols-3 md:gap-3 xl:grid-cols-4 2xl:grid-cols-5 xl:gap-3 pt-4 pb-12"
+      >
         {allPhotos.map((photo) => (
-          <div class="photo-cell">
-            <TiltedCard
-              imageSrc={photo.data.image}
-              altText={photo.data.caption}
-              captionText={[photo.data.caption, photo.data.location].filter(Boolean).join(' · ')}
-              containerHeight="100%"
-              containerWidth="100%"
-              imageHeight="100%"
-              imageWidth="100%"
-              rotateAmplitude={12}
-              scaleOnHover={1.06}
-              showMobileWarning={false}
-              showTooltip={true}
-            />
+          <div class="photo-cell flex min-w-0 flex-col gap-2 md:gap-3">
+            <div class="photo-thumb aspect-square w-full min-w-0">
+              <TiltedCard
+                imageSrc={photo.data.image}
+                altText={photo.data.caption}
+                captionText={[photo.data.caption, photo.data.location].filter(Boolean).join(' · ')}
+                containerHeight="100%"
+                containerWidth="100%"
+                imageHeight="100%"
+                imageWidth="100%"
+                rotateAmplitude={12}
+                scaleOnHover={1.06}
+                showMobileWarning={false}
+                showTooltip={true}
+              />
+            </div>
             <div class="photo-meta">
               <p class="photo-caption">{photo.data.caption}</p>
               <div class="photo-sub">
@@ -60,17 +64,6 @@ const allPhotos = await getCollection('photos');
     z-index: 3;
   }
 
-  .photo-grid {
-    display: grid;
-    grid-template-columns: repeat(1, 1fr);
-    gap: 2rem;
-    padding-top: 1rem;
-    padding-bottom: 3rem;
-    width: 100%;
-    max-width: 1000px;
-    margin-inline: auto;
-  }
-
   .page-title {
     color: #fff;
   }
@@ -82,33 +75,25 @@ const allPhotos = await getCollection('photos');
     line-height: 1.45;
   }
 
-  @media (min-width: 640px) {
-    .photo-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
+  .photo-thumb {
+    min-height: 0;
   }
 
-  @media (min-width: 1024px) {
-    .photo-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2.25rem;
-    }
-  }
-
-  .photo-cell {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .photo-cell :global(.tc-figure) {
-    height: auto !important;
-  }
-
-  .photo-cell :global(.tc-inner) {
+  .photo-thumb :global(.tc-figure) {
+    height: 100% !important;
     width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 1 / 1;
+    min-height: 0;
+  }
+
+  .photo-thumb :global(.tc-inner) {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0;
+  }
+
+  .photo-thumb :global(.tc-img) {
+    object-fit: cover;
+    object-position: center;
   }
 
   .photo-meta {
@@ -141,17 +126,7 @@ const allPhotos = await getCollection('photos');
   }
 
   @media (max-width: 480px) {
-    .photo-grid {
-      gap: 1.3rem;
-      padding-top: 0.65rem;
-      padding-bottom: 2rem;
-    }
-
-    .photo-cell {
-      gap: 0.55rem;
-    }
-
-    .photo-cell :global(.tc-img) {
+    .photo-thumb :global(.tc-img) {
       border-radius: 12px;
     }
 
