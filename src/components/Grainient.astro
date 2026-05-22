@@ -1,10 +1,11 @@
 ---
 /**
+ * @deprecated Removed from Base layout (2026-05) — WebGL grainient competed with the
+ * ASCII video backdrop and re-initialized on every navigation. Use `safari-opaque-bg`
+ * + theme `--bg` in Base.astro instead. Kept for reference only; do not mount globally.
+ *
  * Grainient — ported from React Bits.
  * WebGL2 animated gradient with film grain, ported to pure Astro + vanilla JS.
- * Uses the `ogl` library (Renderer, Program, Mesh, Triangle).
- *
- * Props are passed as data-* attributes so the script can import ogl normally.
  */
 interface Props {
   color1?: string;

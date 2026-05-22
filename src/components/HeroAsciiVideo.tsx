@@ -14,7 +14,7 @@ type HeroAsciiVideoProps = {
 function clampColsForSize(widthPx: number, heightPx: number): number {
   const w = Math.max(48, Math.floor(widthPx || 48));
   const h = Math.max(48, Math.floor(heightPx || 48));
-  const densityCap = Math.floor(w / 1.65);
+  const densityCap = Math.floor(w / 1.58);
   /** Keep grids from getting absurdly tall+thin vs short canvases (~1024/layout shifts). */
   const aspectCap = Math.max(24, Math.min(300, Math.round((w * h) ** 0.52)));
   /** Short mobile viewports (keyboard, short dvh): cap columns so row count stays drawable. */
@@ -24,9 +24,9 @@ function clampColsForSize(widthPx: number, heightPx: number): number {
     const scale = Math.max(0.55, 0.55 + (h - 200) / 580);
     baseCols = Math.round(baseCols * scale);
   }
-  let cols = Math.max(24, Math.min(300, Math.round(baseCols * 0.9)));
+  let cols = Math.max(24, Math.min(300, Math.round(baseCols * 0.945)));
   if (typeof window !== 'undefined' && window.matchMedia('(max-width: 1024px)').matches) {
-    cols = Math.min(cols, 72);
+    cols = Math.min(cols, 76);
   }
   return cols;
 }

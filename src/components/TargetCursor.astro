@@ -75,8 +75,9 @@ const {
 <script>
   import gsap from 'gsap';
 
+  function bootTargetCursor() {
   const wrapper = document.getElementById('tc-wrapper') as HTMLElement;
-  if (!wrapper) throw new Error('TargetCursor: missing wrapper');
+  if (!wrapper) return;
 
   const d               = wrapper.dataset;
   const targetSelector  = d.target  ?? '.cursor-target';
@@ -272,4 +273,12 @@ const {
       }
     }, { passive: true });
   }
+  }
+
+  const scheduleCursor =
+    typeof window.requestIdleCallback === 'function'
+      ? (cb: () => void) => window.requestIdleCallback(cb, { timeout: 2000 })
+      : (cb: () => void) => window.addEventListener('load', () => setTimeout(cb, 0), { once: true });
+
+  scheduleCursor(bootTargetCursor);
 </script>

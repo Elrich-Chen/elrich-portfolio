@@ -3,7 +3,6 @@ const { title = 'Elrich Chen', description = 'Builder. Engineer. Founder.', meta
 import PillNav from '../components/PillNav.astro';
 import TargetCursor from '../components/TargetCursor.astro';
 import Polaroid from '../components/Polaroid.astro';
-import Grainient from '../components/Grainient.astro';
 import HeroAsciiBackdrop from '../components/HeroAsciiBackdrop.astro';
 import PostHog from '../components/posthog.astro';
 import { getHeroAsciiConfig } from '../utils/heroAsciiVideos';
@@ -62,6 +61,16 @@ const contactLinks = [
     {meta}
     <link rel="icon" type="image/svg+xml" href="/e.svg" />
 
+    {heroAscii && (
+      <link
+        rel="preload"
+        href={heroAscii.videoSrc}
+        as="video"
+        type="video/mp4"
+        fetchpriority={Astro.url.pathname === '/' || Astro.url.pathname === '' ? 'high' : 'low'}
+      />
+    )}
+
     <!-- Performance: DNS prefetch and preconnect for fonts -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
@@ -73,44 +82,20 @@ const contactLinks = [
     <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript><link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet" /></noscript>
 
-    <!-- Performance: Preload Syne for hero display text -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap" />
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap" rel="stylesheet" /></noscript>
+    {(fullscreen || heroAscii) && (
+      <>
+        <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap" />
+        <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+        <noscript><link href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap" rel="stylesheet" /></noscript>
+      </>
+    )}
 
     <!-- Performance: Async load signature font (non-critical) -->
     <link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript><link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap" rel="stylesheet" /></noscript>
-    <PostHog />
   </head>
-  <body class="overflow-x-hidden">
+  <body class:list={['site-body overflow-x-hidden', { 'has-hero-ascii': !!heroAscii }]}>
     <div class="safari-opaque-bg" aria-hidden="true"></div>
-    <div class="grainient-global">
-      <Grainient
-        color1="#5b8ae8"
-        color2="#2d4ab4"
-        color3="#c8d8f8"
-        color4="#f0f4ff"
-        color5="#c45810"
-        darkColor1="#1e4db7"
-        darkColor2="#0a1640"
-        darkColor3="#0f2060"
-        darkColor4="#060b1e"
-        darkColor5="#8b3a0a"
-        accentStrength={0.22}
-        timeSpeed={0.5}
-        warpStrength={1.8}
-        warpFrequency={5.0}
-        warpSpeed={3.5}
-        warpAmplitude={40.0}
-        rotationAmount={500.0}
-        grainAmount={0.08}
-        grainScale={2.0}
-        contrast={1.5}
-        saturation={1.0}
-        zoom={0.9}
-      />
-    </div>
     {heroAscii && (
       <HeroAsciiBackdrop
         videoSrc={heroAscii.videoSrc}
@@ -132,7 +117,7 @@ const contactLinks = [
     <PillNav />
     <div class="page-main">
       <div class="prose-measure">
-        <main class:list={['pb-20', { 'main-padded': !fullscreen, 'main-fullscreen': fullscreen }]}>
+        <main class:list={['pb-20', { 'main-padded': !fullscreen, 'main-fullscreen': fullscreen, 'ascii-surface': !!heroAscii }]}>
           <slot />
         </main>
       </div>
@@ -175,6 +160,7 @@ const contactLinks = [
     <footer class="site-copyright" aria-label="Copyright">
       © {new Date().getFullYear()} Elrich Chen. All rights reserved.
     </footer>
+    <PostHog />
     <div id="dark-mode-toast" class="dark-mode-toast" role="status" aria-live="polite">
       <div class="dark-mode-toast-content">
         <span class="dark-mode-toast-label">Try dark mode?</span>
@@ -266,21 +252,11 @@ const contactLinks = [
         background: rgb(var(--bg)) !important;
       }
 
-      .grainient-global {
-        position: fixed;
-        inset: 0;
-        z-index: var(--layer-bg);
-        width: 100vw;
-        height: 100vh;
-        pointer-events: none;
-        background: rgb(var(--bg));
-      }
-
-      /* iOS often drops the second WebGL2 context; ASCII backdrop needs the GPU budget. */
-      @media (max-width: 768px) {
-        .grainient-global {
-          display: none;
-        }
+      .site-body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        min-height: 100dvh;
       }
 
       .loading-screen {
@@ -511,26 +487,32 @@ const contactLinks = [
       }
 
       .page-main {
+        flex: 1 0 auto;
         min-width: 0;
-        padding-bottom: calc(var(--safe-bottom) + 2.25rem);
+        width: 100%;
+        padding-bottom: calc(var(--safe-bottom) + 1rem);
       }
 
       .site-copyright {
-        position: sticky;
-        left: 0;
-        bottom: var(--safe-bottom);
-        transform: none;
+        position: static;
+        flex-shrink: 0;
         z-index: var(--layer-copyright);
         font-size: 0.72rem;
         letter-spacing: 0.04em;
-        color: rgba(255, 255, 255, 0.8);
+        color: rgb(var(--muted));
         text-align: center;
         white-space: normal;
-        width: max-content;
-        max-width: calc(100vw - 2rem);
+        width: 100%;
+        max-width: var(--page-max-width);
         margin: 0 auto;
-        padding-bottom: 0.25rem;
+        padding: 2rem 1.5rem calc(var(--safe-bottom) + 1.25rem);
         pointer-events: none;
+      }
+
+      :global(html.light) body.has-hero-ascii .site-copyright,
+      :global(html.dark) body.has-hero-ascii .site-copyright {
+        color: rgba(255, 255, 255, 0.72);
+        text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
       }
 
       .main-padded {
@@ -668,13 +650,8 @@ const contactLinks = [
         }
 
         .site-copyright {
-          position: static;
-          transform: none;
-          display: block;
-          margin: 1rem auto 0;
           font-size: 0.68rem;
-          width: max-content;
-          max-width: calc(100vw - 1.5rem);
+          padding-inline: 1rem;
         }
 
         .dark-mode-toast-label {

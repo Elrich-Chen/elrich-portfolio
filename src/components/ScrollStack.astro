@@ -124,12 +124,16 @@ const {
     -webkit-backdrop-filter: none;
   }
 
+  :global(html.light .ascii-surface .scroll-stack-card),
+  :global(html.dark .ascii-surface .scroll-stack-card) {
+    --muted: 186 198 214;
+  }
+
   :global(html.light .scroll-stack-card.home-pitch-card),
   :global(html.dark .scroll-stack-card.home-pitch-card) {
     background: transparent;
     border-color: transparent;
     box-shadow: none;
-    --muted: 186 198 214;
   }
 
   @media (max-width: 1024px) {

@@ -1,6 +1,9 @@
 ---
 import HeroAsciiVideo from './HeroAsciiVideo';
+
 const { videoSrc = '/videos/jellyfish.mp4', loop = true } = Astro.props;
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isHome = path === '/';
 ---
 
 <!-- Fixed ASCII layer: decorative only (aria-hidden). -->
@@ -13,13 +16,17 @@ const { videoSrc = '/videos/jellyfish.mp4', loop = true } = Astro.props;
 >
   <div class="hero-name-ascii-shell">
     <div class="hero-name-ascii-mount">
-      <HeroAsciiVideo videoSrc={videoSrc} loop={loop} client:load />
+      {isHome ? (
+        <HeroAsciiVideo videoSrc={videoSrc} loop={loop} client:load />
+      ) : (
+        <HeroAsciiVideo videoSrc={videoSrc} loop={loop} client:idle />
+      )}
     </div>
   </div>
 </div>
 
 <style>
-  /* Above Grainient (layer 0); keep z below home columns/hero (.home-ascii-first-screen is higher). */
+  /* Above page bg (layer 0); keep z below home columns/hero (.home-ascii-first-screen is higher). */
   .home-ascii-global-root {
     position: fixed;
     inset: 0;
@@ -31,7 +38,7 @@ const { videoSrc = '/videos/jellyfish.mp4', loop = true } = Astro.props;
     z-index: 1;
     pointer-events: none;
     overflow: hidden;
-    /* Transparent so Grainient shows when WebGL/video is not ready (avoids flat #080808 void). */
+    /* Transparent so theme bg shows when WebGL/video is not ready. */
     background: transparent;
   }
 

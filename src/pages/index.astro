@@ -189,7 +189,7 @@ const contactLinks = [
 
 <Base title="Elrich Chen" description="CS @ UWaterloo | AI automations for DoneMaker | Aspiring Backend Engineer" fullscreen={true} homeLoading={true}>
 
-  <!-- One WebGL ASCII layer for the whole page (fixed); Grainient stays underneath -->
+  <!-- One WebGL ASCII layer for the whole page (fixed); mounted from Base.astro -->
   <div class="home-ascii-first-screen">
     <section id="section-hero" class="hero-atop-ascii-section" aria-label="Introduction">
       <div class="hero-atop-inner">
@@ -719,14 +719,18 @@ const contactLinks = [
     gap: 0.55rem;
     padding: 0.45rem 1.25rem;
     border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    /* Dark glass in both themes — sits over ASCII video; gold links need contrast */
+    background: rgba(10, 12, 20, 0.62);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
     font-size: clamp(1.1rem, 2.6vw, 1.45rem);
     letter-spacing: 0.13em;
     text-transform: uppercase;
-    color: rgb(var(--fg));
+    color: rgba(255, 255, 255, 0.88);
     font-weight: 500;
     pointer-events: none;
     white-space: normal;
@@ -737,42 +741,60 @@ const contactLinks = [
   }
 
   .tagline-link {
-    color: rgb(var(--fg));
+    color: rgb(255, 210, 138);
     font-weight: 700;
     text-decoration: underline;
     text-underline-offset: 3px;
-    text-decoration-color: rgba(var(--fg), 0.35);
+    text-decoration-color: rgba(255, 210, 138, 0.55);
     pointer-events: auto;
-    transition: text-decoration-color 0.2s ease;
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
   }
 
   .tagline-link:hover {
-    text-decoration-color: rgba(var(--fg), 0.9);
+    color: rgb(255, 228, 168);
+    text-decoration-color: rgba(255, 210, 138, 0.9);
   }
 
   .tagline-plain {
-    color: rgb(var(--fg));
+    color: rgba(255, 255, 255, 0.82);
   }
 
   .tagline-dot {
-    opacity: 0.3;
+    color: rgba(255, 255, 255, 0.35);
+    opacity: 1;
   }
 
-  :global(html.light) .hero-tagline {
-    background: rgba(255, 255, 255, 0.88);
-    border-color: rgba(255, 255, 255, 0.55);
-    color: rgb(var(--fg));
-  }
-
+  /* Same glass pill in light + dark (video backdrop is always dark) */
+  :global(html.light) .hero-tagline,
   :global(html.dark) .hero-tagline {
-    background: rgba(12, 14, 22, 0.72);
-    border-color: rgba(255, 255, 255, 0.14);
-    color: rgb(248, 250, 252);
+    background: rgba(10, 12, 20, 0.62);
+    border-color: rgba(255, 255, 255, 0.16);
+    color: rgba(255, 255, 255, 0.88);
   }
 
-  :global(html.dark) .hero-tagline .tagline-link,
+  :global(html.light) .hero-tagline .tagline-plain,
   :global(html.dark) .hero-tagline .tagline-plain {
-    color: rgb(248, 250, 252);
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  :global(html.light) .hero-tagline .tagline-dot,
+  :global(html.dark) .hero-tagline .tagline-dot {
+    color: rgba(255, 255, 255, 0.35);
+  }
+
+  /* Link text = gold in both themes (same as .company-link on pitch cards) */
+  :global(html.light) .hero-tagline .tagline-link,
+  :global(html.dark) .hero-tagline .tagline-link,
+  .hero-tagline .tagline-link {
+    color: rgb(255, 210, 138) !important;
+    text-decoration-color: rgba(255, 210, 138, 0.55) !important;
+  }
+
+  :global(html.light) .hero-tagline .tagline-link:hover,
+  :global(html.dark) .hero-tagline .tagline-link:hover,
+  .hero-tagline .tagline-link:hover {
+    color: rgb(255, 228, 168) !important;
+    text-decoration-color: rgba(255, 210, 138, 0.9) !important;
   }
 
   .hero-scroll-hint {
@@ -845,14 +867,6 @@ const contactLinks = [
     #section-recent { background: rgba(12, 18, 32, 0.36); }
     #section-building { background: rgba(28, 20, 12, 0.38); }
     #section-clients { background: rgba(10, 22, 16, 0.36); }
-  }
-
-  /* Pitch cards sit on dark ASCII — same readable palette in both theme modes */
-  :global(html.light) .home-pitch-card,
-  :global(html.dark) .home-pitch-card {
-    --card-fg: 248 250 252;
-    --card-muted: 186 198 214;
-    color: rgb(var(--card-fg));
   }
 
   .home-card-intro {

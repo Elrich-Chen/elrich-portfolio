@@ -35,7 +35,7 @@ const entryCount = sortedEntries.length;
 ---
 
 <Base title="Hobbies – Elrich Chen">
-  <div class="hobbies-content-shell">
+  <div class="hobbies-content-shell ascii-surface">
     <div class="hobbies-back">
       <a href="/" class="back-home-link">← Back to home</a>
     </div>
@@ -486,24 +486,6 @@ const entryCount = sortedEntries.length;
     letter-spacing: 0.3em;
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.35);
-  }
-
-  /* ─── Theme: editorial copy over dark ASCII (both light & dark html) ─ */
-  :global(html.light) .hobbies-content-shell,
-  :global(html.dark) .hobbies-content-shell {
-    color: #fff;
-  }
-
-  :global(html.light) .hobbies-content-shell .back-home-link,
-  :global(html.dark) .hobbies-content-shell .back-home-link {
-    color: #fff !important;
-    opacity: 0.78;
-    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
-  }
-
-  :global(html.light) .hobbies-content-shell .back-home-link:hover,
-  :global(html.dark) .hobbies-content-shell .back-home-link:hover {
-    opacity: 1;
   }
 
   :global(html.light) .entry-row {

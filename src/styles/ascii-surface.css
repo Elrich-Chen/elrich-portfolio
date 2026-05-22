@@ -1,0 +1,189 @@
+/**
+ * Typography on ASCII-backdrop pages (dark video behind glass UI).
+ * Same readable palette in html.light and html.dark — theme toggle must not
+ * flip copy to rgb(var(--fg)) (dark) on top of the video.
+ */
+
+.about-content-shell,
+.projects-content-shell,
+.hobbies-content-shell,
+.photos-shell,
+.ascii-surface {
+  --surface-fg: 248 250 252;
+  --surface-fg-soft: 226 232 240;
+  --surface-fg-dim: 186 198 214;
+  --surface-fg-faint: 148 158 176;
+  --surface-accent: 255 210 138;
+  --surface-heading: 255 255 255;
+  --surface-hairline: rgba(255, 255, 255, 0.14);
+  --surface-hairline-strong: rgba(255, 255, 255, 0.28);
+  --surface-glass: rgba(8, 10, 18, 0.48);
+  --surface-glass-strong: rgba(8, 10, 18, 0.62);
+  color: rgb(var(--surface-fg));
+}
+
+html.light :is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface),
+html.dark :is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface) {
+  color: rgb(var(--surface-fg));
+}
+
+/* Headings */
+:is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
+  :is(h1, h2, h3, h4, h5, h6):not(.polaroid *):not(.polaroid-dialog *) {
+  color: rgb(var(--surface-heading));
+}
+
+/* Body copy & lists */
+:is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
+  :is(p, li, dd, dt, blockquote, figcaption, label):not(.polaroid *):not(.polaroid-dialog *):not(.entry-row *) {
+  color: rgb(var(--surface-fg-soft));
+}
+
+/* Global highlight utilities (would otherwise use rgb(var(--fg)) = dark in light mode) */
+:is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
+  :is(.highlight-main-point, .highlight-sub-item, .section-header) {
+  color: rgb(var(--surface-fg-soft));
+}
+
+:is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
+  .highlight-sub-item::before {
+  color: rgb(var(--surface-fg-dim));
+}
+
+/* Tailwind neutral overrides inside glass pages */
+:is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
+  :is(.text-neutral-500, .text-neutral-600, .text-neutral-700) {
+  color: rgb(var(--surface-fg-dim)) !important;
+}
+
+:is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
+  :is(.text-neutral-900, .hover\:text-neutral-900:hover) {
+  color: rgb(var(--surface-fg)) !important;
+}
+
+/* Links */
+:is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
+  a:not(.polaroid a):not(.polaroid-dialog a):not(.home-card-cta):not(.contact-inline-link):not(.contact-cta):not(.contact-icon):not(.tagline-link):not(.icon-link) {
+  color: rgb(var(--surface-fg));
+}
+
+:is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
+  a:hover:not(.polaroid a):not(.polaroid-dialog a):not(.home-card-cta):not(.tagline-link):not(.icon-link) {
+  color: rgb(var(--surface-heading));
+}
+
+/* Home / highlight links — global .company-link uses rgb(var(--fg)) (dark in light mode) */
+:is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
+  :is(.company-link, .company-link strong, .company-link em, .company-link strong em) {
+  color: rgb(var(--surface-accent)) !important;
+  font-weight: 600;
+}
+
+:is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
+  .company-link:hover {
+  color: rgb(var(--surface-heading)) !important;
+}
+
+:is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
+  .view-project-link {
+  color: rgb(var(--surface-accent)) !important;
+  border-bottom-color: rgba(var(--surface-accent), 0.45) !important;
+}
+
+:is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
+  :is(.highlight-item-group em, .highlight-item-group strong) {
+  color: rgb(var(--surface-fg-soft)) !important;
+}
+
+/* Hobbies expandable cards — never inherit theme --fg into glass panels */
+.hobbies-content-shell .entry-row,
+.hobbies-content-shell .entry-row :is(.entry-title, .entry-lede, .entry-date, .entry-index, .entry-tag, .entry-chevron) {
+  color: rgb(var(--surface-fg));
+}
+
+.hobbies-content-shell .entry-lede {
+  color: rgb(var(--surface-fg-soft));
+}
+
+.hobbies-content-shell .entry-date,
+.hobbies-content-shell .entry-index {
+  color: rgb(var(--surface-fg-dim));
+}
+
+.hobbies-content-shell .entry-prose,
+.hobbies-content-shell .entry-prose :global(:is(p, li, ul, ol, h1, h2, h3, h4, h5, h6, blockquote, span, div)) {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+.hobbies-content-shell .entry-prose :global(a) {
+  color: rgb(var(--surface-accent)) !important;
+}
+
+.hobbies-content-shell .entry-prose :global(strong) {
+  color: rgb(var(--surface-heading)) !important;
+}
+
+html.light .hobbies-content-shell .entry-row,
+html.dark .hobbies-content-shell .entry-row {
+  color: rgb(var(--surface-fg));
+}
+
+:is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
+  .back-home-link {
+  color: #fff !important;
+  opacity: 0.78;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
+}
+
+:is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
+  .back-home-link:hover {
+  opacity: 1;
+}
+
+/* Form fields */
+:is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
+  :is(input, textarea, select):not(.polaroid *):not(.polaroid-dialog *) {
+  color: rgb(var(--surface-fg));
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  caret-color: rgb(var(--surface-fg));
+}
+
+:is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
+  :is(input, textarea)::placeholder {
+  color: rgb(var(--surface-fg-dim));
+  opacity: 0.85;
+}
+
+:is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
+  button:not(.polaroid *):not(.polaroid-dialog *) {
+  color: inherit;
+}
+
+/* Inline code on glass */
+:is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
+  :not(pre) > code:not(.polaroid *):not(.polaroid-dialog *) {
+  color: rgb(var(--surface-fg));
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Home pitch cards — lock card tokens to surface palette in both themes */
+html.light .ascii-surface .home-pitch-card,
+html.dark .ascii-surface .home-pitch-card {
+  --card-fg: 248 250 252;
+  --card-muted: 186 198 214;
+  color: rgb(var(--card-fg));
+}
+
+html.light .ascii-surface .scroll-stack-card,
+html.dark .ascii-surface .scroll-stack-card {
+  --muted: 186 198 214;
+}
+
+/* Projects shell aliases */
+.projects-content-shell {
+  --ink: var(--surface-fg);
+  --ink-soft: var(--surface-fg-soft);
+  --ink-dim: var(--surface-fg-dim);
+}

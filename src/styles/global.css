@@ -1,3 +1,5 @@
+@import './ascii-surface.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -190,22 +192,7 @@ a {
   opacity: 1;
 }
 
-/* ASCII-backdrop pages: keep back link readable on the video layer */
-:global(html.light) .about-content-shell .back-home-link,
-:global(html.light) .hobbies-content-shell .back-home-link,
-:global(html.light) .projects-content-shell .back-home-link,
-:global(html.light) .photos-content-shell .back-home-link,
-:global(html.dark) .about-content-shell .back-home-link,
-:global(html.dark) .hobbies-content-shell .back-home-link,
-:global(html.dark) .projects-content-shell .back-home-link,
-:global(html.dark) .photos-content-shell .back-home-link {
-  color: #fff !important;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
-}
-
-:global(html.dark) .back-home-link {
-  color: #fff !important;
-}
+/* Back link on ASCII pages — see ascii-surface.css */
 
 /* Navbar link styling with interactive effects */
 .nav-link {
