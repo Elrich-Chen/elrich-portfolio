@@ -1,7 +1,5 @@
 ---
 import Base from '../layouts/Base.astro';
-import HeroAsciiBackdrop from '../components/HeroAsciiBackdrop.astro';
-import MagicBentoGrid from '../components/MagicBentoGrid.astro';
 import { getCollection } from 'astro:content';
 
 const projects = await getCollection('projects');
@@ -22,276 +20,315 @@ const sortedProjects = projects.sort((a, b) => {
 
 const featuredProjects = sortedProjects.filter((p) => p.data.featured === true);
 const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
+
+const allProjects = [...featuredProjects, ...carouselProjects];
+
+const slugify = (label: string) =>
+  label
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '') || 'other';
+
+const categoryOf = (p: (typeof allProjects)[number]) => p.data.category ?? 'Other';
+
+const orderedCategories = Array.from(
+  new Set(allProjects.map(categoryOf))
+);
+const filters: { label: string; slug: string; count: number }[] = [
+  { label: 'All', slug: 'all', count: allProjects.length },
+  ...orderedCategories.map((cat) => ({
+    label: cat,
+    slug: slugify(cat),
+    count: allProjects.filter((p) => categoryOf(p) === cat).length,
+  })),
+];
+
+const pad2 = (n: number) => n.toString().padStart(2, '0');
 ---
 
 <Base title="Projects – Elrich Chen">
-  <HeroAsciiBackdrop videoSrc="/videos/closepo.mp4" />
   <div class="projects-content-shell">
     <div class="mb-6">
       <a href="/" class="back-home-link">← Back to home</a>
     </div>
-    <h1 class="page-title text-base font-semibold mb-5">Projects</h1>
 
-    <div class="projects-container pb-24">
-      <MagicBentoGrid
-        glowColor="90, 138, 232"
-        enableBorderGlow={true}
-        enableSpotlight={true}
-        enableStars={true}
-        enableTilt={false}
-        enableMagnetism={true}
-        clickEffect={true}
-        spotlightRadius={360}
-        particleCount={12}
-      >
-      <div class="featured-projects-grid">
-        {featuredProjects.map((p, index) => {
-        const highlights = p.data.highlights ?? [];
-        const visibleHighlightCount = 2;
-        const visibleHighlights = highlights.slice(0, visibleHighlightCount);
-        const hiddenHighlights = highlights.slice(visibleHighlightCount);
-        const categoryLabel = p.data.category ?? 'Project';
-        const isHackathon =
-          (p.data.tags?.some((t: string) => t.toLowerCase().trim() === 'hackathon') ?? false) ||
-          (typeof p.data.category === 'string' && p.data.category.toLowerCase() === 'hackathons');
+    <header class="projects-masthead">
+      <p class="masthead-eyebrow">
+        <span class="masthead-dot" aria-hidden="true"></span>
+        Catalogue · {pad2(allProjects.length)} entries · {new Date().getFullYear()}
+      </p>
+      <h1 class="masthead-title">Projects<span class="masthead-stop">.</span></h1>
+      <p class="masthead-lede">
+        A working archive of things I've shipped, broken, and shipped again. Hover to peek, tap to crack one open.
+      </p>
+    </header>
 
-        return (
-          <article class={`project-card ${p.data.featured ? 'featured' : ''} ${p.data.wide ? 'wide' : ''} ${index % 7 === 2 ? 'accent-wide' : ''} ${index % 7 === 5 ? 'accent-tall' : ''} ${isHackathon ? 'hackathon-card' : ''}`}>
-            {p.data.wide && p.data.image && (
-              <div class="card-hero">
-                <img
-                  src={p.data.image}
-                  alt={p.data.name}
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-            )}
-            <div class="card-content">
-              <div class="card-eyebrow" aria-label="Project details">
-                <span class="eyebrow-category">{categoryLabel}</span>
-                {p.data.deployed && <span class="status-badge">Live</span>}
-              </div>
+    <nav class="filter-rail" aria-label="Filter projects by category">
+      <ul class="filter-chips" role="list">
+        {filters.map((f) => (
+          <li>
+            <button
+              type="button"
+              class="filter-chip"
+              data-filter={f.slug}
+              aria-pressed={f.slug === 'all' ? 'true' : 'false'}
+            >
+              <span class="chip-label">{f.label}</span>
+              <span class="chip-count">{pad2(f.count)}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </nav>
 
-              <div class="card-header">
-                <div class="title-wrapper">
-                  <div class="title-row">
-                    {!p.data.wide && p.data.image && (
-                      <div class="card-icon">
-                        <img
-                          src={p.data.image}
-                          alt=""
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </div>
-                    )}
-                    <h3 class="card-title">{p.data.name}</h3>
+    {featuredProjects.length > 0 && (
+      <section class="spotlight-section" aria-label="Featured projects">
+        <header class="section-rule">
+          <span class="rule-marker">★</span>
+          <span class="rule-label">Spotlight</span>
+          <span class="rule-meta">{pad2(featuredProjects.length)} featured</span>
+          <span class="rule-line" aria-hidden="true"></span>
+        </header>
+
+        <div class="spotlight-stage">
+          {featuredProjects.map((p, idx) => {
+          const highlights = p.data.highlights ?? [];
+          const visibleHighlights = highlights.slice(0, 2);
+          const hiddenHighlights = highlights.slice(2);
+          const categoryLabel = p.data.category ?? 'Project';
+          const slug = slugify(categoryLabel);
+          const orientation = idx % 2 === 0 ? 'left' : 'right';
+
+          return (
+            <article
+              class={`spotlight-card spotlight-card--${orientation}`}
+              data-category={slug}
+              style={`--spot-delay: ${idx * 90}ms;`}
+            >
+              <div class="spotlight-image-frame">
+                {p.data.image ? (
+                  <img
+                    src={p.data.image}
+                    alt={p.data.name}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <div class="spotlight-image-fallback" aria-hidden="true">
+                    {p.data.name.slice(0, 2)}
                   </div>
-                </div>
-                {p.data.href && (
-                  <a
-                    href={p.data.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="icon-link project-cta"
-                    aria-label={`Open ${p.data.name} project`}
-                  >
-                    <span>View project</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
-                    </svg>
-                  </a>
+                )}
+                <span class="spotlight-index" aria-hidden="true">{pad2(idx + 1)}</span>
+                {p.data.deployed && (
+                  <span class="status-pulse" aria-label="Live in production">
+                    <span class="status-dot"></span>Live
+                  </span>
                 )}
               </div>
 
-              {p.data.tagline && (
-                <p class="card-tagline">{p.data.tagline}</p>
-              )}
+              <div class="spotlight-body">
+                <p class="spotlight-eyebrow">
+                  <span class="eyebrow-tick" aria-hidden="true">/</span>
+                  {categoryLabel}
+                </p>
+                <h2 class="spotlight-title">{p.data.name}</h2>
+                {p.data.tagline && <p class="spotlight-tagline">{p.data.tagline}</p>}
 
-              {highlights.length > 0 && (
-                <div class="highlights-block">
-                  <ul class="card-highlights">
-                    {visibleHighlights.map((highlight: string) => (
-                      <li>{highlight}</li>
-                    ))}
+                {visibleHighlights.length > 0 && (
+                  <ul class="spotlight-highlights">
+                    {visibleHighlights.map((h: string) => <li>{h}</li>)}
                   </ul>
+                )}
 
-                  {hiddenHighlights.length > 0 && (
-                    <details class="card-details">
-                      <summary class="card-details-summary">
-                        <span class="summary-collapsed">Show {hiddenHighlights.length} more detail{hiddenHighlights.length === 1 ? '' : 's'}</span>
-                        <span class="summary-open">Show fewer details</span>
-                      </summary>
-                      <ul class="card-highlights expanded">
-                        {hiddenHighlights.map((highlight: string) => (
-                          <li>{highlight}</li>
-                        ))}
-                      </ul>
-                    </details>
+                {hiddenHighlights.length > 0 && (
+                  <details class="spotlight-more">
+                    <summary>
+                      <span class="more-collapsed">+ {hiddenHighlights.length} more detail{hiddenHighlights.length === 1 ? '' : 's'}</span>
+                      <span class="more-open">− show fewer</span>
+                    </summary>
+                    <ul class="spotlight-highlights">
+                      {hiddenHighlights.map((h: string) => <li>{h}</li>)}
+                    </ul>
+                  </details>
+                )}
+
+                {p.data.tags && p.data.tags.length > 0 && (
+                  <div class="meta-tags" aria-label={`${p.data.name} stack`}>
+                    {p.data.tags.slice(0, 6).map((t: string) => <span class="meta-tag">{t}</span>)}
+                  </div>
+                )}
+
+                <div class="spotlight-cta-row">
+                  {p.data.duration && (
+                    <span class="spotlight-duration">
+                      <span class="duration-label">Timeline</span>
+                      <span class="duration-value">{p.data.duration}</span>
+                    </span>
+                  )}
+                  {p.data.href && (
+                    <a
+                      href={p.data.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="icon-link spotlight-cta cursor-target"
+                      aria-label={`Open ${p.data.name}`}
+                    >
+                      <span>View project</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+                        <path d="M7 17L17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </a>
                   )}
                 </div>
-              )}
+              </div>
+            </article>
+          );
+          })}
+        </div>
+      </section>
+    )}
 
-              {p.data.duration && (
-                <div class="card-meta">
-                  <span class="meta-item">
-                    <span class="meta-label">Timeline</span>
-                    <span>{p.data.duration}</span>
-                  </span>
-                </div>
-              )}
+    {carouselProjects.length > 0 && (
+      <section class="catalogue-section" aria-label="All other projects">
+        <header class="section-rule">
+          <span class="rule-marker">◇</span>
+          <span class="rule-label">Catalogue</span>
+          <span class="rule-meta">{pad2(carouselProjects.length)} entries · click to expand</span>
+          <span class="rule-line" aria-hidden="true"></span>
+        </header>
 
-              {p.data.tags && p.data.tags.length > 0 && (
-                <div class="card-tags" aria-label={`${p.data.name} technologies`}>
-                  {p.data.tags.map((tag: string) => (
-                    <span class="tag-pill">{tag}</span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </article>
-        );
-        })}
-      </div>
-      </MagicBentoGrid>
+        <div class="catalogue-grid" id="catalogue-grid">
+          {carouselProjects.map((p, idx) => {
+            const highlights = p.data.highlights ?? [];
+            const visibleHighlights = highlights.slice(0, 2);
+            const hiddenHighlights = highlights.slice(2);
+            const categoryLabel = p.data.category ?? 'Project';
+            const slug = slugify(categoryLabel);
+            const overallIndex = featuredProjects.length + idx + 1;
 
-      {carouselProjects.length > 0 && (
-        <section class="projects-carousel-wrap" aria-label="Additional projects">
-          <div
-            class="projects-carousel"
-            role="region"
-            aria-roledescription="carousel"
-            aria-label="More projects"
-          >
-            <button class="carousel-arrow carousel-arrow--prev" aria-label="Previous project" type="button">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <polyline points="15 18 9 12 15 6"></polyline>
-              </svg>
-            </button>
-            <button class="carousel-arrow carousel-arrow--next" aria-label="Next project" type="button">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
-            </button>
-            <div class="carousel-viewport" tabindex="0">
-              <div class="carousel-track" data-clone-count={Math.min(3, carouselProjects.length)}>
-                {carouselProjects.map((p, index) => {
-                const highlights = p.data.highlights ?? [];
-                const visibleHighlightCount = p.data.featured ? 3 : 2;
-                const visibleHighlights = highlights.slice(0, visibleHighlightCount);
-                const hiddenHighlights = highlights.slice(visibleHighlightCount);
-                const categoryLabel = p.data.category ?? 'Project';
-                const isHackathon =
-                  (p.data.tags?.some((t: string) => t.toLowerCase().trim() === 'hackathon') ?? false) ||
-                  (typeof p.data.category === 'string' && p.data.category.toLowerCase() === 'hackathons');
+            // Asymmetric span patterns rotate every 5 tiles
+            const spanClass =
+              idx % 5 === 0 ? 'tile--wide' :
+              idx % 5 === 3 ? 'tile--tall' :
+              '';
+            const offsetClass = idx % 2 === 0 ? 'tile--offset-l' : 'tile--offset-r';
 
-                return (
-                  <div class="carousel-slide" role="group" aria-roledescription="slide" aria-label={`${index + 1} of ${carouselProjects.length}`}>
-                    <article class={`project-card ${p.data.featured ? 'featured' : ''} ${p.data.wide ? 'wide' : ''} ${index % 7 === 2 ? 'accent-wide' : ''} ${index % 7 === 5 ? 'accent-tall' : ''} ${isHackathon ? 'hackathon-card' : ''}`}>
-                      {p.data.wide && p.data.image && (
-                        <div class="card-hero">
-                          <img
-                            src={p.data.image}
-                            alt={p.data.name}
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        </div>
+            return (
+              <details
+                class={`tile ${spanClass} ${offsetClass}`}
+                data-category={slug}
+                style={`--tile-delay: ${(idx % 4) * 70}ms;`}
+              >
+                <summary class="tile-summary">
+                  <span class="tile-index" aria-hidden="true">{pad2(overallIndex)}</span>
+
+                  <div class="tile-head">
+                    <p class="tile-eyebrow">
+                      {p.data.image && (
+                        <span class="tile-icon" aria-hidden="true">
+                          <img src={p.data.image} alt="" loading="lazy" decoding="async" />
+                        </span>
                       )}
-                      <div class="card-content">
-                        <div class="card-eyebrow" aria-label="Project details">
-                          <span class="eyebrow-category">{categoryLabel}</span>
-                          {p.data.deployed && <span class="status-badge">Live</span>}
-                        </div>
+                      <span class="tile-eyebrow-label">{categoryLabel}</span>
+                      {p.data.deployed && (
+                        <span class="tile-live"><span class="status-dot"></span>Live</span>
+                      )}
+                    </p>
+                    <h3 class="tile-title">{p.data.name}</h3>
+                    {p.data.tagline && <p class="tile-tagline">{p.data.tagline}</p>}
+                  </div>
 
-                        <div class="card-header">
-                          <div class="title-wrapper">
-                            <div class="title-row">
-                              {!p.data.wide && p.data.image && (
-                                <div class="card-icon">
-                                  <img
-                                    src={p.data.image}
-                                    alt=""
-                                    loading="lazy"
-                                    decoding="async"
-                                  />
-                                </div>
-                              )}
-                              <h3 class="card-title">{p.data.name}</h3>
-                            </div>
-                          </div>
-                          {p.data.href && (
-                            <a
-                              href={p.data.href}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              class="icon-link project-cta"
-                              aria-label={`Open ${p.data.name} project`}
-                            >
-                              <span>View project</span>
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
-                              </svg>
-                            </a>
-                          )}
-                        </div>
+                  {visibleHighlights.length > 0 && (
+                    <ul class="tile-highlights">
+                      {visibleHighlights.map((h: string) => <li>{h}</li>)}
+                    </ul>
+                  )}
 
-                        {p.data.tagline && (
-                          <p class="card-tagline">{p.data.tagline}</p>
-                        )}
-
-                        {highlights.length > 0 && (
-                          <div class="highlights-block">
-                            <ul class="card-highlights">
-                              {visibleHighlights.map((highlight: string) => (
-                                <li>{highlight}</li>
-                              ))}
-                            </ul>
-
-                            {hiddenHighlights.length > 0 && (
-                              <details class="card-details">
-                                <summary class="card-details-summary">
-                                  <span class="summary-collapsed">Show {hiddenHighlights.length} more detail{hiddenHighlights.length === 1 ? '' : 's'}</span>
-                                  <span class="summary-open">Show fewer details</span>
-                                </summary>
-                                <ul class="card-highlights expanded">
-                                  {hiddenHighlights.map((highlight: string) => (
-                                    <li>{highlight}</li>
-                                  ))}
-                                </ul>
-                              </details>
-                            )}
-                          </div>
-                        )}
-
-                        {p.data.duration && (
-                          <div class="card-meta">
-                            <span class="meta-item">
-                              <span class="meta-label">Timeline</span>
-                              <span>{p.data.duration}</span>
-                            </span>
-                          </div>
-                        )}
-
-                        {p.data.tags && p.data.tags.length > 0 && (
-                          <div class="card-tags" aria-label={`${p.data.name} technologies`}>
-                            {p.data.tags.map((tag: string) => (
-                              <span class="tag-pill">{tag}</span>
-                            ))}
-                          </div>
+                  <div class="tile-foot">
+                    {p.data.tags && p.data.tags.length > 0 && (
+                      <div class="tile-tags">
+                        {p.data.tags.slice(0, 3).map((t: string) => (
+                          <span class="meta-tag meta-tag--mini">{t}</span>
+                        ))}
+                        {p.data.tags.length > 3 && (
+                          <span class="meta-tag meta-tag--mini meta-tag--ghost">+{p.data.tags.length - 3}</span>
                         )}
                       </div>
-                    </article>
+                    )}
+                    <span class="tile-expand" aria-hidden="true">
+                      <span class="tile-expand-text">
+                        <span class="expand-when-closed">Expand</span>
+                        <span class="expand-when-open">Collapse</span>
+                      </span>
+                      <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M3 6l5 4 5-4" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
                   </div>
-                );
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-    </div>
+                </summary>
+
+                <div class="tile-drawer">
+                  {hiddenHighlights.length > 0 && (
+                    <ul class="tile-highlights tile-highlights--extra">
+                      {hiddenHighlights.map((h: string) => <li>{h}</li>)}
+                    </ul>
+                  )}
+
+                  <dl class="tile-drawer-meta">
+                    {p.data.duration && (
+                      <div class="meta-row">
+                        <dt>Timeline</dt>
+                        <dd>{p.data.duration}</dd>
+                      </div>
+                    )}
+                    {p.data.role && (
+                      <div class="meta-row">
+                        <dt>Role</dt>
+                        <dd>{p.data.role}</dd>
+                      </div>
+                    )}
+                    {p.data.year && (
+                      <div class="meta-row">
+                        <dt>Year</dt>
+                        <dd>{p.data.year}</dd>
+                      </div>
+                    )}
+                  </dl>
+
+                  {p.data.tags && p.data.tags.length > 3 && (
+                    <div class="tile-tags tile-tags--full">
+                      {p.data.tags.map((t: string) => (
+                        <span class="meta-tag meta-tag--mini">{t}</span>
+                      ))}
+                    </div>
+                  )}
+
+                  {p.data.href && (
+                    <a
+                      href={p.data.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="icon-link tile-cta cursor-target"
+                      aria-label={`Open ${p.data.name}`}
+                    >
+                      <span>View project</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+                        <path d="M7 17L17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </a>
+                  )}
+                </div>
+              </details>
+            );
+          })}
+        </div>
+
+        <p class="catalogue-empty" id="catalogue-empty" aria-live="polite" hidden>
+          Nothing here under that filter — try another tag.
+        </p>
+      </section>
+    )}
   </div>
 </Base>
 
@@ -299,8 +336,9 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.icon-link').forEach((el) => {
       el.addEventListener('click', () => {
-        const card = el.closest('article');
-        const projectName = card?.querySelector('.card-title')?.textContent?.trim() || 'unknown';
+        const card = el.closest('article, details');
+        const titleEl = card?.querySelector('.spotlight-title, .tile-title');
+        const projectName = titleEl?.textContent?.trim() || 'unknown';
         window.posthog?.capture('project_link_clicked', {
           project_name: projectName,
           href: el.getAttribute('href') || ''
@@ -308,853 +346,1028 @@ const carouselProjects = sortedProjects.filter((p) => p.data.featured !== true);
       });
     });
 
-    const carousel = document.querySelector('.projects-carousel');
-    const viewport = carousel?.querySelector('.carousel-viewport');
-    const track = carousel?.querySelector('.carousel-track');
-    const prevButton = document.querySelector('.carousel-arrow--prev');
-    const nextButton = document.querySelector('.carousel-arrow--next');
-    if (!carousel || !viewport || !track || !prevButton || !nextButton) return;
-
-    const realSlides = Array.from(track.children);
-    if (realSlides.length <= 1) return;
-
-    const cloneCount = Math.min(Number(track.dataset.cloneCount) || 3, realSlides.length);
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const transitionValue = 'transform 2s cubic-bezier(0.4, 0, 0.2, 1)';
-    let reducedMotionEnabled = reducedMotion.matches;
-    let cardStep = 0;
-    let activeIndex = cloneCount;
-    let isTransitioning = false;
-
-    const createClone = (node, suffix) => {
-      const clone = node.cloneNode(true);
-      clone.dataset.clone = suffix;
-      clone.setAttribute('aria-hidden', 'true');
-      clone.querySelectorAll('a, button, input, select, textarea, summary, [tabindex]').forEach((focusable) => {
-        focusable.setAttribute('tabindex', '-1');
+    document.querySelectorAll('.tile').forEach((tile) => {
+      tile.addEventListener('toggle', () => {
+        if (!tile.open) return;
+        const name = tile.querySelector('.tile-title')?.textContent?.trim() || 'unknown';
+        window.posthog?.capture('project_card_expanded', { project_name: name });
       });
-      return clone;
-    };
-
-    const headClones = realSlides.slice(-cloneCount).map((slide, idx) => createClone(slide, `head-${idx}`));
-    const tailClones = realSlides.slice(0, cloneCount).map((slide, idx) => createClone(slide, `tail-${idx}`));
-    headClones.forEach((clone) => track.prepend(clone));
-    tailClones.forEach((clone) => track.append(clone));
-
-    const applyTransition = () => {
-      track.style.transition = reducedMotionEnabled ? 'none' : transitionValue;
-    };
-
-    const updateMeasurements = () => {
-      const firstSlide = track.querySelector('.carousel-slide');
-      if (!firstSlide) return;
-      const gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap || '0');
-      cardStep = firstSlide.getBoundingClientRect().width + gap;
-    };
-
-    const applyTransform = (withTransition = true) => {
-      if (!cardStep) updateMeasurements();
-      if (!cardStep) return;
-      if (!withTransition) {
-        track.style.transition = 'none';
-      } else {
-        applyTransition();
-      }
-      track.style.transform = `translateX(${-(activeIndex * cardStep)}px)`;
-      if (!withTransition) {
-        track.getBoundingClientRect();
-        applyTransition();
-      }
-    };
-
-    const moveBy = (delta) => {
-      if (isTransitioning && !reducedMotionEnabled) return;
-      isTransitioning = !reducedMotionEnabled;
-      activeIndex += delta;
-      applyTransform(!reducedMotionEnabled);
-      if (reducedMotionEnabled) {
-        normalizeIndex();
-      }
-    };
-
-    const normalizeIndex = () => {
-      const maxRealIndex = cloneCount + realSlides.length - 1;
-      if (activeIndex < cloneCount) {
-        activeIndex += realSlides.length;
-        applyTransform(false);
-      } else if (activeIndex > maxRealIndex) {
-        activeIndex -= realSlides.length;
-        applyTransform(false);
-      }
-      isTransitioning = false;
-    };
-
-    track.addEventListener('transitionend', (event) => {
-      if (event.propertyName !== 'transform') return;
-      normalizeIndex();
     });
 
-    reducedMotion.addEventListener('change', (event) => {
-      reducedMotionEnabled = event.matches;
-      applyTransition();
-    });
+    const chips = Array.from(document.querySelectorAll('.filter-chip'));
+    const filterables = Array.from(document.querySelectorAll('[data-category]'));
+    const emptyMsg = document.getElementById('catalogue-empty');
 
-    prevButton.addEventListener('click', () => moveBy(-1));
-    nextButton.addEventListener('click', () => moveBy(1));
-
-    viewport.addEventListener('keydown', (event) => {
-      if (event.key === 'ArrowLeft') {
-        event.preventDefault();
-        moveBy(-1);
-      } else if (event.key === 'ArrowRight') {
-        event.preventDefault();
-        moveBy(1);
+    const applyFilter = (filter) => {
+      chips.forEach((c) => c.setAttribute('aria-pressed', c.dataset.filter === filter ? 'true' : 'false'));
+      filterables.forEach((el) => {
+        const matches = filter === 'all' || el.dataset.category === filter;
+        el.classList.toggle('is-hidden', !matches);
+      });
+      if (emptyMsg) {
+        const gridVisible = document.querySelectorAll('#catalogue-grid .tile:not(.is-hidden)').length;
+        const spotlightVisible = document.querySelectorAll('.spotlight-card:not(.is-hidden)').length;
+        emptyMsg.hidden = (gridVisible + spotlightVisible) > 0;
       }
+    };
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const filter = chip.dataset.filter || 'all';
+        applyFilter(filter);
+        window.posthog?.capture('projects_filter_selected', { filter });
+      });
     });
 
-    window.addEventListener('resize', () => {
-      updateMeasurements();
-      applyTransform(false);
-    });
-
-    applyTransition();
-    updateMeasurements();
-    applyTransform(false);
+    // Pointer-driven tilt for spotlight cards (skip if reduced motion)
+    const motionOk = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const finePtr = window.matchMedia('(pointer: fine)').matches;
+    if (motionOk && finePtr) {
+      document.querySelectorAll('.spotlight-card').forEach((card) => {
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          const px = (e.clientX - rect.left) / rect.width;
+          const py = (e.clientY - rect.top) / rect.height;
+          const rx = (0.5 - py) * 4;
+          const ry = (px - 0.5) * 6;
+          card.style.setProperty('--rx', rx.toFixed(2) + 'deg');
+          card.style.setProperty('--ry', ry.toFixed(2) + 'deg');
+        });
+        card.addEventListener('mouseleave', () => {
+          card.style.setProperty('--rx', '0deg');
+          card.style.setProperty('--ry', '0deg');
+        });
+      });
+    }
   });
 </script>
 
 <style>
+  /* ───────────────────────────────────────────────────────────────────────
+     Layering — content sits above the fixed ASCII video (z-index 1) and
+     the grainient (z-index var(--layer-bg)). We never paint an opaque
+     ancestor at full width; cards are glassy so the backdrop bleeds through.
+     ─────────────────────────────────────────────────────────────────── */
   .projects-content-shell {
     position: relative;
     z-index: 3;
+    --ink: 245 245 245;
+    --ink-soft: 230 232 240;
+    --ink-dim: 160 168 184;
+    --hairline: rgba(255, 255, 255, 0.14);
+    --hairline-strong: rgba(255, 255, 255, 0.28);
+    --glass: rgba(10, 12, 22, 0.52);
+    --glass-strong: rgba(10, 12, 22, 0.66);
+    --accent: #f7a76b;
+    --accent-soft: rgba(247, 167, 107, 0.16);
+    --accent-cool: #8cb6ff;
+    --live: #4ade80;
+    color: rgb(var(--ink));
   }
 
-  .projects-container {
-    width: 100%;
-    max-width: 42rem;
-    margin-inline: auto;
-  }
-
-  .page-title {
-    color: rgb(var(--fg));
-  }
-
-  :global(html.light) .page-title {
-    color: #ffffff;
-  }
-
-  /* Featured row: flex + center so when cards wrap to a single column they
-     are centered in the container (vs. left-aligned with empty grid space). */
-  .featured-projects-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: stretch;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-  }
-
-  .featured-projects-grid > .project-card {
-    flex: 1 1 18rem;
-    min-width: 0;
-    max-width: 22rem;
-  }
-
-  @media (max-width: 767px) {
-    .featured-projects-grid {
-      gap: 1.25rem;
-    }
-
-    .featured-projects-grid > .project-card {
-      flex: 1 1 100%;
-      max-width: 100%;
-    }
-  }
-
-  .projects-carousel-wrap {
-    margin-top: 0.5rem;
-  }
-
-  .projects-carousel {
+  /* ─── MASTHEAD ──────────────────────────────────────────────────────── */
+  .projects-masthead {
+    margin: 0 0 2rem;
+    padding: 0 0 1.4rem;
+    border-bottom: 1px solid var(--hairline);
     position: relative;
   }
 
-  /* White circular chevron arrows overlaying the carousel edges. */
-  .carousel-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 6;
-    width: 1.8rem;
-    height: 1.8rem;
-    border-radius: 999px;
-    border: 1.5px solid rgba(0, 0, 0, 0.08);
-    background: #ffffff;
-    color: #111111;
+  .masthead-eyebrow {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    gap: 0.55rem;
+    margin: 0 0 1rem;
+    font-family: 'Rubik', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgb(var(--ink-soft));
+    opacity: 0.86;
+  }
+
+  .masthead-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft), 0 0 14px rgba(247, 167, 107, 0.55);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.55; transform: scale(0.78); }
+  }
+
+  .masthead-title {
+    font-family: 'Syne', 'Rubik', sans-serif;
+    font-size: clamp(2.6rem, 8.4vw, 5.5rem);
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    margin: 0;
+    color: #fff;
+    text-shadow: 0 2px 30px rgba(0, 0, 0, 0.45);
+  }
+
+  .masthead-stop {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .masthead-lede {
+    margin: 0.8rem 0 0;
+    max-width: 36rem;
+    font-size: clamp(0.88rem, 1.5vw, 1.02rem);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  /* ─── FILTER CHIPS ──────────────────────────────────────────────────── */
+  .filter-rail {
+    margin: 0 0 2.2rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .filter-rail::-webkit-scrollbar { display: none; }
+
+  .filter-chips {
+    list-style: none;
     padding: 0;
+    margin: 0;
+    display: inline-flex;
+    align-items: stretch;
+    gap: 0.45rem;
+    flex-wrap: wrap;
   }
 
-  .carousel-arrow svg {
-    width: 14px;
-    height: 14px;
-    display: block;
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.42rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid var(--hairline);
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: rgba(255, 255, 255, 0.82);
+    font-family: 'Rubik', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+    white-space: nowrap;
   }
 
-  .carousel-arrow--prev {
-    left: 0.4rem;
+  .filter-chip:hover {
+    color: #fff;
+    border-color: var(--hairline-strong);
+    transform: translateY(-1px);
   }
 
-  .carousel-arrow--next {
-    right: 0.4rem;
+  .filter-chip[aria-pressed="true"] {
+    color: #0c0c14;
+    background: rgba(255, 255, 255, 0.94);
+    border-color: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
   }
 
-  .carousel-arrow:hover {
-    transform: translateY(-50%) scale(1.07);
-    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.38);
-    background: #ffffff;
+  .chip-count {
+    font-variant-numeric: tabular-nums;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 0.08rem 0.42rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.65);
+    transition: background 0.2s ease, color 0.2s ease;
   }
 
-  .carousel-arrow:focus-visible {
-    outline: 2px solid #2563eb;
-    outline-offset: 3px;
+  .filter-chip[aria-pressed="true"] .chip-count {
+    background: rgba(12, 12, 20, 0.12);
+    color: #0c0c14;
   }
 
-  @media (min-width: 1024px) {
-    .carousel-arrow {
-      width: 2rem;
-      height: 2rem;
-    }
-    .carousel-arrow svg {
-      width: 16px;
-      height: 16px;
-    }
-    .carousel-arrow--prev {
-      left: -0.75rem;
-    }
-    .carousel-arrow--next {
-      right: -0.75rem;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .carousel-arrow {
-      width: 1.55rem;
-      height: 1.55rem;
-    }
-    .carousel-arrow svg {
-      width: 12px;
-      height: 12px;
-    }
-  }
-
-  :global(html.dark) .carousel-arrow {
-    border-color: rgba(255, 255, 255, 0.14);
-    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
-  }
-
-  .carousel-viewport {
-    overflow: hidden;
-    border-radius: 14px;
-    outline: none;
-  }
-
-  .carousel-track {
+  /* ─── SECTION RULES ─────────────────────────────────────────────────── */
+  .section-rule {
     display: flex;
-    gap: 1rem;
-    will-change: transform;
-    transform: translateX(0);
-    transition: transform 2s cubic-bezier(0.4, 0, 0.2, 1);
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 0 1.1rem;
+    font-family: 'Rubik', sans-serif;
+    color: rgba(255, 255, 255, 0.72);
   }
 
-  /* One card visible at a time, full width of the container.
-     The track translates by exactly one slide width + gap on each prev/next.
-     Cards that scroll past .carousel-viewport are clipped (overflow: hidden). */
-  .carousel-slide {
-    flex: 0 0 100%;
-    display: flex;
+  .rule-marker {
+    color: var(--accent);
+    font-size: 0.9rem;
+    line-height: 1;
   }
 
-  .carousel-slide .project-card {
-    width: 100%;
-    min-height: 19rem;
-    height: 100%;
+  .rule-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: #fff;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .carousel-track {
-      transition: none;
-    }
+  .rule-meta {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.55);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
   }
 
-  /* Hackathon cards: keep clamped copy while carousel enforces uniform size */
-  .project-card.hackathon-card {
-    grid-column: span 1 !important;
-    grid-row: span 1 !important;
-    height: 100%;
-  }
-
-  .project-card.hackathon-card .card-title {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden;
-  }
-
-  .project-card.hackathon-card .card-tagline {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-    overflow: hidden;
-  }
-
-  .project-card.hackathon-card .card-highlights li {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden;
-  }
-
-  .project-card.hackathon-card .card-tags {
-    margin-top: auto;
-  }
-
-  .project-card {
-    position: relative;
-    --card-surface: rgba(255, 255, 255, 0.78);
-    --card-surface-strong: rgba(255, 255, 255, 0.92);
-    --card-fg: rgb(var(--fg));
-    --card-muted: rgba(var(--fg), 0.68);
-    --card-subtle: rgba(var(--fg), 0.54);
-    --card-border: rgba(var(--border), 0.12);
-    --card-border-strong: rgba(var(--border), 0.2);
-    --card-accent: #2563eb;
-    --card-accent-soft: rgba(37, 99, 235, 0.1);
-    --card-badge-bg: rgba(37, 99, 235, 0.12);
-    --card-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
-    background:
-      linear-gradient(145deg, var(--card-surface-strong), var(--card-surface)),
-      radial-gradient(circle at 18% 0%, var(--card-accent-soft), transparent 34%);
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
-    box-shadow: var(--card-shadow);
-    display: flex;
-    flex-direction: column;
-    color: var(--card-fg);
-    backdrop-filter: blur(18px);
-  }
-
-  .project-card.wide {
-    grid-column: span 1;
-  }
-
-  .project-card.accent-wide,
-  .project-card.featured,
-  .project-card.wide {
-    grid-column: span 1;
-  }
-
-  .project-card.accent-tall,
-  .project-card.featured {
-    grid-row: span 1;
-  }
-
-  @media (min-width: 640px) {
-    .project-card.wide,
-    .project-card.accent-wide,
-    .project-card.featured {
-      grid-column: span 2;
-    }
-  }
-
-  @media (min-width: 1200px) {
-    .project-card.wide,
-    .project-card.accent-wide {
-      grid-column: span 2;
-    }
-
-    .project-card.featured {
-      grid-column: span 2;
-      grid-row: span 1;
-    }
-
-    .project-card.accent-tall {
-      grid-row: span 1;
-    }
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .project-card {
-      --card-surface: rgba(17, 24, 39, 0.72);
-      --card-surface-strong: rgba(10, 10, 10, 0.82);
-      --card-fg: rgba(255, 255, 255, 0.95);
-      --card-muted: rgba(255, 255, 255, 0.74);
-      --card-subtle: rgba(255, 255, 255, 0.58);
-      --card-border: rgba(255, 255, 255, 0.18);
-      --card-border-strong: rgba(255, 255, 255, 0.3);
-      --card-accent: #8ab4ff;
-      --card-accent-soft: rgba(90, 138, 232, 0.18);
-      --card-badge-bg: rgba(90, 138, 232, 0.18);
-      --card-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
-    }
-  }
-
-  :global(html.light) .project-card {
-    --card-surface: rgba(255, 255, 255, 0.78);
-    --card-surface-strong: rgba(255, 255, 255, 0.92);
-    --card-fg: rgb(var(--fg));
-    --card-muted: rgba(var(--fg), 0.68);
-    --card-subtle: rgba(var(--fg), 0.54);
-    --card-border: rgba(var(--border), 0.12);
-    --card-border-strong: rgba(var(--border), 0.2);
-    --card-accent: #2563eb;
-    --card-accent-soft: rgba(37, 99, 235, 0.1);
-    --card-badge-bg: rgba(37, 99, 235, 0.12);
-    --card-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
-  }
-
-  :global(html.dark) .project-card {
-    --card-surface: rgba(17, 24, 39, 0.72);
-    --card-surface-strong: rgba(10, 10, 10, 0.82);
-    --card-fg: rgba(255, 255, 255, 0.95);
-    --card-muted: rgba(255, 255, 255, 0.74);
-    --card-subtle: rgba(255, 255, 255, 0.58);
-    --card-border: rgba(255, 255, 255, 0.18);
-    --card-border-strong: rgba(255, 255, 255, 0.3);
-    --card-accent: #8ab4ff;
-    --card-accent-soft: rgba(90, 138, 232, 0.18);
-    --card-badge-bg: rgba(90, 138, 232, 0.18);
-    --card-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
-  }
-
-  .project-card:hover {
-    box-shadow: 0 14px 32px rgba(37, 99, 235, 0.12);
-    border-color: var(--card-border-strong);
-  }
-
-  :global(html.dark) .project-card:hover {
-    box-shadow: 0 8px 28px rgba(90, 138, 232, 0.25);
-  }
-
-  .project-card.featured {
-    --card-accent: #1d4ed8;
-    --card-accent-soft: rgba(37, 99, 235, 0.14);
-    border-color: rgba(37, 99, 235, 0.28);
-    box-shadow: 0 12px 34px rgba(37, 99, 235, 0.12);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .project-card.featured {
-      --card-accent: #8ab4ff;
-      --card-accent-soft: rgba(90, 138, 232, 0.22);
-      border-color: rgba(90, 138, 232, 0.34);
-    }
-  }
-
-  :global(html.light) .project-card.featured {
-    --card-accent: #1d4ed8;
-    --card-accent-soft: rgba(37, 99, 235, 0.14);
-    border-color: rgba(37, 99, 235, 0.28);
-  }
-
-  :global(html.dark) .project-card.featured {
-    --card-accent: #8ab4ff;
-    --card-accent-soft: rgba(90, 138, 232, 0.22);
-    border-color: rgba(90, 138, 232, 0.34);
-  }
-
-  .project-card.featured:hover {
-    border-color: rgba(37, 99, 235, 0.42);
-    box-shadow: 0 16px 44px rgba(37, 99, 235, 0.18);
-  }
-
-  /* Card Content */
-  .card-content {
-    padding: 0.6rem 0.7rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
+  .rule-line {
     flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--hairline), transparent);
   }
 
-  .card-hero {
-    width: 100%;
-    height: 108px;
+  /* ─── SPOTLIGHT STAGE ───────────────────────────────────────────────── */
+  .spotlight-section {
+    margin-bottom: 3rem;
+  }
+
+  .spotlight-stage {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+  }
+
+  .spotlight-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 0;
+    border-radius: 18px;
     overflow: hidden;
-    background: rgba(var(--border), 0.04);
-    border-bottom: 1px solid var(--card-border);
+    border: 1px solid var(--hairline);
+    background: var(--glass-strong);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.35);
+    transform-style: preserve-3d;
+    transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+                border-color 0.3s ease,
+                box-shadow 0.3s ease;
+    transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    will-change: transform;
+    opacity: 0;
+    animation: card-rise 0.7s cubic-bezier(0.2, 0.7, 0.1, 1) forwards;
+    animation-delay: var(--spot-delay, 0ms);
   }
 
-  .card-hero img {
+  @keyframes card-rise {
+    0%   { opacity: 0; transform: perspective(1100px) translateY(18px) rotateX(0) rotateY(0); }
+    100% { opacity: 1; transform: perspective(1100px) translateY(0)    rotateX(0) rotateY(0); }
+  }
+
+  .spotlight-card:hover {
+    border-color: var(--hairline-strong);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45),
+                0 0 0 1px rgba(247, 167, 107, 0.18);
+  }
+
+  /* Asymmetric offsets — pulls the card off-center so the ASCII video
+     bleeds through opposite gutter at desktop widths. */
+  @media (min-width: 1024px) {
+    .spotlight-card--left  { margin-right: 3.5rem; }
+    .spotlight-card--right { margin-left:  3.5rem; }
+    .spotlight-card--right { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); }
+    .spotlight-card--right .spotlight-image-frame { order: 2; }
+    .spotlight-card--right .spotlight-body        { order: 1; }
+  }
+
+  .spotlight-image-frame {
+    position: relative;
+    min-height: 280px;
+    background: linear-gradient(135deg, rgba(247, 167, 107, 0.12), rgba(140, 182, 255, 0.08));
+    overflow: hidden;
+  }
+
+  .spotlight-image-frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.45) 100%);
+    pointer-events: none;
+  }
+
+  .spotlight-image-frame img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
+    transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s ease;
+    filter: saturate(1.05) contrast(1.02);
   }
 
-  .card-eyebrow {
+  .spotlight-card:hover .spotlight-image-frame img {
+    transform: scale(1.045);
+  }
+
+  .spotlight-image-fallback {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    color: var(--card-subtle);
-    font-size: 0.64rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-family: 'Syne', sans-serif;
+    font-size: 4rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: rgba(255, 255, 255, 0.34);
     text-transform: uppercase;
   }
 
-  .eyebrow-category,
-  .eyebrow-item,
-  .status-badge {
-    display: inline-flex;
-    align-items: center;
-    min-height: 1.45rem;
-  }
-
-  .eyebrow-category {
-    color: var(--card-accent);
-  }
-
-  .eyebrow-item::before {
-    content: '';
-    width: 4px;
-    height: 4px;
-    margin-right: 0.45rem;
-    border-radius: 999px;
-    background: currentColor;
-    opacity: 0.45;
-  }
-
-  .status-badge {
-    padding: 0.12rem 0.48rem;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-    border-radius: 999px;
-    box-shadow: 0 8px 18px rgba(16, 185, 129, 0.2);
-  }
-
-  /* Card Header */
-  .card-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.55rem;
-  }
-
-  .title-wrapper {
-    flex: 1 1 12rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    min-width: 0;
-  }
-
-  .title-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    min-width: 0;
-  }
-
-  .card-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: 9px;
-    background: var(--card-badge-bg);
-    border: 1px solid var(--card-border);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-
-  .card-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .card-title {
-    font-size: 0.85rem;
+  .spotlight-index {
+    position: absolute;
+    top: 0.85rem;
+    left: 1rem;
+    z-index: 2;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.92rem;
     font-weight: 700;
-    line-height: 1.3;
-    color: var(--card-fg);
-    margin: 0;
-    min-width: 0;
-    overflow-wrap: anywhere;
+    letter-spacing: 0.05em;
+    color: #fff;
+    padding: 0.18rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(8, 8, 14, 0.55);
+    border: 1px solid var(--hairline);
+    backdrop-filter: blur(6px);
   }
 
-  /* Featured cards use the same tight padding/font as carousel cards;
-     no breakpoint upgrade so they stay compact. */
-
-  .icon-link {
-    min-height: 34px;
-    max-width: 100%;
-    border-radius: 999px;
-    background: var(--card-accent);
-    border: 1px solid transparent;
+  .status-pulse {
+    position: absolute;
+    top: 0.85rem;
+    right: 1rem;
+    z-index: 2;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-    color: white;
-    flex: 0 0 auto;
-    font-size: 0.7rem;
-    font-weight: 700;
-    line-height: 1;
-    padding: 0.45rem 0.7rem;
-    white-space: nowrap;
-    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-    text-decoration: none;
-  }
-
-  .icon-link:hover {
-    background: transparent;
-    border-color: var(--card-accent);
-    color: var(--card-accent);
-    transform: translateY(-2px);
-  }
-
-  /* Tagline */
-  .card-tagline {
-    font-size: 0.76rem;
-    color: var(--card-muted);
-    font-weight: 500;
-    line-height: 1.5;
-    margin: 0;
-  }
-
-  /* Tech Tags */
-  .card-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
-    padding-top: 0.2rem;
-  }
-
-  .tag-pill {
-    display: inline-block;
-    padding: 0.2rem 0.48rem;
-    background: var(--card-badge-bg);
-    border: 1px solid var(--card-border);
-    color: var(--card-muted);
-    border-radius: 999px;
-    font-size: 0.66rem;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    transition: all 0.2s ease;
-  }
-
-  .tag-pill:hover {
-    background: var(--card-accent-soft);
-    color: var(--card-accent);
-    border-color: rgba(37, 99, 235, 0.24);
-  }
-
-  /* Highlights */
-  .highlights-block {
-    display: flex;
-    flex-direction: column;
     gap: 0.32rem;
-    padding: 0.46rem 0.52rem;
-    background: rgba(var(--border), 0.035);
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
+    padding: 0.22rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(74, 222, 128, 0.18);
+    border: 1px solid rgba(74, 222, 128, 0.36);
+    color: #d8ffe1;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    backdrop-filter: blur(6px);
   }
 
-  :global(html.dark) .highlights-block {
-    background: rgba(255, 255, 255, 0.04);
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--live);
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.8);
+    animation: pulse 1.6s ease-in-out infinite;
   }
 
-  .card-highlights {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  .spotlight-body {
+    padding: 1.5rem 1.6rem 1.55rem;
     display: flex;
     flex-direction: column;
+    gap: 0.85rem;
+    min-width: 0;
+  }
+
+  .spotlight-eyebrow {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
     gap: 0.4rem;
+    font-family: 'Rubik', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
   }
 
-  .card-details {
-    display: block;
+  .eyebrow-tick {
+    opacity: 0.7;
+    font-weight: 400;
   }
 
-  .card-details-summary {
+  .spotlight-title {
+    margin: 0;
+    font-family: 'Syne', 'Rubik', sans-serif;
+    font-size: clamp(1.45rem, 3vw, 1.95rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    color: #fff;
+  }
+
+  .spotlight-tagline {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  .spotlight-highlights {
+    margin: 0.1rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .spotlight-highlights li {
+    position: relative;
+    padding-left: 1.1rem;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.86);
+  }
+
+  .spotlight-highlights li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55rem;
+    width: 0.5rem;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .spotlight-more {
+    margin: 0;
+  }
+
+  .spotlight-more summary {
     cursor: pointer;
     list-style: none;
-    font-size: 0.74rem;
+    font-family: 'Rubik', sans-serif;
+    font-size: 0.72rem;
     font-weight: 700;
-    color: var(--card-accent);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding: 0.3rem 0;
     width: fit-content;
-    min-height: 36px;
-    padding: 0.18rem 0;
-    border-bottom: 1px solid currentColor;
+    border-bottom: 1px dashed currentColor;
     transition: color 0.2s ease, border-color 0.2s ease;
   }
 
-  .card-details-summary:hover {
-    color: var(--card-fg);
+  .spotlight-more summary::-webkit-details-marker { display: none; }
+  .spotlight-more summary::marker { content: ''; }
+
+  .spotlight-more summary:hover {
+    color: #fff;
   }
 
-  .card-details-summary::-webkit-details-marker {
-    display: none;
+  .spotlight-more .more-open { display: none; }
+  .spotlight-more[open] .more-collapsed { display: none; }
+  .spotlight-more[open] .more-open { display: inline; }
+
+  .spotlight-more .spotlight-highlights {
+    margin-top: 0.55rem;
+    animation: drawer-in 0.4s ease forwards;
   }
 
-  .card-details-summary::marker {
-    content: '';
-  }
-
-  .card-details .card-highlights {
+  .meta-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.36rem;
     margin-top: 0.15rem;
   }
 
-  .summary-open {
-    display: none;
+  .meta-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.22rem 0.55rem;
+    border-radius: 6px;
+    border: 1px solid var(--hairline);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.78);
+    font-family: 'Rubik', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
   }
 
-  .card-details[open] .summary-open {
-    display: inline;
+  .meta-tag:hover {
+    border-color: var(--hairline-strong);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
   }
 
-  .card-details[open] .summary-collapsed {
-    display: none;
+  .meta-tag--mini {
+    font-size: 0.62rem;
+    padding: 0.18rem 0.45rem;
   }
 
-  .card-highlights li {
-    font-size: 0.76rem;
-    color: var(--card-fg);
-    line-height: 1.45;
-    padding-left: 0.85rem;
-    position: relative;
+  .meta-tag--ghost {
+    color: rgba(255, 255, 255, 0.55);
+    background: transparent;
   }
 
-  .card-highlights li::before {
-    content: '•';
-    position: absolute;
-    left: 0;
-    color: var(--card-accent);
-    font-weight: 600;
-  }
-
-  /* Metadata */
-  .card-meta {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 0.45rem;
-    font-size: 0.7rem;
-    color: var(--card-muted);
-    padding-top: 0.1rem;
+  .spotlight-cta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
     margin-top: auto;
+    padding-top: 0.35rem;
+    flex-wrap: wrap;
   }
 
-  .meta-item {
+  .spotlight-duration {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.05rem;
+    font-family: 'Rubik', sans-serif;
+  }
+
+  .duration-label {
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .duration-value {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 500;
+  }
+
+  /* ─── ICON LINK (shared CTA) ────────────────────────────────────────── */
+  .icon-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
+    padding: 0.5rem 0.95rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.92);
+    background: rgba(255, 255, 255, 0.92);
+    color: #0c0c14;
+    font-family: 'Rubik', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .icon-link:hover {
+    transform: translateY(-1px);
+    background: transparent;
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.32);
+  }
+
+  .icon-link svg {
+    transition: transform 0.2s ease;
+  }
+
+  .icon-link:hover svg {
+    transform: translate(2px, -2px);
+  }
+
+  /* ─── CATALOGUE GRID ────────────────────────────────────────────────── */
+  .catalogue-section {
+    margin-bottom: 4rem;
+  }
+
+  .catalogue-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Tablet: 2 cols, span widens occasionally */
+  @media (min-width: 640px) {
+    .catalogue-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.1rem;
+    }
+    .catalogue-grid .tile--wide { grid-column: span 2; }
+  }
+
+  /* Desktop: 12-col grid, asymmetric spans, dense packing */
+  @media (min-width: 1024px) {
+    .catalogue-grid {
+      grid-template-columns: repeat(12, 1fr);
+      grid-auto-flow: dense;
+      gap: 1.1rem;
+    }
+    .catalogue-grid .tile             { grid-column: span 6; }
+    .catalogue-grid .tile--wide       { grid-column: span 8; }
+    .catalogue-grid .tile--tall       { grid-column: span 4; grid-row: span 2; }
+    .catalogue-grid .tile[open]       { grid-column: span 12; }
+  }
+
+  /* Tile */
+  .tile {
+    position: relative;
+    display: block;
+    border-radius: 14px;
+    border: 1px solid var(--hairline);
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    overflow: hidden;
+    transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
+    opacity: 0;
+    animation: card-rise 0.6s cubic-bezier(0.2, 0.7, 0.1, 1) forwards;
+    animation-delay: var(--tile-delay, 0ms);
+  }
+
+  .tile:hover {
+    border-color: var(--hairline-strong);
+    transform: translateY(-3px);
+    background: var(--glass-strong);
+    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.42);
+  }
+
+  /* Subtle alternating offset to break the grid feel — only on small screens */
+  @media (max-width: 639px) {
+    .tile--offset-l { margin-right: 1.1rem; }
+    .tile--offset-r { margin-left:  1.1rem; }
+  }
+
+  .tile.is-hidden,
+  .spotlight-card.is-hidden {
+    display: none !important;
+  }
+
+  .tile-summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 1.05rem 1.1rem 1rem;
     display: flex;
     flex-direction: column;
-    gap: 0.12rem;
-    padding: 0.42rem 0.52rem;
-    background: rgba(var(--border), 0.035);
-    border: 1px solid var(--card-border);
-    border-radius: 10px;
+    gap: 0.65rem;
+    color: inherit;
+    position: relative;
+    min-height: 100%;
+    transition: padding 0.3s ease;
   }
 
-  .meta-label {
-    color: var(--card-subtle);
-    font-size: 0.6rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
+  .tile-summary::-webkit-details-marker { display: none; }
+  .tile-summary::marker { content: ''; }
+
+  .tile-index {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.85rem;
+    font-family: 'Syne', sans-serif;
+    font-size: 2.6rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+    transition: color 0.4s ease, transform 0.4s ease;
+  }
+
+  .tile:hover .tile-index {
+    color: rgba(247, 167, 107, 0.42);
+    transform: translateY(-2px);
+  }
+
+  .tile[open] .tile-index {
+    color: var(--accent);
+  }
+
+  .tile-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding-right: 3.2rem; /* clear index */
+  }
+
+  .tile-eyebrow {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: 'Rubik', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.68);
+  }
+
+  .tile-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 1px solid var(--hairline);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .tile-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .tile-eyebrow-label {
+    color: var(--accent-cool);
+  }
+
+  .tile-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-left: auto;
+    color: #d8ffe1;
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+  }
+
+  .tile-title {
+    margin: 0;
+    font-family: 'Syne', 'Rubik', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.22;
+    letter-spacing: -0.02em;
+    color: #fff;
+    word-break: break-word;
+  }
+
+  .tile-tagline {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .tile-highlights {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .tile-highlights li {
+    position: relative;
+    padding-left: 1rem;
+    font-size: 0.76rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .tile-highlights li::before {
+    content: '·';
+    position: absolute;
+    left: 0.25rem;
+    top: -0.05rem;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+
+  .tile-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+    margin-top: auto;
+    padding-top: 0.2rem;
+  }
+
+  .tile-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+
+  .tile-expand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-family: 'Rubik', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.65);
+    transition: color 0.2s ease, transform 0.25s ease;
+  }
+
+  .tile:hover .tile-expand {
+    color: var(--accent);
+  }
+
+  .tile-expand svg {
+    transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.1, 1);
+  }
+
+  .tile[open] .tile-expand svg {
+    transform: rotate(180deg);
+  }
+
+  .tile-expand .expand-when-open { display: none; }
+  .tile[open] .tile-expand .expand-when-closed { display: none; }
+  .tile[open] .tile-expand .expand-when-open { display: inline; }
+
+  /* Drawer (opens beneath summary when <details open>) */
+  .tile-drawer {
+    padding: 0 1.1rem 1.15rem;
+    border-top: 1px dashed var(--hairline);
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    animation: drawer-in 0.42s cubic-bezier(0.2, 0.7, 0.1, 1);
+  }
+
+  @keyframes drawer-in {
+    0%   { opacity: 0; transform: translateY(-6px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  .tile-drawer .tile-highlights--extra {
+    padding-top: 0.95rem;
+  }
+
+  .tile-drawer-meta {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.55rem;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.5rem 0.65rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+  }
+
+  .meta-row dt {
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+    margin: 0;
+  }
+
+  .meta-row dd {
+    margin: 0;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.92);
+  }
+
+  .tile-tags--full {
+    margin-top: 0.1rem;
+  }
+
+  .tile-cta {
+    align-self: flex-start;
+    margin-top: 0.1rem;
+  }
+
+  /* ─── Empty state ───────────────────────────────────────────────────── */
+  .catalogue-empty {
+    margin: 1.6rem 0 0;
+    padding: 1.1rem 1.2rem;
+    border: 1px dashed var(--hairline);
+    border-radius: 12px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    background: rgba(10, 12, 22, 0.32);
+    backdrop-filter: blur(8px);
+  }
+
+  /* ─── BREAKPOINTS ───────────────────────────────────────────────────── */
+  @media (max-width: 1023px) {
+    .spotlight-card {
+      grid-template-columns: 1fr;
+    }
+    .spotlight-image-frame {
+      min-height: 220px;
+    }
+    .spotlight-body {
+      padding: 1.25rem 1.25rem 1.3rem;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .projects-masthead {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+    }
+    .spotlight-section { margin-bottom: 2.2rem; }
+    .spotlight-stage { gap: 1.2rem; }
+    .spotlight-image-frame { min-height: 180px; }
+    .spotlight-title { font-size: 1.4rem; }
+    .spotlight-tagline { font-size: 0.88rem; }
+
+    .catalogue-grid { gap: 0.85rem; }
+
+    .tile-summary {
+      padding: 0.95rem 1rem 0.95rem;
+      gap: 0.55rem;
+    }
+    .tile-index {
+      font-size: 2.2rem;
+      top: 0.4rem;
+      right: 0.7rem;
+    }
+    .tile-title {
+      font-size: 1rem;
+    }
+    .tile-tagline { font-size: 0.82rem; }
+    .tile-highlights li { font-size: 0.78rem; }
+
+    .tile-drawer {
+      padding: 0 1rem 1rem;
+      gap: 0.7rem;
+    }
   }
 
   @media (max-width: 480px) {
-    .projects-container {
-      padding-inline: 0.1rem;
-    }
+    .masthead-eyebrow { font-size: 0.62rem; letter-spacing: 0.18em; }
+    .masthead-lede { font-size: 0.86rem; }
+    .filter-rail { margin-bottom: 1.6rem; }
+    .filter-chip { padding: 0.38rem 0.7rem; font-size: 0.72rem; }
+    .chip-count { font-size: 0.62rem; padding: 0.06rem 0.36rem; }
 
-    .featured-projects-grid {
-      gap: 1rem;
-    }
+    .spotlight-card { border-radius: 14px; }
+    .spotlight-image-frame { min-height: 160px; }
+    .spotlight-body { padding: 1.05rem 1rem 1.1rem; gap: 0.7rem; }
+    .spotlight-index, .status-pulse { top: 0.55rem; }
+    .spotlight-index { left: 0.6rem; font-size: 0.78rem; padding: 0.14rem 0.46rem; }
+    .status-pulse { right: 0.6rem; }
 
-    .project-card {
-      border-radius: 14px;
-    }
+    .meta-tag { font-size: 0.62rem; padding: 0.18rem 0.46rem; }
 
-    .card-content {
-      padding: 0.9rem;
-      gap: 0.65rem;
+    .tile {
+      border-radius: 12px;
     }
-
-    .card-hero {
-      height: 190px;
+    .tile-summary {
+      padding: 0.85rem 0.9rem 0.85rem;
     }
-
-    .card-header {
-      gap: 0.7rem;
-      align-items: stretch;
-      flex-direction: column;
+    .tile-head { padding-right: 2.7rem; }
+    .tile-index {
+      font-size: 1.85rem;
     }
-
-    .title-row {
-      gap: 0.45rem;
-      align-items: flex-start;
-    }
-
-    .card-title {
-      font-size: 1.05rem;
-      line-height: 1.35;
-    }
-
-    .card-tagline {
-      font-size: 0.96rem;
-      line-height: 1.5;
-    }
-
-    .tag-pill {
-      font-size: 0.72rem;
-      padding: 0.26rem 0.5rem;
-    }
-
-    .card-highlights li {
-      font-size: 0.9rem;
-      line-height: 1.45;
-      padding-left: 1rem;
-    }
-
-    .card-details-summary {
-      min-height: 44px;
-      font-size: 0.88rem;
-      border-bottom-color: currentColor;
-    }
-
     .icon-link {
-      width: fit-content;
-      min-height: 40px;
-      border-radius: 999px;
-      padding-inline: 0.85rem;
-      align-self: flex-start;
+      font-size: 0.7rem;
+      padding: 0.45rem 0.8rem;
     }
 
-    .icon-link svg {
-      width: 19px;
-      height: 19px;
-    }
+    /* Soften alternating offsets so cards don't shrink too much */
+    .tile--offset-l { margin-right: 0.55rem; }
+    .tile--offset-r { margin-left:  0.55rem; }
+  }
 
-    .card-meta {
-      gap: 0.45rem;
-      font-size: 0.8rem;
-      padding-top: 0.35rem;
+  /* ─── Light mode tweaks ─────────────────────────────────────────────── */
+  /* Since the ASCII video is dark (#080808), we keep card text white in
+     both modes. Only adjust border opacities slightly for light. */
+  :global(html.light) .projects-content-shell {
+    --hairline: rgba(255, 255, 255, 0.18);
+    --hairline-strong: rgba(255, 255, 255, 0.34);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spotlight-card,
+    .tile {
+      animation: none;
+      opacity: 1;
+      transform: none !important;
     }
+    .status-dot, .masthead-dot {
+      animation: none;
+    }
+    .tile-drawer { animation: none; }
   }
 </style>

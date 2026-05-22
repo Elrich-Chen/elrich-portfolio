@@ -115,6 +115,23 @@ const {
     --muted: 210 210 210;
   }
 
+  /* Home pitch cards style themselves in index.astro (glass over ASCII). */
+  :global(.scroll-stack-card.home-pitch-card) {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  :global(html.light .scroll-stack-card.home-pitch-card),
+  :global(html.dark .scroll-stack-card.home-pitch-card) {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    --muted: 186 198 214;
+  }
+
   @media (max-width: 1024px) {
     .ss-container {
       padding-top: 1.25rem;

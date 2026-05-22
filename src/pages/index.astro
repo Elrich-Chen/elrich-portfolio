@@ -1,6 +1,5 @@
 ---
 import Base from '../layouts/Base.astro';
-import HeroAsciiBackdrop from '../components/HeroAsciiBackdrop.astro';
 import ScrollStack from '../components/ScrollStack.astro';
 import { getEntry, getCollection } from 'astro:content';
 
@@ -20,21 +19,21 @@ const cardMeta = {
   recent: {
     kicker: '01',
     title: 'Recently, I:',
-    subtitle: 'A quick scan of wins, roles, and proof points from the last stretch.',
+    subtitle: 'Recent wins, roles, and shipped proof — expand any row for detail.',
     chips: [] as string[],
     cta: { href: '/projects', label: 'Browse the work' },
   },
   building: {
     kicker: '02',
     title: 'Things in progress:',
-    subtitle: 'Current product bets, community work, and systems I am actively shipping.',
+    subtitle: 'Active builds and leadership bets — what I am shipping right now.',
     chips: [] as string[],
     cta: { href: '/projects', label: 'See active builds' },
   },
   clients: {
     kicker: '03',
     title: 'Client References',
-    subtitle: 'Compact notes from people who trusted me to ship useful software.',
+    subtitle: 'Founder feedback on delivery — ratings up front, full quotes on expand.',
     chips: [] as string[],
     cta: { href: 'mailto:elrichchen123@gmail.com', label: 'Start a project' },
   },
@@ -191,8 +190,6 @@ const contactLinks = [
 <Base title="Elrich Chen" description="CS @ UWaterloo | AI automations for DoneMaker | Aspiring Backend Engineer" fullscreen={true} homeLoading={true}>
 
   <!-- One WebGL ASCII layer for the whole page (fixed); Grainient stays underneath -->
-  <HeroAsciiBackdrop videoSrc="/videos/po.mp4" />
-
   <div class="home-ascii-first-screen">
     <section id="section-hero" class="hero-atop-ascii-section" aria-label="Introduction">
       <div class="hero-atop-inner">
@@ -216,35 +213,44 @@ const contactLinks = [
   <ScrollStack itemDistance={44} itemStackDistance={12}>
 
     {highlights?.data?.what_makes_me_different?.length > 0 && (
-      <div class="scroll-stack-card" id="section-recent">
-        <div class="home-card-intro">
-          <p class="card-kicker">{cardMeta.recent.kicker}</p>
-          <h2 class="panel-header">{cardMeta.recent.title}</h2>
-          <p class="card-subtitle">{cardMeta.recent.subtitle}</p>
-        </div>
-        <ul class="highlight-list">
-          {highlights.data.what_makes_me_different.map((item: any) => {
+      <div class="scroll-stack-card home-pitch-card" id="section-recent">
+        <header class="home-card-intro home-card-intro--recent">
+          <div class="card-pillar-row">
+            <span class="card-pillar-num" aria-hidden="true">{cardMeta.recent.kicker}</span>
+            <div class="card-pillar-copy">
+              <h2 class="panel-header">{cardMeta.recent.title}</h2>
+              <p class="card-subtitle">{cardMeta.recent.subtitle}</p>
+            </div>
+          </div>
+        </header>
+        <ul class="highlight-list" role="list">
+          {highlights.data.what_makes_me_different.map((item: any, rowIndex: number) => {
             const mainPoint = typeof item === 'string' ? item : (item.point || '');
             const subPoints: string[] = typeof item === 'string' ? [] : (item.details || []);
             const parts = mainPoint.split(/\[LOGO:([^\]]+)\]/g);
             const plainLabel = toPlainLabel(mainPoint);
+            const rowNum = String(rowIndex + 1).padStart(2, '0');
             return (
               <li class="highlight-item-group">
                 {subPoints.length > 0 ? (
                   <details class="highlight-details" data-highlight-section="recent" data-highlight-label={plainLabel}>
                     <summary class="highlight-summary">
-                      <span class="highlight-main-point">
+                      <span class="highlight-row-index" aria-hidden="true">{rowNum}</span>
+                      <span class="highlight-main-point highlight-punchline">
                         {parts.map((part: string, i: number) => {
                           if (i % 2 === 1) {
-                            return <span set:html={renderLogoImg(part)}></span>;
+                            return <span set:html={renderLogoImg(part, { width: 22, height: 22, className: 'highlight-inline-logo' })}></span>;
                           }
                           return <span set:html={formatSummaryText(part)}></span>;
                         })}
                       </span>
-                      <span class="details-cue details-cue--chevron" aria-hidden="true">
-                        <svg class="highlight-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
+                      <span class="highlight-expand-affordance" aria-hidden="true">
+                        <span class="expand-label">Proof</span>
+                        <span class="details-cue details-cue--chevron">
+                          <svg class="highlight-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                        </span>
                       </span>
                     </summary>
                     <div class="highlight-details-body">
@@ -258,10 +264,11 @@ const contactLinks = [
                   </details>
                 ) : (
                   <div class="highlight-row highlight-row--no-bullet">
-                    <div class="highlight-main-point">
+                    <span class="highlight-row-index" aria-hidden="true">{rowNum}</span>
+                    <div class="highlight-main-point highlight-punchline">
                       {parts.map((part: string, i: number) => {
                         if (i % 2 === 1) {
-                          return <span set:html={renderLogoImg(part)}></span>;
+                          return <span set:html={renderLogoImg(part, { width: 22, height: 22, className: 'highlight-inline-logo' })}></span>;
                         }
                         return <span set:html={formatStatsAndCompanies(part)}></span>;
                       })}
@@ -272,18 +279,23 @@ const contactLinks = [
             );
           })}
         </ul>
+        <a href={cardMeta.recent.cta.href} class="home-card-cta">{cardMeta.recent.cta.label} →</a>
       </div>
     )}
 
     {highlights?.data?.building?.length > 0 && (
-      <div class="scroll-stack-card" id="section-building">
-        <div class="home-card-intro">
-          <p class="card-kicker">{cardMeta.building.kicker}</p>
-          <h2 class="panel-header">{cardMeta.building.title}</h2>
-          <p class="card-subtitle">{cardMeta.building.subtitle}</p>
-        </div>
-        <ul class="highlight-list">
-          {highlights.data.building.map((item: any) => {
+      <div class="scroll-stack-card home-pitch-card" id="section-building">
+        <header class="home-card-intro home-card-intro--building">
+          <div class="card-pillar-row">
+            <span class="card-pillar-num" aria-hidden="true">{cardMeta.building.kicker}</span>
+            <div class="card-pillar-copy">
+              <h2 class="panel-header">{cardMeta.building.title}</h2>
+              <p class="card-subtitle">{cardMeta.building.subtitle}</p>
+            </div>
+          </div>
+        </header>
+        <ul class="highlight-list" role="list">
+          {highlights.data.building.map((item: any, rowIndex: number) => {
             const mainPoint = typeof item === 'string' ? item : (item.point || '');
             let subPoints: string[] = typeof item === 'string' ? [] : (item.details || []);
             if (mainPoint.includes('TechPlus UW')) {
@@ -291,23 +303,28 @@ const contactLinks = [
             }
             const parts = mainPoint.split(/\[LOGO:([^\]]+)\]/g);
             const plainLabel = toPlainLabel(mainPoint);
+            const rowNum = String(rowIndex + 1).padStart(2, '0');
             return (
               <li class="highlight-item-group">
                 {subPoints.length > 0 ? (
                   <details class="highlight-details" data-highlight-section="building" data-highlight-label={plainLabel}>
                     <summary class="highlight-summary">
-                      <span class="highlight-main-point">
+                      <span class="highlight-row-index" aria-hidden="true">{rowNum}</span>
+                      <span class="highlight-main-point highlight-punchline">
                         {parts.map((part: string, i: number) => {
                           if (i % 2 === 1) {
-                            return <span set:html={renderLogoImg(part)}></span>;
+                            return <span set:html={renderLogoImg(part, { width: 22, height: 22, className: 'highlight-inline-logo' })}></span>;
                           }
                           return <span set:html={formatSummaryText(part)}></span>;
                         })}
                       </span>
-                      <span class="details-cue details-cue--chevron" aria-hidden="true">
-                        <svg class="highlight-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
+                      <span class="highlight-expand-affordance" aria-hidden="true">
+                        <span class="expand-label">Proof</span>
+                        <span class="details-cue details-cue--chevron">
+                          <svg class="highlight-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                        </span>
                       </span>
                     </summary>
                     <div class="highlight-details-body">
@@ -321,10 +338,11 @@ const contactLinks = [
                   </details>
                 ) : (
                   <div class="highlight-row highlight-row--no-bullet">
-                    <div class="highlight-main-point">
+                    <span class="highlight-row-index" aria-hidden="true">{rowNum}</span>
+                    <div class="highlight-main-point highlight-punchline">
                       {parts.map((part: string, i: number) => {
                         if (i % 2 === 1) {
-                          return <span set:html={renderLogoImg(part)}></span>;
+                          return <span set:html={renderLogoImg(part, { width: 22, height: 22, className: 'highlight-inline-logo' })}></span>;
                         }
                         return <span set:html={formatStatsAndCompanies(part)}></span>;
                       })}
@@ -335,34 +353,43 @@ const contactLinks = [
             );
           })}
         </ul>
+        <a href={cardMeta.building.cta.href} class="home-card-cta">{cardMeta.building.cta.label} →</a>
       </div>
     )}
 
     {testimonials.length > 0 && (
-      <div class="scroll-stack-card" id="section-clients">
-        <div class="home-card-intro">
-          <p class="card-kicker">{cardMeta.clients.kicker}</p>
-          <h2 class="panel-header">{cardMeta.clients.title}</h2>
-          <p class="card-subtitle">{cardMeta.clients.subtitle}</p>
-        </div>
+      <div class="scroll-stack-card home-pitch-card" id="section-clients">
+        <header class="home-card-intro home-card-intro--clients">
+          <div class="card-pillar-row">
+            <span class="card-pillar-num" aria-hidden="true">{cardMeta.clients.kicker}</span>
+            <div class="card-pillar-copy">
+              <h2 class="panel-header">{cardMeta.clients.title}</h2>
+              <p class="card-subtitle">{cardMeta.clients.subtitle}</p>
+            </div>
+          </div>
+        </header>
         <div class="proof-grid">
           {testimonials.map((t) => (
             <details class="proof-card" data-testimonial-company={t.data.company} data-testimonial-project={t.data.project || 'unspecified'}>
               <summary class="proof-summary">
-                <span class="proof-topline">
-                  {t.data.companyLogo && (
-                    <span set:html={renderLogoImg(t.data.companyLogo, { width: 28, height: 28, className: 'proof-logo', alt: '' })}></span>
-                  )}
-                  <span>
-                    {t.data.project && <span class="proof-project">{t.data.project}</span>}
-                    <span class="proof-company">{t.data.company}</span>
-                  </span>
-                </span>
-                <span class="proof-meta">
-                  <span aria-label={`${t.data.rating} out of 5 stars`}>
-                    <span aria-hidden="true">{'★'.repeat(t.data.rating)}</span>
-                  </span>
-                  <span class="details-cue details-cue--chevron" aria-hidden="true">
+                <div class="proof-summary-head">
+                  <div class="proof-identity">
+                    {t.data.companyLogo && (
+                      <span set:html={renderLogoImg(t.data.companyLogo, { width: 32, height: 32, className: 'proof-logo', alt: '' })}></span>
+                    )}
+                    <div class="proof-names">
+                      <span class="proof-company">{t.data.company}</span>
+                      {t.data.project && <span class="proof-project">{t.data.project}</span>}
+                    </div>
+                  </div>
+                  <div class="proof-rating-block" aria-label={`${t.data.rating} out of 5 stars`}>
+                    <span class="proof-stars" aria-hidden="true">{'★'.repeat(t.data.rating)}{'☆'.repeat(5 - t.data.rating)}</span>
+                    <span class="proof-rating-value">{t.data.rating}/5</span>
+                  </div>
+                </div>
+                <span class="proof-expand-affordance" aria-hidden="true">
+                  <span class="expand-label">Quote</span>
+                  <span class="details-cue details-cue--chevron">
                     <svg class="highlight-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
@@ -381,6 +408,7 @@ const contactLinks = [
             </details>
           ))}
         </div>
+        <a href={cardMeta.clients.cta.href} class="home-card-cta">{cardMeta.clients.cta.label} →</a>
       </div>
     )}
 
@@ -730,9 +758,21 @@ const contactLinks = [
     opacity: 0.3;
   }
 
-  :global(.dark) .hero-tagline {
-    background: rgba(var(--bg), 0.72);
-    border-color: rgba(var(--border), 0.14);
+  :global(html.light) .hero-tagline {
+    background: rgba(255, 255, 255, 0.88);
+    border-color: rgba(255, 255, 255, 0.55);
+    color: rgb(var(--fg));
+  }
+
+  :global(html.dark) .hero-tagline {
+    background: rgba(12, 14, 22, 0.72);
+    border-color: rgba(255, 255, 255, 0.14);
+    color: rgb(248, 250, 252);
+  }
+
+  :global(html.dark) .hero-tagline .tagline-link,
+  :global(html.dark) .hero-tagline .tagline-plain {
+    color: rgb(248, 250, 252);
   }
 
   .hero-scroll-hint {
@@ -766,14 +806,84 @@ const contactLinks = [
     .hero-scroll-hint { animation: none; }
   }
 
-  /* ── Card field-note headers ───────────────────────────────────────────── */
-  .home-card-intro {
-    display: grid;
-    gap: 0.5rem;
-    margin-bottom: 1.15rem;
+  /* ── Home pitch cards (translucent glass over ASCII) ───────────────────── */
+  .home-pitch-card {
+    --card-fg: 248 250 252;
+    --card-muted: 186 198 214;
+    --card-accent: 148 180 220;
+    color: rgb(var(--card-fg));
+    backdrop-filter: blur(18px) saturate(135%);
+    -webkit-backdrop-filter: blur(18px) saturate(135%);
+    box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
   }
 
-  /* Stacked cards: no lead bullet, chevron toggle, no sub-point rail */
+  #section-recent {
+    background: rgba(12, 18, 32, 0.48);
+    border-color: rgba(120, 168, 230, 0.28);
+    --card-accent: 120 168 230;
+  }
+  #section-building {
+    background: rgba(28, 20, 12, 0.5);
+    border-color: rgba(220, 168, 96, 0.26);
+    --card-accent: 220 168 96;
+  }
+  #section-clients {
+    background: rgba(10, 22, 16, 0.48);
+    border-color: rgba(130, 196, 150, 0.26);
+    --card-accent: 130 196 150;
+  }
+
+  @media (max-width: 768px) {
+    #section-recent { background: rgba(12, 18, 32, 0.4); }
+    #section-building { background: rgba(28, 20, 12, 0.42); }
+    #section-clients { background: rgba(10, 22, 16, 0.4); }
+  }
+
+  @media (max-width: 480px) {
+    #section-recent { background: rgba(12, 18, 32, 0.36); }
+    #section-building { background: rgba(28, 20, 12, 0.38); }
+    #section-clients { background: rgba(10, 22, 16, 0.36); }
+  }
+
+  /* Pitch cards sit on dark ASCII — same readable palette in both theme modes */
+  :global(html.light) .home-pitch-card,
+  :global(html.dark) .home-pitch-card {
+    --card-fg: 248 250 252;
+    --card-muted: 186 198 214;
+    color: rgb(var(--card-fg));
+  }
+
+  .home-card-intro {
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.95rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .card-pillar-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.85rem;
+    align-items: start;
+  }
+
+  .card-pillar-num {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.65rem, 4.5vw, 2.15rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: rgba(var(--card-accent), 0.92);
+    text-shadow: 0 0 28px rgba(var(--card-accent), 0.35);
+  }
+
+  .card-pillar-copy {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
+  }
+
   #section-recent .highlight-sub-points,
   #section-building .highlight-sub-points {
     border-left: none;
@@ -790,7 +900,7 @@ const contactLinks = [
     align-items: center;
     justify-content: center;
     padding: 0.15rem;
-    color: rgb(var(--muted));
+    color: rgb(var(--card-muted));
     letter-spacing: 0;
     text-transform: none;
     font-size: 0;
@@ -806,88 +916,41 @@ const contactLinks = [
   }
 
   .highlight-details.is-open .details-cue--chevron,
-  .proof-card.is-open .details-cue--chevron {
-    color: rgb(var(--fg));
+  .proof-card.is-open .details-cue--chevron,
+  .highlight-details.is-open .expand-label,
+  .proof-card.is-open .expand-label {
+    color: rgb(var(--card-fg));
   }
 
-  /* When the JS shim drives the open/close, content is laid out via inline
-     height; this keeps the body box visible during the transition even though
-     the [open] attr toggles asynchronously. */
   .highlight-details[data-animating="true"] > .highlight-details-body,
   .proof-card[data-animating="true"] > .proof-body {
     display: block;
   }
 
-  /* ── Per-card minimalistic tints ──────────────────────────────────────────
-     Very faint hue washes that stay legible over the B&W ASCII backdrop.
-     Card 1 (recent)   → cool slate   (washed blue-grey)
-     Card 2 (building) → warm sand    (washed cream)
-     Card 3 (clients)  → soft sage    (washed green-grey)
-  */
-  #section-recent {
-    background: rgba(228, 237, 248, 0.86);
-    border-color: rgba(170, 192, 220, 0.32);
-  }
-  #section-building {
-    background: rgba(250, 243, 230, 0.86);
-    border-color: rgba(212, 192, 158, 0.32);
-  }
-  #section-clients {
-    background: rgba(234, 244, 235, 0.86);
-    border-color: rgba(178, 204, 184, 0.32);
-  }
-
-  :global(html.dark) #section-recent {
-    background: rgba(13, 16, 24, 0.86);
-    border-color: rgba(120, 144, 184, 0.18);
-  }
-  :global(html.dark) #section-building {
-    background: rgba(24, 19, 13, 0.86);
-    border-color: rgba(184, 156, 108, 0.18);
-  }
-  :global(html.dark) #section-clients {
-    background: rgba(13, 20, 15, 0.86);
-    border-color: rgba(140, 176, 148, 0.18);
-  }
-
   .highlight-row--no-bullet {
-    gap: 0;
-  }
-
-  .card-kicker {
-    width: fit-content;
-    margin: 0;
-    padding: 0.18rem 0.44rem;
-    border: 1px solid rgba(var(--border), 0.18);
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.48);
-    color: rgb(var(--muted));
-    font-size: 0.6rem;
-    font-weight: 800;
-    letter-spacing: 0.18em;
-    line-height: 1;
-    text-transform: uppercase;
-  }
-
-  :global(html.dark) .card-kicker {
-    background: rgba(255, 255, 255, 0.08);
+    gap: 0.65rem;
+    grid-template-columns: auto 1fr;
   }
 
   .panel-header {
-    font-size: 1.05rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: rgb(var(--fg));
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.05rem, 2.8vw, 1.28rem);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: rgb(var(--card-fg));
     margin: 0;
+    line-height: 1.15;
+    text-wrap: balance;
   }
 
   .card-subtitle {
-    max-width: 40rem;
+    max-width: 36rem;
     margin: 0;
-    color: rgb(var(--muted));
-    font-size: 0.8rem;
-    line-height: 1.45;
+    color: rgb(var(--card-muted));
+    font-size: clamp(0.78rem, 2.2vw, 0.86rem);
+    line-height: 1.5;
+    text-wrap: pretty;
   }
 
   .scan-chips,
@@ -903,48 +966,40 @@ const contactLinks = [
     align-items: center;
     min-height: 1.45rem;
     padding: 0.22rem 0.5rem;
-    border: 1px solid rgba(var(--border), 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.42);
-    color: rgb(var(--fg));
+    background: rgba(255, 255, 255, 0.1);
+    color: rgb(var(--card-muted));
     font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
-  :global(html.dark) .scan-chips span,
-  :global(html.dark) .tech-chips span {
-    background: rgba(255, 255, 255, 0.07);
-  }
-
-  /* ── Highlight lists (reuse global.css classes) ─────────────────────── */
+  /* ── Highlight lists ─────────────────────────────────────────────────── */
   .highlight-list {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
+    gap: 0.5rem;
   }
 
   .highlight-item-group {
-    border: 1px solid rgba(var(--border), 0.12);
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.32);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
     overflow: hidden;
-  }
-
-  :global(html.dark) .highlight-item-group {
-    background: rgba(255, 255, 255, 0.045);
   }
 
   .highlight-row,
   .highlight-summary {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.55rem;
-    padding: 0.65rem 0.78rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: start;
+    gap: 0.55rem 0.65rem;
+    padding: 0.72rem 0.8rem;
   }
 
   .highlight-summary {
@@ -960,52 +1015,89 @@ const contactLinks = [
   .highlight-summary:focus-visible,
   .proof-summary:focus-visible,
   .home-card-cta:focus-visible {
-    outline: 2px solid rgba(var(--fg), 0.72);
-    outline-offset: 4px;
+    outline: 2px solid rgba(var(--card-accent), 0.85);
+    outline-offset: 3px;
   }
 
-  .bullet-point {
-    display: inline-block;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: rgb(var(--fg));
-    margin-top: 0.65em;
-    flex-shrink: 0;
-    opacity: 0.45;
+  .highlight-row-index {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    color: rgba(var(--card-accent), 0.75);
+    padding-top: 0.2rem;
+    line-height: 1;
   }
 
   .highlight-main-point {
     flex: 1;
-    font-size: 0.94rem;
-    line-height: 1.48;
-    color: rgb(var(--fg));
+    min-width: 0;
+    font-size: clamp(0.86rem, 2.4vw, 0.94rem);
+    line-height: 1.45;
+    color: rgb(var(--card-fg));
+    font-weight: 500;
+  }
+
+  .highlight-punchline :global(strong em),
+  .highlight-punchline :global(strong > em) {
+    color: rgba(var(--card-accent), 1);
+    font-style: normal;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+  }
+
+  .highlight-inline-logo,
+  :global(.highlight-inline-logo) {
+    vertical-align: -0.2em;
+    margin-inline: 0.15rem 0.25rem !important;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .highlight-expand-affordance,
+  .proof-expand-affordance {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    align-self: center;
+    flex-shrink: 0;
+  }
+
+  .expand-label {
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(var(--card-muted));
+    transition: color 0.35s ease;
   }
 
   .details-cue {
     align-self: center;
     flex-shrink: 0;
-    color: rgb(var(--muted));
+    color: rgb(var(--card-muted));
     font-size: 0.66rem;
     font-weight: 800;
     letter-spacing: 0.12em;
     text-transform: uppercase;
   }
 
-  .highlight-details[open] .details-cue,
-  .proof-card[open] .details-cue {
-    color: rgb(var(--fg));
-  }
-
   .highlight-details-body {
-    padding: 0 0.78rem 0.85rem 2.1rem;
+    padding: 0 0.8rem 0.85rem;
+    margin-left: 2.35rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .highlight-expanded-main {
-    margin: 0 0 0.45rem;
-    color: rgb(var(--fg));
+    margin: 0.65rem 0 0.5rem;
+    color: rgb(var(--card-muted));
     font-size: 0.8rem;
-    line-height: 1.46;
+    line-height: 1.5;
+  }
+
+  .highlight-expanded-main :global(a),
+  .highlight-sub-item :global(a) {
+    color: rgb(var(--card-fg));
   }
 
   .highlight-sub-points {
@@ -1014,15 +1106,26 @@ const contactLinks = [
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
-    border-left: 2px solid rgba(var(--border), 0.12);
-    padding-left: 0.75rem;
+    gap: 0.35rem;
   }
 
   .highlight-sub-item {
-    font-size: 0.82rem;
-    line-height: 1.48;
-    color: rgb(var(--muted));
+    position: relative;
+    padding-left: 0.85rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: rgb(var(--card-muted));
+  }
+
+  .highlight-sub-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(var(--card-accent), 0.85);
   }
 
   .home-card-cta {
@@ -1030,23 +1133,24 @@ const contactLinks = [
     align-items: center;
     gap: 0.35rem;
     width: fit-content;
-    margin-top: 0.85rem;
-    padding: 0.48rem 0.72rem;
-    border: 1px solid rgba(var(--border), 0.2);
+    margin-top: 1rem;
+    padding: 0.5rem 0.85rem;
+    border: 1px solid rgba(var(--card-accent), 0.45);
     border-radius: 999px;
-    background: rgb(var(--fg));
-    color: rgb(var(--bg));
-    font-size: 0.7rem;
+    background: rgba(var(--card-accent), 0.18);
+    color: rgb(var(--card-fg));
+    font-size: 0.68rem;
     font-weight: 800;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-decoration: none;
     text-transform: uppercase;
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
   }
 
   .home-card-cta:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+    background: rgba(var(--card-accent), 0.32);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   }
 
   /* ── Contact panels ────────────────────────────────────────────────────── */
@@ -1057,7 +1161,7 @@ const contactLinks = [
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #fff;
+    color: rgb(var(--connect-fg));
     margin: 0 0 0.75rem;
   }
 
@@ -1065,29 +1169,25 @@ const contactLinks = [
     font-size: 3rem;
     font-weight: 700;
     margin: 0 0 1rem;
-    color: #fff;
+    color: rgb(var(--connect-fg));
   }
 
   .contact-body {
     font-size: 1.35rem;
     line-height: 1.6;
-    color: #fff;
+    color: rgb(var(--connect-fg));
     margin: 0 0 1.5rem;
   }
 
   .contact-inline-link {
-    color: #fff;
+    color: rgb(var(--connect-fg));
     font-weight: 600;
     text-decoration: none;
-    border-bottom: 1px solid rgba(var(--border), 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.35);
   }
 
-  .contact-inline-link:hover { border-bottom-color: rgba(var(--border), 0.6); }
-
-  :global(html.light) .contact-eyebrow,
-  :global(html.light) .contact-body,
-  :global(html.light) .contact-inline-link {
-    color: #fff;
+  .contact-inline-link:hover {
+    border-bottom-color: rgba(255, 255, 255, 0.65);
   }
 
   .contact-cta {
@@ -1096,24 +1196,22 @@ const contactLinks = [
     gap: 0.35rem;
     padding: 0.5rem 1.1rem;
     border-radius: 999px;
-    border: 1px solid rgba(var(--border), 0.22);
-    color: rgb(var(--fg));
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    color: rgb(var(--connect-fg));
     font-size: 0.85rem;
     font-weight: 600;
     text-decoration: none;
-    background: rgba(255, 255, 255, 0.6);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     margin-bottom: 1rem;
   }
 
   .contact-cta:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-  }
-
-  :global(html.dark) .contact-cta {
-    background: rgba(30, 30, 30, 0.7);
-    border-color: rgba(255,255,255,0.15);
+    background: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   }
 
   .contact-icons {
@@ -1130,9 +1228,9 @@ const contactLinks = [
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: rgb(var(--fg));
-    background: rgba(255, 255, 255, 0.75);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: rgb(var(--connect-fg));
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     text-decoration: none;
@@ -1141,8 +1239,9 @@ const contactLinks = [
 
   .contact-icon:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.32);
   }
 
   .contact-icon-svg {
@@ -1153,19 +1252,7 @@ const contactLinks = [
 
   .contact-icon svg { width: 100%; height: 100%; }
 
-  :global(html.dark) .contact-icon {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.15);
-  }
-
-  :global(html.dark) .contact-icon:hover {
-    background: rgba(255, 255, 255, 0.16);
-    border-color: rgba(255, 255, 255, 0.35);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-  }
-
-  /* ── Standalone connect section ─────────────────────────────────────────── */
+  /* ── Standalone connect section (over ASCII — light text in both themes) ── */
   .connect-section {
     display: flex;
     flex-direction: column;
@@ -1174,11 +1261,8 @@ const contactLinks = [
     padding: 5rem 1.5rem 6rem;
     position: relative;
     z-index: 5;
-    --muted: 40 40 40;
-  }
-
-  :global(html.dark) .connect-section {
-    --muted: 210 210 210;
+    --connect-fg: 255 255 255;
+    --connect-muted: 190 200 215;
   }
 
   .connect-section .contact-eyebrow { margin-bottom: 0.5rem; }
@@ -1188,106 +1272,133 @@ const contactLinks = [
 
   /* ── Client proof cards ────────────────────────────────────────────────── */
   .proof-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.9rem;
-    margin-top: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
   }
 
   .proof-card {
-    border: 1px solid rgba(var(--border), 0.14);
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.34);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
     overflow: hidden;
-  }
-
-  :global(html.dark) .proof-card {
-    background: rgba(255, 255, 255, 0.05);
   }
 
   .proof-summary {
     display: grid;
-    gap: 0.55rem;
-    padding: 0.75rem 0.85rem;
+    gap: 0.5rem;
+    padding: 0.72rem 0.8rem;
     cursor: pointer;
     list-style: none;
   }
 
-  .proof-topline {
+  .proof-summary-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.65rem;
+  }
+
+  .proof-identity {
     display: flex;
     align-items: center;
-    gap: 0.7rem;
+    gap: 0.65rem;
+    min-width: 0;
+    flex: 1;
   }
 
   .proof-logo {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: 8px;
     object-fit: contain;
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.14);
+    flex-shrink: 0;
   }
 
-  .proof-project,
-  .proof-company,
-  .proof-excerpt,
-  .proof-meta {
-    display: block;
-  }
-
-  .proof-project {
-    color: rgb(var(--fg));
-    font-size: 0.86rem;
-    font-weight: 800;
-    line-height: 1.25;
+  .proof-names {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
   }
 
   .proof-company {
-    color: rgb(var(--muted));
-    font-size: 0.78rem;
-    font-weight: 700;
+    display: block;
+    color: rgb(var(--card-fg));
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(0.88rem, 2.5vw, 0.98rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    text-wrap: balance;
+  }
+
+  .proof-project {
+    display: block;
+    color: rgb(var(--card-muted));
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0.04em;
+  }
+
+  .proof-rating-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.12rem;
+    flex-shrink: 0;
+  }
+
+  .proof-stars {
+    color: #f5c842;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    text-shadow: 0 0 12px rgba(245, 200, 66, 0.35);
+  }
+
+  .proof-rating-value {
+    font-size: 0.58rem;
+    font-weight: 800;
     letter-spacing: 0.12em;
     text-transform: uppercase;
+    color: rgb(var(--card-muted));
   }
 
-  .proof-excerpt {
-    color: rgb(var(--fg));
-    font-size: 0.88rem;
-    line-height: 1.48;
-  }
-
-  .proof-meta {
-    display: flex;
-    justify-content: space-between;
-    gap: 0.75rem;
-    color: rgb(var(--muted));
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+  .proof-expand-affordance {
+    justify-content: flex-end;
+    width: 100%;
   }
 
   .proof-body {
-    border-top: 1px solid rgba(var(--border), 0.12);
-    padding: 0.75rem 0.85rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.75rem 0.8rem 0.85rem;
   }
 
   .quote-text {
-    font-size: 0.92rem;
-    line-height: 1.58;
-    color: rgb(var(--fg));
+    font-size: clamp(0.86rem, 2.4vw, 0.92rem);
+    line-height: 1.55;
+    color: rgb(var(--card-fg));
     font-style: italic;
     margin: 0;
   }
 
   .quote-author {
-    font-size: 0.92rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    color: rgb(var(--fg));
-    margin: 0.75rem 0 0;
+    color: rgb(var(--card-muted));
+    margin: 0.65rem 0 0;
   }
 
-  .tech-chips {
-    margin-top: 0.9rem;
+  .home-pitch-card .tech-chips {
+    margin-top: 0.75rem;
+  }
+
+  .home-pitch-card .tech-chips span {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.14);
+    color: rgb(var(--card-fg));
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -1308,23 +1419,8 @@ const contactLinks = [
       column-gap: 0.45rem;
     }
 
-    .panel-header {
-      font-size: 1.08rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .card-subtitle,
-    .highlight-main-point,
-    .proof-excerpt,
-    .quote-text {
-      font-size: 0.92rem;
-      line-height: 1.5;
-    }
-
-    .highlight-sub-item,
-    .contact-body {
-      font-size: 0.88rem;
-      line-height: 1.5;
+    .home-pitch-card .panel-header {
+      font-size: 1.1rem;
     }
   }
 
@@ -1337,10 +1433,6 @@ const contactLinks = [
 
     .tagline-dot {
       display: none;
-    }
-
-    .proof-grid {
-      grid-template-columns: 1fr;
     }
   }
 
@@ -1371,50 +1463,72 @@ const contactLinks = [
       text-wrap: balance;
     }
 
-    .panel-header {
-      font-size: 1.05rem;
-      letter-spacing: 0.04em;
+    .card-pillar-row {
+      gap: 0.65rem;
+    }
+
+    .card-pillar-num {
+      font-size: 1.5rem;
+    }
+
+    .home-pitch-card .panel-header {
+      font-size: 1rem;
     }
 
     .home-card-intro {
-      margin-bottom: 1rem;
+      margin-bottom: 0.9rem;
+      padding-bottom: 0.8rem;
     }
 
     .highlight-list {
-      gap: 0.7rem;
+      gap: 0.45rem;
     }
 
     .highlight-row,
     .highlight-summary {
-      gap: 0.55rem;
-      padding: 0.75rem;
+      gap: 0.45rem 0.5rem;
+      padding: 0.68rem 0.72rem;
     }
 
     .highlight-main-point,
-    .proof-excerpt,
     .quote-text {
-      font-size: 0.92rem;
-      line-height: 1.52;
+      font-size: 0.88rem;
+      line-height: 1.48;
     }
 
     .highlight-sub-item {
-      font-size: 0.84rem;
-      line-height: 1.5;
+      font-size: 0.82rem;
+      line-height: 1.48;
     }
 
     .highlight-details-body {
-      padding: 0 0.75rem 0.75rem 2rem;
+      margin-left: 1.85rem;
+      padding: 0 0.72rem 0.72rem;
     }
 
-    .details-cue,
-    .proof-meta {
-      font-size: 0.64rem;
-      letter-spacing: 0.08em;
+    .expand-label {
+      font-size: 0.54rem;
+    }
+
+    .proof-summary-head {
+      flex-wrap: wrap;
+    }
+
+    .proof-rating-block {
+      flex-direction: row;
+      align-items: center;
+      gap: 0.35rem;
     }
 
     .proof-summary,
     .proof-body {
-      padding: 0.8rem;
+      padding: 0.68rem 0.72rem;
+    }
+
+    .home-card-cta {
+      margin-top: 0.85rem;
+      min-height: 2.5rem;
+      padding: 0.55rem 0.9rem;
     }
 
     .contact-heading {

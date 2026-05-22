@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
-import HeroAsciiBackdrop from '../../components/HeroAsciiBackdrop.astro';
 import { getCollection } from 'astro:content';
+
 const posts = await getCollection('hobbies');
 const photos = await getCollection('photos');
 const entries = await Promise.all(
@@ -25,54 +25,98 @@ const getRandomPhotoForEntry = (seed: string) => {
   const hash = Array.from(seed).reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
   return photos[hash % photos.length]?.data.image ?? fallbackPhoto;
 };
+
+const issueDate = new Date().toLocaleDateString('en-US', {
+  month: 'short',
+  year: 'numeric',
+}).toUpperCase();
+
+const entryCount = sortedEntries.length;
 ---
 
 <Base title="Hobbies – Elrich Chen">
-  <HeroAsciiBackdrop videoSrc="/videos/homeland.mp4" loop />
   <div class="hobbies-content-shell">
-    <div class="mb-6">
+    <div class="hobbies-back">
       <a href="/" class="back-home-link">← Back to home</a>
     </div>
-    <h1 class="page-title text-xl font-semibold mb-4">Hobbies</h1>
 
-    <div class="hobby-grid-wrap">
-    <div class="hobby-grid">
-      {sortedEntries.map(({ entry, Content }) => (
-        <details class="hobby-card hobby-details">
-          <summary class="hobby-summary-toggle">
-            <div class="hobby-head">
-              <div>
-                <h2 class="hobby-title">{entry.data.title}</h2>
-                <p class="hobby-date">{entry.data.date}</p>
+    <header class="masthead">
+      <div class="masthead-meta">
+        <span class="masthead-edition">Field Notes · Vol. IV</span>
+        <span class="masthead-rule" aria-hidden="true"></span>
+        <span class="masthead-date">{issueDate}</span>
+      </div>
+      <h1 class="masthead-title">
+        <span class="masthead-amper">H</span>obbies
+      </h1>
+      <p class="masthead-sub">
+        Off-keyboard rituals, side quests, and the small obsessions that keep the main thread human.
+      </p>
+    </header>
+
+    <section class="entries-section" aria-labelledby="entries-heading">
+      <p class="eyebrow" id="entries-heading">
+        <span class="eyebrow-num">01</span>
+        <span class="eyebrow-rule"></span>
+        <span class="eyebrow-label">Catalog · {entryCount} {entryCount === 1 ? 'entry' : 'entries'}</span>
+      </p>
+
+      <div class="entries-catalog">
+        {sortedEntries.map(({ entry, Content }, index) => (
+          <details class="entry-row hobby-details">
+            <summary class="entry-summary">
+              <span class="entry-index" aria-hidden="true">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <div class="entry-main">
+                <div class="entry-head">
+                  <h2 class="entry-title">{entry.data.title}</h2>
+                  {entry.data.date && (
+                    <time class="entry-date" datetime={entry.data.date}>
+                      {entry.data.date}
+                    </time>
+                  )}
+                </div>
+                {entry.data.summary && (
+                  <p class="entry-lede">{entry.data.summary}</p>
+                )}
+                {entry.data.tags?.length > 0 && (
+                  <div class="entry-tags" aria-label="Tags">
+                    {entry.data.tags.map((tag: string) => (
+                      <span class="entry-tag">{tag}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <span class="entry-chevron" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 8l4 4 4-4" />
+                </svg>
+              </span>
+            </summary>
+
+            <div class="entry-expand">
+              <div class="entry-expand-inner">
+                <figure class="entry-photo">
+                  <img
+                    src={getRandomPhotoForEntry(entry.slug)}
+                    alt={`Hobby visual for ${entry.data.title}`}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </figure>
+                <div class="entry-prose">
+                  <Content />
+                </div>
               </div>
             </div>
-            {entry.data.summary && <p class="hobby-summary">{entry.data.summary}</p>}
-            {entry.data.tags?.length > 0 && (
-              <div class="hobby-tags hobby-tags-bottom">
-                {entry.data.tags.map((tag: string) => (
-                  <span class="hobby-tag">{tag}</span>
-                ))}
-              </div>
-            )}
-            <span class="hobby-toggle" aria-hidden="true">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M6 8l4 4 4-4" />
-              </svg>
-            </span>
-          </summary>
-          <div class="hobby-body">
-            <img
-              src={getRandomPhotoForEntry(entry.slug)}
-              alt={`Hobby visual for ${entry.data.title}`}
-              class="hobby-body-photo"
-              loading="lazy"
-              decoding="async"
-            />
-            <Content />
-          </div>
-        </details>
-      ))}
-    </div>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <div class="hobbies-colophon" aria-hidden="true">
+      <span>— end of issue —</span>
     </div>
   </div>
 </Base>
@@ -82,9 +126,9 @@ const getRandomPhotoForEntry = (seed: string) => {
     document.querySelectorAll('.hobby-details').forEach((details) => {
       details.addEventListener('toggle', () => {
         if (details.open) {
-          const title = details.querySelector('.hobby-title')?.textContent?.trim() || 'unknown';
+          const title = details.querySelector('.entry-title')?.textContent?.trim() || 'unknown';
           window.posthog?.capture('hobby_expanded', {
-            hobby_title: title
+            hobby_title: title,
           });
         }
       });
@@ -93,282 +137,499 @@ const getRandomPhotoForEntry = (seed: string) => {
 </script>
 
 <style>
+  /* ─── Shell: no opaque wrapper — ASCII stays visible ─────────────── */
   .hobbies-content-shell {
     position: relative;
     z-index: 3;
-  }
-
-  .page-title {
     color: #fff;
+    padding-bottom: 2.5rem;
   }
 
-  .hobby-grid-wrap {
-    width: 100%;
-    max-width: 56rem;
-    margin-inline: auto;
+  .hobbies-back {
+    margin-bottom: 1.25rem;
   }
 
-  .hobby-grid {
-    display: grid;
+  /* ─── Masthead ───────────────────────────────────────────────────── */
+  .masthead {
+    margin: 0.5rem 0 2.2rem;
+  }
+
+  .masthead-meta {
+    display: flex;
+    align-items: center;
     gap: 0.7rem;
-  }
-
-  .hobby-card {
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    padding: 0.78rem 0.9rem;
-    background: rgba(255, 255, 255, 0.16);
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
-  }
-
-  :global(html.dark) .hobby-card {
-    background: rgba(10, 10, 10, 0.58);
-    border-color: rgba(255, 255, 255, 0.14);
-    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.42);
-  }
-
-  .hobby-card[open] {
-    border-color: rgba(var(--border), 0.3);
-    box-shadow: 0 18px 34px rgba(15, 23, 42, 0.12);
-  }
-
-  .hobby-head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.8rem;
-  }
-
-  .hobby-title {
-    margin: 0;
-    font-size: 0.9rem;
-    color: #fff;
-  }
-
-  .hobby-date {
-    margin: 0.3rem 0 0;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: rgba(255, 255, 255, 0.82);
-  }
-
-  .hobby-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-  }
-
-  .hobby-tags-bottom {
-    align-self: flex-start;
-    justify-content: flex-start;
-    margin-top: 0.6rem;
-  }
-
-  .hobby-tag {
+    font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
     font-size: 0.7rem;
-    padding: 0.24rem 0.58rem;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.18);
-    color: #fff;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+    margin-bottom: 1.2rem;
   }
 
-  .hobby-summary-toggle {
-    cursor: pointer;
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    color: inherit;
-    border: none;
-    padding: 0;
+  .masthead-edition,
+  .masthead-date {
+    white-space: nowrap;
+  }
+
+  .masthead-rule {
+    flex: 1 1 auto;
+    height: 1px;
+    min-width: 1.5rem;
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.25),
+      rgba(255, 255, 255, 0.06)
+    );
+  }
+
+  .masthead-title {
     margin: 0;
-    position: relative;
-    padding-right: 2.5rem;
-    transition: color 0.35s ease, border-color 0.35s ease;
-  }
-
-  .hobby-summary-toggle:hover {
-    color: rgb(var(--fg));
-  }
-
-  .hobby-summary-toggle::-webkit-details-marker {
-    display: none;
-  }
-
-  .hobby-summary-toggle::marker {
-    content: '';
-  }
-
-  .hobby-summary {
-    margin: 0.45rem 0 0;
-    font-size: 0.8rem;
-    line-height: 1.45;
+    font-family: 'Syne', 'Rubik', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2.8rem, 9vw, 5.4rem);
+    line-height: 0.95;
+    letter-spacing: -0.045em;
     color: #fff;
+    text-shadow: 0 2px 22px rgba(0, 0, 0, 0.45);
   }
 
-  .hobby-toggle {
-    position: absolute;
-    top: -0.2rem;
-    right: 0;
-    width: 44px;
-    height: 44px;
-    border-radius: 999px;
+  .masthead-amper {
+    display: inline-block;
+    font-style: italic;
+    transform: translateY(-0.04em);
+  }
+
+  .masthead-sub {
+    margin: 1rem 0 0;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.7);
+    max-width: 48ch;
+    line-height: 1.55;
+  }
+
+  /* ─── Eyebrow ────────────────────────────────────────────────────── */
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0 0 1.15rem;
+    font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  .eyebrow-num {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.14);
-    border: 1px solid rgba(255, 255, 255, 0.26);
-    color: rgba(255, 255, 255, 0.9);
-    transition: transform 0.35s ease, color 0.35s ease, background 0.35s ease, border-color 0.35s ease;
+    min-width: 1.55rem;
+    height: 1.55rem;
+    padding: 0 0.32rem;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffd28a;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
   }
 
-  .hobby-toggle svg {
+  .eyebrow-rule {
+    width: 1.4rem;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .eyebrow-label {
+    white-space: nowrap;
+  }
+
+  /* ─── Catalog: spaced rows, glass cards ──────────────────────────── */
+  .entries-section {
+    margin-bottom: 2rem;
+  }
+
+  .entries-catalog {
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+  }
+
+  .entry-row {
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(8, 10, 18, 0.38);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+    overflow: hidden;
+    transition:
+      border-color 0.3s ease,
+      box-shadow 0.3s ease,
+      background 0.3s ease;
+  }
+
+  .entry-row[open] {
+    border-color: rgba(255, 210, 138, 0.35);
+    background: rgba(8, 10, 18, 0.48);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.38);
+  }
+
+  .entry-summary {
+    cursor: pointer;
+    list-style: none;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: start;
+    gap: 1rem 1.1rem;
+    padding: 1.35rem 1.4rem 1.3rem;
+    color: inherit;
+    transition: background 0.25s ease;
+  }
+
+  .entry-summary:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .entry-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .entry-summary::marker {
+    content: '';
+  }
+
+  .entry-index {
+    font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    color: rgba(255, 210, 138, 0.85);
+    padding-top: 0.35rem;
+    min-width: 1.75rem;
+  }
+
+  .entry-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .entry-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+  }
+
+  .entry-title {
+    margin: 0;
+    font-family: 'Syne', 'Rubik', sans-serif;
+    font-size: clamp(1.05rem, 2.4vw, 1.28rem);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+
+  .entry-date {
+    font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+    white-space: nowrap;
+  }
+
+  .entry-lede {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.78);
+    max-width: 58ch;
+  }
+
+  .entry-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .entry-tag {
+    font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 0.64rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.28rem 0.62rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: rgba(255, 255, 255, 0.88);
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+
+  .entry-row[open] .entry-tag {
+    border-color: rgba(255, 210, 138, 0.35);
+    background: rgba(255, 210, 138, 0.1);
+  }
+
+  .entry-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-top: 0.1rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.9);
+    transition:
+      transform 0.38s cubic-bezier(0.34, 1.2, 0.5, 1),
+      border-color 0.25s ease,
+      background 0.25s ease;
+  }
+
+  .entry-chevron svg {
     width: 16px;
     height: 16px;
   }
 
-  .hobby-card[open] .hobby-toggle {
+  .entry-row[open] .entry-chevron {
     transform: rotate(180deg);
-    color: #fff;
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.34);
+    border-color: rgba(255, 210, 138, 0.5);
+    background: rgba(255, 210, 138, 0.12);
+    color: #ffd28a;
   }
 
-  .hobby-body {
-    margin-top: 0.55rem;
-    font-size: 0.78rem;
-    color: #161616;
-    line-height: 1.65;
-    background: rgba(255, 255, 255, 0.94);
+  /* ─── Expanded body ──────────────────────────────────────────────── */
+  .entry-expand {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0 1.4rem 1.35rem;
+    animation: entry-reveal 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes entry-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .entry-expand-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 200px) minmax(0, 1fr);
+    gap: 1.25rem 1.5rem;
+    align-items: start;
+    padding-top: 1.15rem;
+  }
+
+  .entry-photo {
+    margin: 0;
     border-radius: 12px;
-    padding: 0.62rem 0.68rem;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    opacity: 0;
-    transform: translateY(-6px);
-    transition: opacity 0.38s ease, transform 0.38s ease;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+    aspect-ratio: 1;
   }
 
-  .hobby-card[open] .hobby-body {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  :global(html.dark) .hobby-body {
-    background: rgba(12, 12, 12, 0.88);
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.16);
-  }
-
-  .hobby-body-photo {
-    width: clamp(80px, 18vw, 112px);
-    height: clamp(80px, 18vw, 112px);
+  .entry-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    border-radius: 10px;
-    float: left;
-    margin: 0.2rem 0.85rem 0.45rem 0;
-    border: 1px solid rgba(0, 0, 0, 0.08);
   }
 
-  .hobby-body :global(p) {
-    margin: 0 0 0.9rem;
+  .entry-prose {
+    font-size: 0.9rem;
+    line-height: 1.68;
+    color: rgba(255, 255, 255, 0.86);
+    max-width: 65ch;
   }
 
-  .hobby-body :global(p:last-child) {
+  .entry-prose :global(p) {
+    margin: 0 0 0.95rem;
+  }
+
+  .entry-prose :global(p:last-child) {
     margin-bottom: 0;
   }
 
-  .hobby-body::after {
-    content: '';
-    display: block;
-    clear: both;
-  }
-
-  .hobby-body :global(a) {
-    color: #111;
+  .entry-prose :global(a) {
+    color: #ffd28a;
     text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
-  :global(html.dark) .hobby-body :global(a) {
+  .entry-prose :global(a:hover) {
     color: #fff;
   }
 
-  @media (max-width: 640px) {
-    .hobby-body-photo {
-      float: none;
-      display: block;
-      margin: 0 0 0.75rem;
-      width: 100%;
-      height: 180px;
+  .entry-prose :global(strong) {
+    color: #fff;
+    font-weight: 600;
+  }
+
+  /* ─── Colophon ───────────────────────────────────────────────────── */
+  .hobbies-colophon {
+    text-align: center;
+    margin: 2rem 0 0.5rem;
+    font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.35);
+  }
+
+  /* ─── Theme: editorial copy over dark ASCII (both light & dark html) ─ */
+  :global(html.light) .hobbies-content-shell,
+  :global(html.dark) .hobbies-content-shell {
+    color: #fff;
+  }
+
+  :global(html.light) .hobbies-content-shell .back-home-link,
+  :global(html.dark) .hobbies-content-shell .back-home-link {
+    color: #fff !important;
+    opacity: 0.78;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
+  }
+
+  :global(html.light) .hobbies-content-shell .back-home-link:hover,
+  :global(html.dark) .hobbies-content-shell .back-home-link:hover {
+    opacity: 1;
+  }
+
+  :global(html.light) .entry-row {
+    background: rgba(8, 10, 18, 0.42);
+    border-color: rgba(255, 255, 255, 0.16);
+  }
+
+  :global(html.light) .entry-row[open] {
+    background: rgba(8, 10, 18, 0.5);
+    border-color: rgba(255, 210, 138, 0.38);
+  }
+
+  :global(html.light) .entry-summary:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  /* ─── Tablet ─────────────────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .masthead {
+      margin-bottom: 1.8rem;
+    }
+
+    .masthead-sub {
+      font-size: 0.88rem;
+    }
+
+    .entries-catalog {
+      gap: 1.25rem;
+    }
+
+    /* Mobile: lighter glass so ASCII backdrop reads through gaps */
+    .entry-row {
+      background: rgba(8, 10, 18, 0.28);
+      border-color: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+    }
+
+    .entry-row[open] {
+      background: rgba(8, 10, 18, 0.34);
+    }
+
+    .entry-summary {
+      grid-template-columns: auto 1fr auto;
+      gap: 0.85rem 0.75rem;
+      padding: 1.15rem 1.1rem 1.1rem;
+    }
+
+    .entry-expand {
+      padding: 0 1.1rem 1.15rem;
+    }
+
+    .entry-expand-inner {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .entry-photo {
+      max-width: 220px;
+      aspect-ratio: 4 / 3;
+    }
+
+    .entry-chevron {
+      width: 2.35rem;
+      height: 2.35rem;
     }
   }
 
+  /* ─── Small phones ───────────────────────────────────────────────── */
   @media (max-width: 480px) {
-    .hobby-grid {
-      gap: 0.9rem;
+    .hobbies-content-shell {
+      padding-bottom: 1.5rem;
     }
 
-    .hobby-card {
+    .masthead-meta {
+      gap: 0.55rem;
+      font-size: 0.62rem;
+      letter-spacing: 0.18em;
+    }
+
+    .masthead-sub {
+      margin-top: 0.85rem;
+      font-size: 0.85rem;
+    }
+
+    .eyebrow {
+      margin-bottom: 0.9rem;
+      font-size: 0.65rem;
+    }
+
+    .entries-catalog {
+      gap: 1.35rem;
+    }
+
+    .entry-row {
       border-radius: 14px;
-      padding: 1rem 0.95rem;
+      background: rgba(8, 10, 18, 0.24);
     }
 
-    .hobby-summary-toggle {
-      gap: 0.3rem;
-      padding-right: 2.85rem;
+    .entry-row[open] {
+      background: rgba(8, 10, 18, 0.32);
     }
 
-    .hobby-title {
+    .entry-summary {
+      padding: 1rem 0.95rem 0.95rem;
+    }
+
+    .entry-title {
       font-size: 1rem;
-      line-height: 1.35;
     }
 
-    .hobby-date {
-      margin-top: 0.25rem;
-      font-size: 0.69rem;
-      letter-spacing: 0.1em;
+    .entry-lede {
+      font-size: 0.86rem;
     }
 
-    .hobby-summary {
-      margin-top: 0.55rem;
-      font-size: 0.9rem;
-      line-height: 1.55;
+    .entry-photo {
+      max-width: none;
+      width: 100%;
     }
 
-    .hobby-tags-bottom {
-      margin-top: 0.5rem;
-      gap: 0.3rem;
+    .entry-prose {
+      font-size: 0.86rem;
     }
 
-    .hobby-tag {
-      font-size: 0.68rem;
-      padding: 0.22rem 0.52rem;
-    }
-
-    .hobby-toggle {
-      width: 44px;
-      height: 44px;
-      top: -0.15rem;
-    }
-
-    .hobby-toggle svg {
-      width: 18px;
-      height: 18px;
-    }
-
-    .hobby-body {
-      margin-top: 0.75rem;
-      padding: 0.8rem;
-      font-size: 0.88rem;
-      line-height: 1.6;
-    }
-
-    .hobby-body-photo {
-      height: 165px;
-      margin-bottom: 0.65rem;
+    .hobbies-colophon {
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
     }
   }
 </style>

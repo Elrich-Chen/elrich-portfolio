@@ -1,6 +1,5 @@
 ---
 import Base from '../layouts/Base.astro';
-import HeroAsciiBackdrop from '../components/HeroAsciiBackdrop.astro';
 import Polaroid from '../components/Polaroid.astro';
 
 const stats = [
@@ -64,236 +63,465 @@ const techStack = {
   Frameworks: ['React', 'Next.js', 'Flask', 'FastAPI', 'TailwindCSS', 'PostgresSQL'],
   Tools: ['Figma', 'GitHub', 'Notion', 'MongoDB', 'Git'],
 };
+
+const issueDate = new Date().toLocaleDateString('en-US', {
+  month: 'short',
+  year: 'numeric',
+}).toUpperCase();
 ---
 
 <Base title="About – Elrich Chen">
-  <HeroAsciiBackdrop videoSrc="/videos/shifu.mp4" />
   <div class="about-content-shell">
-    <div class="mb-6">
+    <div class="about-back">
       <a href="/" class="back-home-link">← Back to home</a>
     </div>
 
-    <div class="about-shell">
-    <div class="about-grid">
-      <aside class="about-sidebar">
-        <div class="profile-card">
-          <div class="polaroid-wrapper" id="polaroid-stack">
-            <div class="polaroid-item" data-index="0">
-              <Polaroid
-                src="/photos/elrich_photos/gym.jpeg"
-                alt="Elrich at the gym"
-                caption="Staying active"
-                rotation={-3}
-              />
-            </div>
-            <div class="polaroid-item" data-index="2">
-              <Polaroid
-                src="/photos/elrich_photos/IMG_7489.jpeg"
-                alt="Elrich"
-                caption="Making memories"
-                rotation={2}
-              />
-            </div>
-            <div class="polaroid-item" data-index="1">
-              <Polaroid
-                src="/photos/elrich_photos/IMG_8352.jpeg"
-                alt="Elrich"
-                caption="Exploring new hobbies"
-                rotation={-2}
-              />
-            </div>
-            <div class="click-indicator">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                <path d="M3 3v5h5"/>
-              </svg>
-              <span>Click to cycle</span>
-            </div>
-          </div>
-
-	          <div class="profile-text">
-	            <h2 class="profile-name">Elrich Chen</h2>
-	            <p class="profile-title">CS @ Waterloo</p>
-	          </div>
-
-	          <div class="stats-grid">
-	            {stats.map((stat) => (
-	              <div class="stat-item">
-                <span class="stat-value">{stat.value}</span>
-                <span class="stat-label">{stat.label}</span>
-              </div>
-            ))}
-          </div>
-
-          <div class="social-row" aria-label="Social links">
-            {socials.map((link) => (
-              <a
-                href={link.href}
-                aria-label={link.label}
-                class="social-icon"
-                target={link.href.startsWith('mailto:') ? undefined : '_blank'}
-                rel={link.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-              >
-                <span class="social-icon-svg" set:html={link.icon}></span>
-              </a>
-            ))}
-          </div>
-        </div>
-      </aside>
-
-      <div class="about-cards">
-	        <section class="about-card tldr-card">
-	          <p class="card-eyebrow">TL;DR</p>
-	          <h2 class="tldr-hook">{tldr.hook}</h2>
-	          <p class="tldr-body">{tldr.body}</p>
-	        </section>
-
-	        <section class="about-card highlights-card">
-	          <p class="card-eyebrow">Highlights</p>
-	          <ul class="highlights-list">
-	            {highlights.map((item) => (
-	              <li class="highlights-item">
-	                <img src={item.logo} alt="" class="highlights-logo" loading="lazy" />
-	                <a href={item.href} class="highlights-link" target="_blank" rel="noopener noreferrer">
-	                  {item.text}
-	                </a>
-	              </li>
-	            ))}
-	          </ul>
-	        </section>
-
-	        <section class="about-card education-card">
-	          <p class="card-eyebrow">Education</p>
-	          <div class="edu-grid">
-            {education.map((item) => (
-              <div class="edu-card">
-                <div class="edu-top">
-                  <img src={item.logo} alt={item.school} class="edu-logo" loading="lazy" />
-                </div>
-                <h3 class="edu-school">{item.school}</h3>
-                <p class="edu-degree">{item.degree}</p>
-              </div>
-            ))}
-          </div>
-          <p class="edu-note">Transferred from Queen's University to the University of Waterloo for Computer Science.</p>
-        </section>
-
-        <section class="about-card stack-card">
-          <p class="card-eyebrow">Tech Stack</p>
-          <div class="stack-groups">
-            {Object.entries(techStack).map(([group, items]) => (
-              <div class="stack-group">
-                <h3 class="stack-label">{group}</h3>
-                <div class="stack-badges">
-                  {items.map((item) => (
-                    <span class="stack-badge">{item}</span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section class="about-card beyond-card">
-          <p class="card-eyebrow">Beyond the Keyboard</p>
-          <div class="beyond-grid">
-            <div class="beyond-item beyond-photo">
-              <img src="/photos/elrich_photos/liondance.png" alt="Lion dance" loading="lazy" />
-              <span>Lion Dancing</span>
-            </div>
-            <div class="beyond-item beyond-text">
-              <h4>Teaching</h4>
-              <p>Mentoring and workshops.</p>
-            </div>
-            <div class="beyond-item beyond-text">
-              <h4>Climbing</h4>
-              <p>Weekly bouldering reset.</p>
-            </div>
-          </div>
-        </section>
+    <!-- Magazine masthead -->
+    <header class="masthead">
+      <div class="masthead-meta">
+        <span class="masthead-edition">Field Notes · Vol. III</span>
+        <span class="masthead-rule" aria-hidden="true"></span>
+        <span class="masthead-date">{issueDate}</span>
       </div>
+      <h1 class="masthead-title">
+        <span class="masthead-amper">A</span>bout
+        <span class="masthead-name">Elrich</span>
+      </h1>
+      <p class="masthead-sub">A short paper on what I build, study, and reach for on my days off.</p>
+    </header>
+
+    <!-- HERO row: TL;DR + fanned polaroid stack -->
+    <section class="hero-strip">
+      <div class="hero-prose">
+        <p class="eyebrow">
+          <span class="eyebrow-num">01</span>
+          <span class="eyebrow-rule"></span>
+          <span class="eyebrow-label">TL;DR</span>
+        </p>
+        <h2 class="hero-hook">{tldr.hook}</h2>
+        <p class="hero-body">{tldr.body}</p>
+
+        <div class="hero-socials" aria-label="Social links">
+          {socials.map((link) => (
+            <a
+              href={link.href}
+              aria-label={link.label}
+              class="hero-social"
+              target={link.href.startsWith('mailto:') ? undefined : '_blank'}
+              rel={link.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+            >
+              <span class="hero-social-svg" set:html={link.icon}></span>
+              <span class="hero-social-label">{link.label}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <aside class="hero-aside">
+        <div class="polaroid-wrapper" id="polaroid-stack">
+          <div class="polaroid-item" data-index="0">
+            <Polaroid
+              src="/photos/elrich_photos/gym.jpeg"
+              alt="Elrich at the gym"
+              caption="Staying active"
+              rotation={-3}
+            />
+          </div>
+          <div class="polaroid-item" data-index="2">
+            <Polaroid
+              src="/photos/elrich_photos/IMG_7489.jpeg"
+              alt="Elrich"
+              caption="Making memories"
+              rotation={2}
+            />
+          </div>
+          <div class="polaroid-item" data-index="1">
+            <Polaroid
+              src="/photos/elrich_photos/IMG_8352.jpeg"
+              alt="Elrich"
+              caption="Exploring new hobbies"
+              rotation={-2}
+            />
+          </div>
+          <button type="button" class="cycle-pill" aria-label="Cycle through photos">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+            <span>Click to cycle</span>
+          </button>
+        </div>
+
+        <figcaption class="hero-tag">
+          <span class="hero-tag-line">— Elrich Chen</span>
+          <span class="hero-tag-sub">CS @ Waterloo</span>
+        </figcaption>
+      </aside>
+    </section>
+
+    <!-- STATS ticker -->
+    <div class="stats-strip" aria-label="Personal stats">
+      {stats.map((stat, i) => (
+        <div class="stat-cell">
+          <span class="stat-index">{String(i + 1).padStart(2, '0')}</span>
+          <span class="stat-value">{stat.value}</span>
+          <span class="stat-label">{stat.label}</span>
+        </div>
+      ))}
     </div>
+
+    <!-- FIELD NOTES grid -->
+    <div class="field-grid">
+      <!-- Highlights (wide) -->
+      <section class="field-card field-highlights">
+        <p class="eyebrow">
+          <span class="eyebrow-num">02</span>
+          <span class="eyebrow-rule"></span>
+          <span class="eyebrow-label">Highlights</span>
+        </p>
+        <ul class="highlights-list">
+          {highlights.map((item, i) => (
+            <li class="highlights-item">
+              <span class="highlights-marker">{String(i + 1).padStart(2, '0')}</span>
+              <img src={item.logo} alt="" class="highlights-logo" loading="lazy" />
+              <a href={item.href} class="highlights-link" target="_blank" rel="noopener noreferrer">
+                {item.text}
+                <span class="highlights-arrow" aria-hidden="true">↗</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <!-- Tech Stack (narrow) -->
+      <section class="field-card field-stack">
+        <p class="eyebrow">
+          <span class="eyebrow-num">03</span>
+          <span class="eyebrow-rule"></span>
+          <span class="eyebrow-label">Tech Stack</span>
+        </p>
+        <div class="stack-groups">
+          {Object.entries(techStack).map(([group, items]) => (
+            <div class="stack-group">
+              <h3 class="stack-label">{group}</h3>
+              <div class="stack-badges">
+                {items.map((item) => (
+                  <span class="stack-badge">{item}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Education (two stamps + transfer note) -->
+      <section class="field-card field-education">
+        <p class="eyebrow">
+          <span class="eyebrow-num">04</span>
+          <span class="eyebrow-rule"></span>
+          <span class="eyebrow-label">Education</span>
+        </p>
+        <div class="edu-stamps">
+          {education.map((item, i) => (
+            <div class={`edu-stamp ${i === 0 ? 'edu-stamp-primary' : 'edu-stamp-prior'}`}>
+              <span class="edu-stamp-corner edu-stamp-corner-tl" aria-hidden="true"></span>
+              <span class="edu-stamp-corner edu-stamp-corner-tr" aria-hidden="true"></span>
+              <span class="edu-stamp-corner edu-stamp-corner-bl" aria-hidden="true"></span>
+              <span class="edu-stamp-corner edu-stamp-corner-br" aria-hidden="true"></span>
+              <img src={item.logo} alt={item.school} class="edu-stamp-logo" loading="lazy" />
+              <h3 class="edu-stamp-school">{item.school}</h3>
+              <p class="edu-stamp-degree">{item.degree}</p>
+              <span class="edu-stamp-status">{i === 0 ? 'Current' : 'Prior'}</span>
+            </div>
+          ))}
+        </div>
+        <p class="edu-note">
+          <span class="edu-note-mark" aria-hidden="true">※</span>
+          Transferred from Queen's University to the University of Waterloo for Computer Science.
+        </p>
+      </section>
+    </div>
+
+    <!-- BEYOND the keyboard -->
+    <section class="beyond-section">
+      <p class="eyebrow eyebrow-center">
+        <span class="eyebrow-num">05</span>
+        <span class="eyebrow-rule"></span>
+        <span class="eyebrow-label">Beyond the Keyboard</span>
+      </p>
+      <div class="beyond-grid">
+        <figure class="beyond-photo">
+          <img src="/photos/elrich_photos/liondance.png" alt="Lion dance performance" loading="lazy" />
+          <figcaption>
+            <span class="beyond-photo-label">Lion Dancing</span>
+            <span class="beyond-photo-sub">Drums, footwork, weekends.</span>
+          </figcaption>
+        </figure>
+        <div class="beyond-tile beyond-teach">
+          <span class="beyond-tile-glyph" aria-hidden="true">✦</span>
+          <h4>Teaching</h4>
+          <p>Mentoring and workshops with the next wave of CS students.</p>
+        </div>
+        <div class="beyond-tile beyond-climb">
+          <span class="beyond-tile-glyph" aria-hidden="true">△</span>
+          <h4>Climbing</h4>
+          <p>Weekly bouldering — the reset button for everything else.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="about-colophon" aria-hidden="true">
+      <span>— end of issue —</span>
     </div>
   </div>
 </Base>
 
 <style>
+  /* ─── Layering: keep ASCII visible at all times ─────────────────────── */
   .about-content-shell {
     position: relative;
     z-index: 3;
-  }
-
-  .about-shell {
+    color: #fff;
     padding-bottom: 2.5rem;
   }
 
-  .about-grid {
+  .about-back {
+    margin-bottom: 1.25rem;
+  }
+
+  /* ─── Masthead ──────────────────────────────────────────────────────── */
+  .masthead {
+    margin: 0.5rem 0 2.4rem;
+  }
+
+  .masthead-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+    margin-bottom: 1.2rem;
+  }
+
+  .masthead-edition {
+    white-space: nowrap;
+  }
+
+  .masthead-rule {
+    flex: 1 1 auto;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.25),
+      rgba(255, 255, 255, 0.06)
+    );
+    min-width: 1.5rem;
+  }
+
+  .masthead-date {
+    white-space: nowrap;
+  }
+
+  .masthead-title {
+    margin: 0;
+    font-family: 'Syne', 'Rubik', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2.8rem, 9vw, 5.4rem);
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    color: #fff;
+    text-shadow: 0 2px 22px rgba(0, 0, 0, 0.45);
+  }
+
+  .masthead-amper {
+    display: inline-block;
+    font-style: italic;
+    transform: translateY(-0.04em);
+  }
+
+  .masthead-name {
+    font-family: 'Reenie Beanie', cursive;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0;
+    font-size: 1.12em;
+    color: #ffd28a;
+    display: inline-block;
+    transform: rotate(-3deg) translateY(0.08em);
+    margin-left: 0.4rem;
+  }
+
+  .masthead-sub {
+    margin: 1rem 0 0;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.7);
+    max-width: 44ch;
+    line-height: 1.55;
+  }
+
+  /* ─── Shared eyebrow label (numbered field-note marker) ─────────────── */
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0 0 1rem;
+    font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  .eyebrow-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.55rem;
+    height: 1.55rem;
+    padding: 0 0.32rem;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffd28a;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .eyebrow-rule {
+    width: 1.4rem;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .eyebrow-label {
+    white-space: nowrap;
+  }
+
+  .eyebrow-center {
+    justify-content: center;
+  }
+
+  .eyebrow-center .eyebrow-rule {
+    width: 2.4rem;
+  }
+
+  /* ─── HERO strip: TL;DR + fanned polaroid stack ─────────────────────── */
+  .hero-strip {
     display: grid;
-    grid-template-columns: minmax(260px, 0.34fr) minmax(0, 1fr);
-    gap: 2.5rem;
-    align-items: start;
-  }
-
-  .about-sidebar {
-    position: sticky;
-    top: 1.5rem;
-    align-self: start;
-  }
-
-  .profile-card {
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 3rem;
+    align-items: center;
+    margin-bottom: 3rem;
+    padding: 1.8rem 1.9rem;
     border-radius: 18px;
-    padding: 1.6rem;
-    background: rgba(255, 255, 255, 0.78);
+    background: rgba(8, 10, 18, 0.42);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
-    display: flex;
-    flex-direction: column;
-    gap: 1.3rem;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+    position: relative;
+    overflow: hidden;
   }
 
-  :global(html.dark) .profile-card {
-    background: rgba(10, 15, 30, 0.65);
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+  .hero-strip::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(135deg, rgba(255, 210, 138, 0.06), transparent 40%),
+      radial-gradient(circle at 85% 110%, rgba(96, 165, 250, 0.08), transparent 55%);
+    pointer-events: none;
+  }
+
+  .hero-prose {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-hook {
+    margin: 0 0 0.85rem;
+    font-family: 'Syne', 'Rubik', sans-serif;
+    font-size: clamp(1.5rem, 3vw, 2.05rem);
+    font-weight: 600;
+    line-height: 1.18;
+    letter-spacing: -0.025em;
+    color: #fff;
+    max-width: 22ch;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  .hero-body {
+    margin: 0 0 1.5rem;
+    font-size: 0.96rem;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.78);
+    max-width: 46ch;
+  }
+
+  .hero-socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  .hero-social {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.85rem 0.5rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+  }
+
+  .hero-social:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 210, 138, 0.55);
+    background: rgba(255, 255, 255, 0.13);
+  }
+
+  .hero-social-svg {
+    display: inline-flex;
+    width: 15px;
+    height: 15px;
+  }
+
+  .hero-social-svg :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ─── HERO aside: fanned polaroid stack ─────────────────────────────── */
+  .hero-aside {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
   }
 
   .polaroid-wrapper {
-    flex-shrink: 0;
-    width: 220px;
     position: relative;
-    min-height: 330px;
+    width: 220px;
+    min-height: 320px;
     margin: 0 auto;
   }
 
-  .about-sidebar :global(.polaroid) {
+  .hero-aside :global(.polaroid) {
     width: 100%;
     max-width: 220px;
-  }
-
-  .click-indicator {
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.25rem 0.6rem;
-    background: rgba(255, 255, 255, 0.88);
-    backdrop-filter: blur(4px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 6px;
-    font-size: 0.7rem;
-    color: rgb(var(--muted));
-    opacity: 0;
-    transition: all 0.3s ease;
-  }
-
-  :global(html.dark) .click-indicator {
-    background: rgba(10, 15, 30, 0.8);
-    border-color: rgba(255, 255, 255, 0.1);
+    margin-top: 0;
   }
 
   .polaroid-item {
@@ -301,508 +529,791 @@ const techStack = {
     top: 0;
     left: 0;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition:
+      transform 0.55s cubic-bezier(0.34, 1.4, 0.5, 1),
+      filter 0.4s ease,
+      opacity 0.4s ease;
+    transform-origin: 50% 70%;
   }
 
-  .polaroid-item:hover {
-    transform: scale(1.05);
-  }
-
-  .polaroid-wrapper:hover .click-indicator {
-    opacity: 1;
-    bottom: 5px;
-  }
-
-  .polaroid-wrapper:focus-within .click-indicator {
-    opacity: 1;
-    bottom: 5px;
-  }
-
+  /* Fan the stack so all three peek out — depth without dominating the frame */
   .polaroid-item[data-index="0"] {
     z-index: 1;
+    transform: translate(-22px, 16px) rotate(-7deg);
+    filter: brightness(0.78);
+    opacity: 0.94;
   }
 
   .polaroid-item[data-index="1"] {
     z-index: 2;
+    transform: translate(14px, 8px) rotate(5deg);
+    filter: brightness(0.9);
+    opacity: 0.96;
   }
 
   .polaroid-item[data-index="2"] {
     z-index: 3;
+    transform: translate(0, 0) rotate(-1deg);
+    filter: brightness(1);
+    opacity: 1;
   }
 
-  .profile-text {
-    text-align: center;
+  .polaroid-item:hover {
+    filter: brightness(1.05) !important;
   }
 
-  .profile-name {
-    margin: 0;
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: rgb(var(--fg));
+  .polaroid-wrapper.is-cycling .polaroid-item[data-index="2"] {
+    animation: polaroid-shake 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
   }
 
-  .profile-title {
-    margin: 0.2rem 0 0;
-    font-size: 0.95rem;
-    color: rgb(var(--muted));
+  @keyframes polaroid-shake {
+    0%   { transform: translate(0, 0) rotate(-1deg); }
+    25%  { transform: translate(-4px, -3px) rotate(-5deg) scale(1.03); }
+    55%  { transform: translate(5px, 1px) rotate(3deg) scale(1.04); }
+    80%  { transform: translate(-2px, 2px) rotate(-2deg) scale(1.01); }
+    100% { transform: translate(0, 0) rotate(-1deg); }
   }
 
-  .status-badge {
+  .cycle-pill {
+    position: absolute;
+    bottom: -14px;
+    left: 50%;
+    transform: translateX(-50%);
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 0.7rem;
+    gap: 0.35rem;
+    padding: 0.32rem 0.7rem;
+    background: rgba(10, 10, 14, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 999px;
-    border: 1px solid rgba(34, 197, 94, 0.35);
-    background: rgba(34, 197, 94, 0.08);
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: rgb(var(--fg));
-    width: fit-content;
-    margin: 0 auto;
+    color: rgba(255, 255, 255, 0.88);
+    font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    z-index: 10;
   }
 
-  .status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #22c55e;
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
-    animation: pulse 1.6s ease-out infinite;
+  .cycle-pill:hover {
+    border-color: rgba(255, 210, 138, 0.7);
+    transform: translateX(-50%) translateY(-1px);
   }
 
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.8rem;
-  }
-
-  .stat-item {
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.45);
-    padding: 0.6rem 0.7rem;
-    background: rgba(255, 255, 255, 0.6);
+  .hero-tag {
+    margin: 1.4rem 0 0;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
   }
 
-  :global(html.dark) .stat-item {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.08);
+  .hero-tag-line {
+    font-family: 'Reenie Beanie', cursive;
+    font-size: 1.65rem;
+    line-height: 1;
+    color: #ffd28a;
+  }
+
+  .hero-tag-sub {
+    font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  /* ─── Stats ticker strip ────────────────────────────────────────────── */
+  .stats-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    margin-bottom: 3rem;
+    padding: 0;
+    border-radius: 14px;
+    background: rgba(8, 10, 18, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    overflow: hidden;
+  }
+
+  .stat-cell {
+    position: relative;
+    padding: 1.1rem 0.9rem;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .stat-cell + .stat-cell::before {
+    content: '';
+    position: absolute;
+    top: 18%;
+    bottom: 18%;
+    left: 0;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .stat-index {
+    font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.22em;
+    color: rgba(255, 210, 138, 0.75);
   }
 
   .stat-value {
-    display: block;
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: rgb(var(--fg));
+    font-family: 'Syne', 'Rubik', sans-serif;
+    font-size: clamp(1.4rem, 3.4vw, 1.95rem);
+    font-weight: 700;
+    line-height: 1.05;
+    color: #fff;
+    letter-spacing: -0.02em;
   }
 
   .stat-label {
-    display: block;
-    font-size: 0.72rem;
-    color: rgb(var(--muted));
-    margin-top: 0.2rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.13em;
+    color: rgba(255, 255, 255, 0.62);
   }
 
-  .social-row {
-    display: flex;
-    justify-content: center;
-    gap: 0.6rem;
+  /* ─── Field notes grid: highlights | stack | education ──────────────── */
+  .field-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    gap: 1.4rem;
+    margin-bottom: 3rem;
   }
 
-  .social-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(var(--border), 0.06);
-    color: rgb(var(--fg));
-    border: 1px solid rgba(var(--border), 0.12);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  }
-
-  .social-icon:hover {
-    transform: translateY(-2px);
-    border-color: rgba(var(--border), 0.3);
-    box-shadow: 0 10px 18px rgba(15, 23, 42, 0.12);
-  }
-
-  .social-icon-svg {
-    display: inline-flex;
-    width: 18px;
-    height: 18px;
-  }
-
-  .about-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    padding-bottom: 2rem;
-  }
-
-  .about-card {
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 18px;
-    padding: 1.6rem 1.8rem;
-    background: rgba(255, 255, 255, 0.78);
+  .field-card {
+    position: relative;
+    padding: 1.6rem 1.65rem;
+    border-radius: 16px;
+    background: rgba(8, 10, 18, 0.46);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
   }
 
-  :global(html.dark) .about-card {
-    background: rgba(10, 15, 30, 0.65);
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+  .field-highlights {
+    grid-column: 1;
+    grid-row: 1;
   }
 
-  .card-eyebrow {
-    margin: 0 0 0.7rem;
-    font-size: 0.75rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: rgb(var(--muted));
-    font-weight: 600;
+  .field-stack {
+    grid-column: 2;
+    grid-row: 1 / span 2;
   }
 
-  .tldr-hook {
-    margin: 0 0 0.6rem;
-    font-size: 1.4rem;
-    line-height: 1.3;
-    color: rgb(var(--fg));
-    max-width: 32ch;
+  .field-education {
+    grid-column: 1;
+    grid-row: 2;
   }
 
-	  .tldr-body {
-	    margin: 0;
-	    font-size: 0.95rem;
-	    color: rgb(var(--muted));
-	    line-height: 1.6;
-	    max-width: 60ch;
-	  }
-
-	  .highlights-list {
-	    margin: 0;
-	    padding: 0;
-	    list-style: none;
-	    display: grid;
-	    gap: 0.75rem;
-	  }
-
-	  .highlights-item {
-	    display: flex;
-	    align-items: flex-start;
-	    gap: 0.75rem;
-	  }
-
-	  .highlights-logo {
-	    width: 22px;
-	    height: 22px;
-	    object-fit: contain;
-	    margin-top: 0.1rem;
-	    flex: 0 0 auto;
-	  }
-
-	  .highlights-link {
-	    color: rgb(var(--fg));
-	    text-decoration: none;
-	    line-height: 1.55;
-	  }
-
-	  .highlights-link:hover {
-	    text-decoration: underline;
-	  }
-
-  .edu-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-  }
-
-  .edu-card {
-    border: 1px dashed rgba(0, 0, 0, 0.15);
-    border-radius: 14px;
-    padding: 1rem 1.1rem;
-    background: rgba(255, 255, 255, 0.6);
-  }
-
-  :global(html.dark) .edu-card {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-  }
-
-  .edu-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 0.7rem;
-  }
-
-  .edu-logo {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-  }
-
-  .edu-school {
-    margin: 0 0 0.2rem;
-    font-size: 0.98rem;
-    font-weight: 600;
-    color: rgb(var(--fg));
-  }
-
-  .edu-degree {
+  /* Highlights ------------------------------------------------------- */
+  .highlights-list {
     margin: 0;
-    font-size: 0.86rem;
-    color: rgb(var(--muted));
-    line-height: 1.45;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.95rem;
   }
 
-  .edu-note {
-    margin: 0.9rem 0 0;
-    font-size: 0.84rem;
-    color: rgb(var(--muted));
+  .highlights-item {
+    display: grid;
+    grid-template-columns: auto 26px 1fr;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.6rem 0.7rem 0.6rem 0.65rem;
+    border-left: 2px solid rgba(255, 210, 138, 0.45);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 0 10px 10px 0;
+    transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+  }
+
+  .highlights-item:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-left-color: #ffd28a;
+    transform: translateX(2px);
+  }
+
+  .highlights-marker {
+    font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 0.7rem;
+    color: rgba(255, 210, 138, 0.8);
+    letter-spacing: 0.1em;
+  }
+
+  .highlights-logo {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.92);
+    padding: 3px;
+  }
+
+  .highlights-link {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem;
+    color: rgba(255, 255, 255, 0.92);
+    text-decoration: none;
     line-height: 1.5;
+    font-size: 0.93rem;
+  }
+
+  .highlights-link:hover {
+    color: #ffd28a;
+  }
+
+  .highlights-arrow {
+    font-size: 0.85rem;
+    color: rgba(255, 210, 138, 0.7);
+    transition: transform 0.25s ease;
+  }
+
+  .highlights-link:hover .highlights-arrow {
+    transform: translate(2px, -2px);
+  }
+
+  /* Tech stack ------------------------------------------------------- */
+  .field-stack {
+    display: flex;
+    flex-direction: column;
   }
 
   .stack-groups {
-    display: grid;
-    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  .stack-group + .stack-group {
+    padding-top: 1.1rem;
+    border-top: 1px dashed rgba(255, 255, 255, 0.14);
   }
 
   .stack-label {
-    margin: 0 0 0.4rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: rgb(var(--fg));
+    margin: 0 0 0.55rem;
+    font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 210, 138, 0.85);
   }
 
   .stack-badges {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.45rem;
+    gap: 0.4rem;
   }
 
   .stack-badge {
     display: inline-flex;
     align-items: center;
     padding: 0.3rem 0.65rem;
-    border-radius: 999px;
-    background: rgba(var(--border), 0.08);
-    color: rgb(var(--fg));
-    font-size: 0.75rem;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 0.78rem;
     font-weight: 500;
+    letter-spacing: 0.01em;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .stack-badge:hover {
+    background: rgba(255, 210, 138, 0.12);
+    border-color: rgba(255, 210, 138, 0.4);
+    transform: translateY(-1px);
+  }
+
+  /* Education stamps ------------------------------------------------- */
+  .edu-stamps {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+
+  .edu-stamp {
+    position: relative;
+    padding: 1.1rem 1rem 1rem;
+    border: 1px dashed rgba(255, 255, 255, 0.28);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+  }
+
+  .edu-stamp:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 210, 138, 0.5);
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  .edu-stamp-corner {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border: 1px solid rgba(255, 210, 138, 0.6);
+  }
+
+  .edu-stamp-corner-tl { top: 4px; left: 4px; border-right: none; border-bottom: none; }
+  .edu-stamp-corner-tr { top: 4px; right: 4px; border-left: none; border-bottom: none; }
+  .edu-stamp-corner-bl { bottom: 4px; left: 4px; border-right: none; border-top: none; }
+  .edu-stamp-corner-br { bottom: 4px; right: 4px; border-left: none; border-top: none; }
+
+  .edu-stamp-logo {
+    width: 38px;
+    height: 38px;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 6px;
+    padding: 4px;
+  }
+
+  .edu-stamp-school {
+    margin: 0.15rem 0 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.25;
+  }
+
+  .edu-stamp-degree {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.68);
+  }
+
+  .edu-stamp-status {
+    margin-top: auto;
+    padding-top: 0.45rem;
+    font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 210, 138, 0.75);
+  }
+
+  .edu-stamp-prior {
+    opacity: 0.92;
+  }
+
+  .edu-note {
+    margin: 1rem 0 0;
+    padding: 0.75rem 0.85rem;
+    background: rgba(255, 210, 138, 0.06);
+    border-left: 2px solid rgba(255, 210, 138, 0.5);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.83rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .edu-note-mark {
+    color: #ffd28a;
+    margin-right: 0.4rem;
+    font-weight: 600;
+  }
+
+  /* ─── Beyond the keyboard ───────────────────────────────────────────── */
+  .beyond-section {
+    margin-bottom: 2.2rem;
+    padding: 1.8rem 1.65rem;
+    border-radius: 18px;
+    background: rgba(8, 10, 18, 0.42);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
   }
 
   .beyond-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-    gap: 0.9rem;
+    grid-template-columns: minmax(0, 1.2fr) repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    align-items: stretch;
   }
 
-  .beyond-item {
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.45);
-    padding: 0.9rem;
-    background: rgba(255, 255, 255, 0.6);
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  :global(html.dark) .beyond-item {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.08);
+  .beyond-photo {
+    margin: 0;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    min-height: 200px;
   }
 
   .beyond-photo img {
+    position: absolute;
+    inset: 0;
     width: 100%;
-    height: 160px;
+    height: 100%;
     object-fit: cover;
-    border-radius: 10px;
+    transition: transform 0.45s ease;
   }
 
-  .beyond-photo span {
-    font-size: 0.85rem;
+  .beyond-photo:hover img {
+    transform: scale(1.05);
+  }
+
+  .beyond-photo figcaption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0.85rem 0.95rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0));
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    z-index: 1;
+  }
+
+  .beyond-photo-label {
+    font-family: 'Syne', 'Rubik', sans-serif;
+    font-size: 1.1rem;
     font-weight: 600;
-    color: rgb(var(--fg));
+    color: #fff;
+    letter-spacing: -0.01em;
   }
 
-  .beyond-text h4 {
+  .beyond-photo-sub {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.75);
+    letter-spacing: 0.03em;
+  }
+
+  .beyond-tile {
+    padding: 1.1rem 1.15rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+  }
+
+  .beyond-tile:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 210, 138, 0.5);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .beyond-tile-glyph {
+    font-size: 1.4rem;
+    color: #ffd28a;
+    line-height: 1;
+  }
+
+  .beyond-tile h4 {
     margin: 0;
-    font-size: 0.95rem;
-    color: rgb(var(--fg));
+    font-family: 'Syne', 'Rubik', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.01em;
   }
 
-  .beyond-text p {
+  .beyond-tile p {
     margin: 0;
     font-size: 0.82rem;
-    color: rgb(var(--muted));
-    line-height: 1.4;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.7);
   }
 
+  /* ─── Colophon ──────────────────────────────────────────────────────── */
+  .about-colophon {
+    text-align: center;
+    margin: 2rem 0 0.5rem;
+    font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.35);
+  }
+
+  /* ─── Responsive ────────────────────────────────────────────────────── */
+
+  /* Tablet ─────────────────────────────────────── */
   @media (max-width: 980px) {
-    .about-grid {
+    .hero-strip {
+      grid-template-columns: 1fr;
+      gap: 2.2rem;
+      padding: 1.5rem 1.4rem;
+    }
+
+    .hero-aside {
+      order: -1;
+    }
+
+    .field-grid {
       grid-template-columns: 1fr;
     }
 
-    .about-sidebar {
-      position: static;
+    .field-stack {
+      grid-column: 1;
+      grid-row: auto;
     }
 
-    .polaroid-wrapper {
-      margin-bottom: 0.5rem;
-    }
-
-    .about-sidebar :global(.polaroid) {
-      max-width: 240px;
+    .field-highlights,
+    .field-education {
+      grid-column: 1;
+      grid-row: auto;
     }
   }
 
-  @media (max-width: 480px) {
-    .about-shell {
-      padding-bottom: 1.5rem;
+  /* Mobile ─────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .masthead {
+      margin-bottom: 1.8rem;
     }
 
-    .profile-card {
-      padding: 1.2rem 1rem;
-      gap: 1rem;
+    .masthead-sub {
+      font-size: 0.88rem;
     }
 
-    .polaroid-wrapper {
-      width: min(210px, 100%);
-      min-height: 300px;
-      margin-bottom: 0.3rem;
+    .hero-strip {
+      gap: 1.8rem;
+      margin-bottom: 2.2rem;
+      padding: 1.3rem 1.1rem;
     }
 
-    .about-sidebar :global(.polaroid) {
-      max-width: 210px;
+    .stats-strip {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(2, auto);
+      margin-bottom: 2.2rem;
     }
 
-    .click-indicator {
-      opacity: 1;
-      bottom: 5px;
-      font-size: 0.72rem;
-      padding: 0.28rem 0.62rem;
+    .stat-cell {
+      padding: 0.95rem 0.85rem;
     }
 
-    .stats-grid {
-      gap: 0.6rem;
+    .stat-cell:nth-child(2)::before {
+      content: '';
+      position: absolute;
+      top: 18%;
+      bottom: 18%;
+      left: 0;
+      width: 1px;
+      background: rgba(255, 255, 255, 0.14);
     }
 
-    .stat-item {
-      padding: 0.65rem 0.5rem;
+    .stat-cell:nth-child(3)::before,
+    .stat-cell:nth-child(4)::before {
+      top: 0;
+      left: 8%;
+      right: 8%;
+      bottom: auto;
+      width: auto;
+      height: 1px;
     }
 
-    .stat-value {
-      font-size: 1rem;
+    .stat-cell:nth-child(3)::before {
+      left: 8%;
+      width: auto;
     }
 
-    .stat-label {
-      font-size: 0.68rem;
-      letter-spacing: 0.06em;
+    .field-grid {
+      gap: 1.2rem;
+      margin-bottom: 2.2rem;
     }
 
-    .social-row {
-      gap: 0.55rem;
+    .field-card {
+      padding: 1.35rem 1.2rem;
     }
 
-    .social-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-    }
-
-    .social-icon-svg {
-      width: 19px;
-      height: 19px;
-    }
-
-    .about-cards {
-      gap: 1rem;
-      padding-bottom: 1.25rem;
-    }
-
-    .about-card {
-      border-radius: 16px;
-      padding: 1.2rem 1rem;
-    }
-
-    .card-eyebrow {
-      margin-bottom: 0.55rem;
-      letter-spacing: 0.16em;
-    }
-
-    .tldr-hook {
-      font-size: 1.2rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .tldr-body,
-    .highlights-link {
-      font-size: 0.92rem;
-      line-height: 1.55;
-    }
-
-    .edu-grid {
-      grid-template-columns: 1fr;
-      gap: 0.75rem;
-    }
-
-    .edu-card {
-      padding: 0.9rem;
-    }
-
-    .stack-badges {
-      gap: 0.4rem;
-    }
-
-    .stack-badge {
-      padding: 0.34rem 0.62rem;
-      font-size: 0.73rem;
+    .beyond-section {
+      padding: 1.5rem 1.2rem;
     }
 
     .beyond-grid {
       grid-template-columns: 1fr;
-      gap: 0.7rem;
+      gap: 0.85rem;
     }
 
-    .beyond-photo img {
-      height: 150px;
+    .beyond-photo {
+      min-height: 180px;
     }
   }
 
-  @keyframes pulse {
-    0% {
-      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+  /* Small phones ───────────────────────────────── */
+  @media (max-width: 480px) {
+    .about-content-shell {
+      padding-bottom: 1.5rem;
     }
-    70% {
-      box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+
+    .masthead-meta {
+      gap: 0.55rem;
+      font-size: 0.62rem;
+      letter-spacing: 0.18em;
     }
-    100% {
-      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+
+    .masthead-name {
+      font-size: 1.05em;
+      margin-left: 0.25rem;
+    }
+
+    .masthead-sub {
+      margin-top: 0.85rem;
+      font-size: 0.85rem;
+    }
+
+    .hero-strip {
+      padding: 1.15rem 1rem;
+      border-radius: 14px;
+    }
+
+    .hero-hook {
+      font-size: 1.3rem;
+    }
+
+    .hero-body {
+      font-size: 0.9rem;
+    }
+
+    .hero-social {
+      padding: 0.45rem 0.75rem 0.45rem 0.6rem;
+      font-size: 0.78rem;
+    }
+
+    .polaroid-wrapper {
+      width: min(200px, 85%);
+      min-height: 290px;
+    }
+
+    .hero-aside :global(.polaroid) {
+      max-width: 200px;
+    }
+
+    .polaroid-item[data-index="0"] {
+      transform: translate(-14px, 12px) rotate(-6deg);
+    }
+
+    .polaroid-item[data-index="1"] {
+      transform: translate(10px, 6px) rotate(4deg);
+    }
+
+    .cycle-pill {
+      bottom: -10px;
+      font-size: 0.6rem;
+      padding: 0.28rem 0.62rem;
+    }
+
+    .hero-tag-line {
+      font-size: 1.45rem;
+    }
+
+    .stats-strip {
+      border-radius: 12px;
+    }
+
+    .stat-value {
+      font-size: 1.4rem;
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+    }
+
+    .field-card,
+    .beyond-section {
+      border-radius: 14px;
+      padding: 1.2rem 1rem;
+    }
+
+    .eyebrow {
+      margin-bottom: 0.8rem;
+      font-size: 0.65rem;
+    }
+
+    .highlights-item {
+      grid-template-columns: auto 22px 1fr;
+      gap: 0.65rem;
+      padding: 0.55rem 0.6rem 0.55rem 0.55rem;
+    }
+
+    .highlights-logo {
+      width: 22px;
+      height: 22px;
+    }
+
+    .highlights-link {
+      font-size: 0.88rem;
+    }
+
+    .edu-stamps {
+      grid-template-columns: 1fr;
+      gap: 0.7rem;
+    }
+
+    .edu-stamp {
+      padding: 1rem 0.95rem;
+    }
+
+    .beyond-photo {
+      min-height: 170px;
+    }
+
+    .about-colophon {
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
     }
   }
 </style>
 
-<script>
+<script is:inline>
   document.addEventListener('DOMContentLoaded', () => {
-    const polaroidItems = document.querySelectorAll('.polaroid-item');
+    const wrapper = document.getElementById('polaroid-stack');
+    if (!wrapper) return;
+
+    const polaroidItems = wrapper.querySelectorAll('.polaroid-item');
     const totalItems = polaroidItems.length;
+    let cycleTimer = null;
+
+    const cycle = () => {
+      polaroidItems.forEach((polaroid) => {
+        const currentIndex = parseInt(polaroid.getAttribute('data-index') || '0', 10);
+        const nextIndex = (currentIndex + 1) % totalItems;
+        polaroid.setAttribute('data-index', String(nextIndex));
+      });
+
+      wrapper.classList.add('is-cycling');
+      if (cycleTimer) window.clearTimeout(cycleTimer);
+      cycleTimer = window.setTimeout(() => {
+        wrapper.classList.remove('is-cycling');
+      }, 560);
+    };
 
     polaroidItems.forEach((item) => {
-      item.addEventListener('click', () => {
-        // Cycle all items: increment each index, wrap around to 0 after reaching max
-        polaroidItems.forEach((polaroid) => {
-          const currentIndex = parseInt(polaroid.getAttribute('data-index') || '0');
-          const nextIndex = (currentIndex + 1) % totalItems;
-          polaroid.setAttribute('data-index', nextIndex.toString());
-        });
-      });
+      item.addEventListener('click', cycle);
     });
+
+    const cyclePill = wrapper.querySelector('.cycle-pill');
+    if (cyclePill) {
+      cyclePill.addEventListener('click', (event) => {
+        event.stopPropagation();
+        cycle();
+      });
+    }
   });
 </script>

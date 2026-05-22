@@ -4,8 +4,12 @@ import PillNav from '../components/PillNav.astro';
 import TargetCursor from '../components/TargetCursor.astro';
 import Polaroid from '../components/Polaroid.astro';
 import Grainient from '../components/Grainient.astro';
+import HeroAsciiBackdrop from '../components/HeroAsciiBackdrop.astro';
 import PostHog from '../components/posthog.astro';
+import { getHeroAsciiConfig } from '../utils/heroAsciiVideos';
 import '../styles/global.css';
+
+const heroAscii = getHeroAsciiConfig(Astro.url.pathname);
 
 const contactLinks = [
   {
@@ -41,6 +45,18 @@ const contactLinks = [
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
+    <script is:inline>
+      // Skip loading overlay on subsequent in-tab navigations. Inject a style
+      // synchronously in <head> so #loading is hidden before first paint.
+      try {
+        if (sessionStorage.getItem('ec_loaded_once') === '1') {
+          var ecHideStyle = document.createElement('style');
+          ecHideStyle.setAttribute('data-ec-skip-loading', '');
+          ecHideStyle.textContent = '#loading{display:none !important;}';
+          document.head.appendChild(ecHideStyle);
+        }
+      } catch (e) {}
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
     {meta}
@@ -95,6 +111,12 @@ const contactLinks = [
         zoom={0.9}
       />
     </div>
+    {heroAscii && (
+      <HeroAsciiBackdrop
+        videoSrc={heroAscii.videoSrc}
+        loop={heroAscii.loop}
+      />
+    )}
     <div
       id="loading"
       class:list={['loading-screen fixed inset-0 bg-[rgb(var(--bg))] flex items-center justify-center z-50 transition-opacity duration-200', { 'loading-screen-home': homeLoading }]}
@@ -174,6 +196,7 @@ const contactLinks = [
             loading.style.opacity = '0';
             setTimeout(() => {
               loading.style.display = 'none';
+              try { sessionStorage.setItem('ec_loaded_once', '1'); } catch (e) {}
             }, 260);
           }, wait);
         }
@@ -251,6 +274,13 @@ const contactLinks = [
         height: 100vh;
         pointer-events: none;
         background: rgb(var(--bg));
+      }
+
+      /* iOS often drops the second WebGL2 context; ASCII backdrop needs the GPU budget. */
+      @media (max-width: 768px) {
+        .grainient-global {
+          display: none;
+        }
       }
 
       .loading-screen {
