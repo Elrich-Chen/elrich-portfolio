@@ -45,6 +45,22 @@ const contactLinks = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var isDark = stored ? stored === 'dark' : prefersDark;
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.classList.remove('light');
+          } else {
+            document.documentElement.classList.add('light');
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script is:inline>
       // Skip loading overlay on subsequent in-tab navigations. Inject a style
       // synchronously in <head> so #loading is hidden before first paint.
       try {
@@ -219,10 +235,9 @@ const contactLinks = [
 
         cta?.addEventListener('click', () => {
           window.posthog?.capture('dark_mode_toast_accepted');
-          const toggle = document.getElementById('theme-toggle');
-          if (toggle instanceof HTMLButtonElement) {
-            toggle.click();
-          }
+          document.documentElement.classList.remove('light');
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
           hideToast();
         });
 

@@ -477,6 +477,33 @@ const entryCount = sortedEntries.length;
     font-weight: 600;
   }
 
+  .entry-prose :global(:is(p, li, ul, ol, h1, h2, h3, h4, h5, h6, blockquote, span, div, em, code)) {
+    color: #fff !important;
+  }
+
+  /* Card copy always white (both themes) */
+  .entry-row,
+  .entry-row :is(.entry-summary, .entry-expand, .entry-main, .entry-expand-inner) {
+    color: #fff !important;
+  }
+
+  .entry-row :is(.entry-title, .entry-lede, .entry-date, .entry-tag, .entry-chevron) {
+    color: #fff !important;
+  }
+
+  .entry-row .entry-index {
+    color: rgba(255, 210, 138, 0.9) !important;
+  }
+
+  .entry-row .entry-lede,
+  .entry-row .entry-date {
+    color: rgba(255, 255, 255, 0.78) !important;
+  }
+
+  .entry-row .entry-prose :global(a) {
+    color: #ffd28a !important;
+  }
+
   /* ─── Colophon ───────────────────────────────────────────────────── */
   .hobbies-colophon {
     text-align: center;

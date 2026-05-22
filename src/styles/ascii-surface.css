@@ -29,7 +29,7 @@ html.dark :is(.about-content-shell, .projects-content-shell, .hobbies-content-sh
 
 /* Headings */
 :is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
-  :is(h1, h2, h3, h4, h5, h6):not(.polaroid *):not(.polaroid-dialog *) {
+  :is(h1, h2, h3, h4, h5, h6):not(.polaroid *):not(.polaroid-dialog *):not(.entry-row *) {
   color: rgb(var(--surface-heading));
 }
 
@@ -95,37 +95,35 @@ html.dark :is(.about-content-shell, .projects-content-shell, .hobbies-content-sh
   color: rgb(var(--surface-fg-soft)) !important;
 }
 
-/* Hobbies expandable cards — never inherit theme --fg into glass panels */
-.hobbies-content-shell .entry-row,
-.hobbies-content-shell .entry-row :is(.entry-title, .entry-lede, .entry-date, .entry-index, .entry-tag, .entry-chevron) {
-  color: rgb(var(--surface-fg));
-}
-
-.hobbies-content-shell .entry-lede {
-  color: rgb(var(--surface-fg-soft));
-}
-
-.hobbies-content-shell .entry-date,
-.hobbies-content-shell .entry-index {
-  color: rgb(var(--surface-fg-dim));
+/* Hobbies expandable cards — always white copy on glass */
+.hobbies-content-shell .entry-row {
+  color: #fff;
 }
 
 .hobbies-content-shell .entry-prose,
-.hobbies-content-shell .entry-prose :global(:is(p, li, ul, ol, h1, h2, h3, h4, h5, h6, blockquote, span, div)) {
-  color: rgba(255, 255, 255, 0.88) !important;
+.hobbies-content-shell .entry-prose :is(p, li, ul, ol, h1, h2, h3, h4, h5, h6, blockquote, span, div, em, code) {
+  color: #fff !important;
 }
 
-.hobbies-content-shell .entry-prose :global(a) {
+.hobbies-content-shell .entry-prose a {
   color: rgb(var(--surface-accent)) !important;
 }
 
-.hobbies-content-shell .entry-prose :global(strong) {
-  color: rgb(var(--surface-heading)) !important;
+.hobbies-content-shell .entry-prose strong {
+  color: #fff !important;
 }
 
-html.light .hobbies-content-shell .entry-row,
-html.dark .hobbies-content-shell .entry-row {
-  color: rgb(var(--surface-fg));
+.hobbies-content-shell .entry-row :is(.entry-title, .entry-lede, .entry-date, .entry-tag, .entry-chevron, .entry-summary, .entry-expand) {
+  color: #fff !important;
+}
+
+.hobbies-content-shell .entry-row .entry-lede,
+.hobbies-content-shell .entry-row .entry-date {
+  color: rgba(255, 255, 255, 0.78) !important;
+}
+
+.hobbies-content-shell .entry-row .entry-index {
+  color: rgba(255, 210, 138, 0.9) !important;
 }
 
 :is(.about-content-shell, .projects-content-shell, .hobbies-content-shell, .photos-shell, .ascii-surface)
