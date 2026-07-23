@@ -13,7 +13,7 @@ import PostHog from '../components/posthog.astro';
     <link rel="icon" type="image/svg+xml" href="/e.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@500;700;800&display=swap" rel="stylesheet" />
   </head>
   <body>
     <main class="wip" aria-label="Portfolio in progress">
@@ -26,11 +26,6 @@ import PostHog from '../components/posthog.astro';
 
       <div class="wip-stage">
         <p class="wip-brand">Elrich Chen</p>
-
-        <p class="wip-status">
-          <span class="wip-dot" aria-hidden="true"></span>
-          <span>Work in progress</span>
-        </p>
 
         <h1 class="wip-title">
           <span class="wip-line">Portfolio</span>
@@ -190,33 +185,12 @@ import PostHog from '../components/posthog.astro';
 
   .wip-brand {
     margin: 0;
-    font-size: clamp(1.1rem, 2.4vw, 1.35rem);
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: clamp(1.35rem, 3.2vw, 1.85rem);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: 0.01em;
     color: rgb(var(--wip-ink));
-  }
-
-  .wip-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.55rem;
-    margin: 0;
-    padding: 0.35rem 0.8rem 0.35rem 0.55rem;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.04);
-    font-size: 0.66rem;
-    font-weight: 700;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: rgba(var(--wip-muted), 0.95);
-  }
-
-  .wip-dot {
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    background: rgb(var(--wip-accent));
   }
 
   .wip-title {
