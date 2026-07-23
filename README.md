@@ -14,8 +14,16 @@ AI desktop companion marketing site — Astro + Tailwind + GSAP.
 ## Structure
 
 - `src/pages/index.astro` — Lumen landing page
-- `src/components/lumen/` — page sections
+- `src/components/lumen/` — page sections (Hero → Statement → Principles → Product → Changelog → Status → CTA)
 - `src/layouts/LumenLayout.astro` — site shell
-- `src/content/` — retained portfolio content collections
+- `src/content/lumen-changelog/` · `src/content/lumen-status/` — product updates (wired)
+- `src/content/` — also retains unused portfolio collections
 - `public/photos/` · `public/logos/` · `public/projects/` — retained assets
 - `.kombai/` — Kombai design source
+
+## Environment
+
+Copy `.env.example` to `.env`:
+
+- `PUBLIC_POSTHOG_*` — analytics (optional)
+- `PUBLIC_FORMSPREE_FORM_ID` — waitlist backend (required for CTA submissions)

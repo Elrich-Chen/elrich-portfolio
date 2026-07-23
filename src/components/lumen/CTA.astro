@@ -13,25 +13,31 @@
         Lumen is free while in beta. Takes 20 seconds to install.
       </p>
       
-      <form id="cta-form" class="flex flex-col sm:flex-row gap-3 w-full max-w-[480px]">
+      <form id="cta-form" class="flex flex-col sm:flex-row gap-3 w-full max-w-[480px]" novalidate>
+        <label for="cta-email" class="sr-only">Email</label>
         <input 
           id="cta-email"
+          name="email"
           type="email" 
+          autocomplete="email"
           placeholder="you@company.com" 
           class="flex-1 h-12 px-4 rounded-md bg-white bg-opacity-[0.05] border border-white border-opacity-[0.10] text-lumen-fg placeholder:text-lumen-fg-muted/40 focus:outline-none focus:border-lumen-accent/50 transition-all"
           required
         />
-        <button type="submit" class="h-12 px-6 rounded-md bg-lumen-accent text-lumen-bg font-semibold hover:brightness-110 transition-all">
+        <!-- Formspree honeypot -->
+        <input type="text" name="_gotcha" class="hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <button type="submit" class="h-12 px-6 rounded-md bg-lumen-accent text-lumen-bg font-semibold hover:brightness-110 transition-all disabled:opacity-70 disabled:cursor-not-allowed">
           Get early access
         </button>
       </form>
+      <p id="cta-error" class="text-[13px] text-red-400 mt-3 m-0 hidden" role="alert"></p>
 
       <div class="cta-meta mt-6 flex flex-col gap-4">
         <p class="text-[13px] text-lumen-fg-muted/60">
-          Free during beta · No credit card · macOS & Linux · Open beta closes June 30
+          Free during beta · No credit card · macOS & Linux
         </p>
-        <a href="#" class="text-[14px] text-lumen-fg-muted hover:text-lumen-fg transition-colors flex items-center justify-center gap-1.5 no-underline">
-          Watch the 90s demo <span class="text-[18px]">→</span>
+        <a href="#demo" class="text-[14px] text-lumen-fg-muted hover:text-lumen-fg transition-colors flex items-center justify-center gap-1.5 no-underline">
+          See it think <span class="text-[18px]">→</span>
         </a>
       </div>
     </div>
@@ -67,36 +73,90 @@
           <li><a href="#status" class="text-[13.5px] text-lumen-fg-muted hover:text-lumen-fg transition-colors no-underline">Status</a></li>
         </ul>
       </div>
-      <div class="flex flex-col gap-4">
-        <p class="text-[11px] font-medium uppercase tracking-wider text-lumen-fg-muted">Company</p>
-        <ul class="flex flex-col gap-2 list-none p-0 m-0">
-          <li><a href="#" class="text-[13.5px] text-lumen-fg-muted hover:text-lumen-fg transition-colors no-underline">Twitter</a></li>
-          <li><a href="#" class="text-[13.5px] text-lumen-fg-muted hover:text-lumen-fg transition-colors no-underline">GitHub</a></li>
-          <li><a href="#" class="text-[13.5px] text-lumen-fg-muted hover:text-lumen-fg transition-colors no-underline">Contact</a></li>
-        </ul>
-      </div>
     </div>
 
     <p class="lg:self-end text-[13px] italic text-lumen-fg-muted font-serif">Built in 2026.</p>
   </div>
 </footer>
 
-<script>
-  const form = document.getElementById('cta-form') as HTMLFormElement;
+<script define:vars={{ formspreeId: import.meta.env.PUBLIC_FORMSPREE_FORM_ID ?? '' }}>
+  const form = document.getElementById('cta-form');
+  const errorEl = document.getElementById('cta-error');
+
+  function showError(message) {
+    if (!errorEl) return;
+    errorEl.textContent = message;
+    errorEl.classList.remove('hidden');
+  }
+
+  function clearError() {
+    if (!errorEl) return;
+    errorEl.textContent = '';
+    errorEl.classList.add('hidden');
+  }
+
+  function setSuccess(input, btn) {
+    if (btn) {
+      btn.textContent = 'On the list';
+      btn.disabled = true;
+    }
+    if (input) {
+      input.value = '';
+      input.placeholder = "We'll be in touch.";
+      input.blur();
+      input.disabled = true;
+    }
+  }
+
   if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const input = form.querySelector('input') as HTMLInputElement;
-      const btn = form.querySelector('button');
-      if (btn) {
-        btn.textContent = 'On the list';
-        btn.disabled = true;
-        btn.style.opacity = '0.85';
+      clearError();
+
+      const input = form.querySelector('#cta-email');
+      const btn = form.querySelector('button[type="submit"]');
+      const email = (input?.value || '').trim();
+
+      if (!email || !input?.checkValidity()) {
+        showError('Enter a valid email address.');
+        input?.focus();
+        return;
       }
-      if (input) {
-        input.value = '';
-        input.placeholder = "We'll be in touch.";
-        input.blur();
+
+      if (!formspreeId) {
+        showError('Waitlist is not configured yet. Set PUBLIC_FORMSPREE_FORM_ID in .env.');
+        return;
+      }
+
+      const prevLabel = btn?.textContent || 'Get early access';
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Joining…';
+      }
+
+      try {
+        const res = await fetch(`https://formspree.io/f/${formspreeId}`, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        });
+
+        if (!res.ok) {
+          throw new Error('request_failed');
+        }
+
+        window.posthog?.identify(email, { email });
+        window.posthog?.capture('waitlist_signup', { email });
+        setSuccess(input, btn);
+      } catch {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = prevLabel;
+        }
+        showError('Something went wrong. Please try again.');
       }
     });
   }

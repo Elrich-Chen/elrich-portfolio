@@ -92,6 +92,14 @@
   }
 }
 
+.lumen-site #features,
+.lumen-site #demo,
+.lumen-site #changelog,
+.lumen-site #status,
+.lumen-site #cta {
+  scroll-margin-top: 4.5rem;
+}
+
 .lumen-site::-webkit-scrollbar,
 .lumen-site *::-webkit-scrollbar {
   width: 10px;

@@ -103,4 +103,33 @@ const testimonials = defineCollection({
   }),
 });
 
-export const collections = { bio, experiences: experience, projects: project, hobbies: hobby, highlights, photos, testimonials };
+const lumenChangelog = defineCollection({
+  type: 'content',
+  schema: z.object({
+    date: z.string(), // ISO date, e.g. 2026-07-01
+    title: z.string(),
+    summary: z.string(),
+  }),
+});
+
+const lumenStatus = defineCollection({
+  type: 'data',
+  schema: z.object({
+    state: z.enum(['operational', 'degraded', 'maintenance']),
+    label: z.string(),
+    detail: z.string(),
+    updated: z.string(), // ISO date
+  }),
+});
+
+export const collections = {
+  bio,
+  experiences: experience,
+  projects: project,
+  hobbies: hobby,
+  highlights,
+  photos,
+  testimonials,
+  'lumen-changelog': lumenChangelog,
+  'lumen-status': lumenStatus,
+};

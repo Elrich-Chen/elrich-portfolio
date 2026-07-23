@@ -34,12 +34,15 @@ public/
 | `npm run build` | Production build to ./dist/ |
 | `npm run preview` | Preview production build |
 
-## Content (retained)
-- Bio: `src/content/bio/`
-- Experiences: `src/content/experiences/`
-- Projects: `src/content/projects/`
-- Hobbies: `src/content/hobbies/`
-- Highlights: `src/content/highlights/`
-- Photos metadata: `src/content/photos/`
-- Testimonials: `src/content/testimonials/`
+## Content
+### Lumen (wired into homepage)
+- Changelog: `src/content/lumen-changelog/`
+- Status: `src/content/lumen-status/current.yaml`
+
+### Retained portfolio (unused on Lumen page)
+- Bio, experiences, projects, hobbies, highlights, photos, testimonials under `src/content/`
 - Assets: `public/photos/`, `public/logos/`, `public/projects/`
+
+## Env (see `.env.example`)
+- `PUBLIC_POSTHOG_PROJECT_TOKEN` / `PUBLIC_POSTHOG_HOST` — analytics
+- `PUBLIC_FORMSPREE_FORM_ID` — waitlist form endpoint
