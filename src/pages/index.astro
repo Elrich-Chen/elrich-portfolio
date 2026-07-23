@@ -128,10 +128,12 @@ import PostHog from '../components/posthog.astro';
 
     position: relative;
     isolation: isolate;
+    min-height: 100svh;
     min-height: 100dvh;
+    width: 100%;
     display: grid;
     place-items: center;
-    padding: clamp(1.5rem, 5vw, 3rem);
+    padding: clamp(1.25rem, 4vw, 3rem);
     overflow: hidden;
     color: rgb(var(--wip-ink));
   }
@@ -209,7 +211,8 @@ import PostHog from '../components/posthog.astro';
     width: min(100%, 38rem);
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    text-align: center;
     gap: clamp(0.95rem, 2.5vw, 1.45rem);
   }
 
@@ -255,15 +258,18 @@ import PostHog from '../components/posthog.astro';
     margin: 0;
     display: grid;
     gap: 0.02em;
+    justify-items: center;
     font-weight: 800;
     letter-spacing: -0.045em;
     line-height: 0.92;
     text-transform: uppercase;
+    text-align: center;
   }
 
   .wip-line {
     display: block;
-    font-size: clamp(2.75rem, 12vw, 5.75rem);
+    font-size: clamp(2.4rem, 10vw, 5.75rem);
+    white-space: nowrap;
     opacity: 0;
     transform: translateY(0.5em);
     animation: wip-title-in 1.05s cubic-bezier(0.22, 1, 0.36, 1) calc(0.25s + var(--i) * 0.12s) forwards;
@@ -338,13 +344,14 @@ import PostHog from '../components/posthog.astro';
   }
 
   .wip-note {
-    margin: 0;
+    margin: 0 auto;
     max-width: 28rem;
     font-size: clamp(0.95rem, 2.2vw, 1.08rem);
     line-height: 1.55;
     font-weight: 500;
     letter-spacing: 0.01em;
     color: rgba(var(--wip-muted), 0.98);
+    text-wrap: balance;
     opacity: 0;
     animation: wip-enter 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.75s forwards;
   }
