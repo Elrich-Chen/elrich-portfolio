@@ -1,1560 +1,503 @@
 ---
-import Base from '../layouts/Base.astro';
-import ScrollStack from '../components/ScrollStack.astro';
-import { getEntry, getCollection } from 'astro:content';
-
-const highlights    = await getEntry('highlights', 'home');
-const testimonials  = await getCollection('testimonials');
-
-// Ensure at least 6 cards for the carousel
-const carouselItems = (() => {
-  if (testimonials.length === 0) return [];
-  if (testimonials.length >= 6) return testimonials;
-  const repeated: typeof testimonials = [];
-  while (repeated.length < 6) repeated.push(...testimonials);
-  return repeated.slice(0, 6);
-})();
-
-const cardMeta = {
-  recent: {
-    kicker: '01',
-    title: 'Recently, I:',
-    subtitle: 'Recent wins, roles, and shipped proof — expand any row for detail.',
-    chips: [] as string[],
-    cta: { href: '/projects', label: 'Browse the work' },
-  },
-  building: {
-    kicker: '02',
-    title: 'Things in progress:',
-    subtitle: 'Active builds and leadership bets — what I am shipping right now.',
-    chips: [] as string[],
-    cta: { href: '/projects', label: 'See active builds' },
-  },
-  clients: {
-    kicker: '03',
-    title: 'Client References',
-    subtitle: 'Founder feedback on delivery — ratings up front, full quotes on expand.',
-    chips: [] as string[],
-    cta: { href: 'mailto:elrichchen123@gmail.com', label: 'Start a project' },
-  },
-};
-
-function toPlainLabel(text: string) {
-  return text
-    .replace(/\[LOGO:[^\]]+\]/gi, '')
-    .replace(/\[IMAGE:[^\]]+\]/gi, '')
-    .replace(/\[LINK:\s*([^\]]+?)\s*\](.+?)\[\/LINK\]/gi, '$2')
-    .replace(/<[^>]*>/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-// ── Company link map ──────────────────────────────────────────────────────────
-const companyData: Record<string, { url: string; logo?: string }> = {
-  'Ontario Legal Tech':                      { url: 'https://ontariomandatorymediation.my.canva.site/ontario-court-helper' },
-  "Queen's COMPSA":                          { url: 'https://compsa.ca/', logo: 'compsa' },
-  'DoneMaker':                               { url: 'https://donemaker.com', logo: 'zivko' },
-  'UWaterloo':                               { url: 'https://uwaterloo.ca', logo: 'uwaterloo' },
-  'QueensU':                                 { url: 'http://queensu.ca/', logo: 'queenu' },
-  'University of Toronto Engineering Outreach': { url: 'https://outreach.engineering.utoronto.ca', logo: 'uoft2' },
-  'TypeScript':                              { url: 'https://www.typescriptlang.org' },
-  'Next.js':                                 { url: 'https://nextjs.org' },
-  'React':                                   { url: 'https://react.dev' },
-  'Flask':                                   { url: 'https://flask.palletsprojects.com' },
-  'FastAPI':                                 { url: 'https://fastapi.tiangolo.com' },
-  'TailwindCSS':                             { url: 'https://tailwindcss.com' },
-  'Figma':                                   { url: 'https://www.figma.com' },
-  'Python':                                  { url: 'https://www.python.org' },
-  'PyTorch':                                 { url: 'https://pytorch.org' },
-  'NumPy':                                   { url: 'https://numpy.org' },
-  'Pandas':                                  { url: 'https://pandas.pydata.org' },
-  'Jupyter docs tool':                       { url: 'https://github.com/Elrich-Chen/jupyterlab_docs_helper' },
-  'MongoDB':                                 { url: 'https://www.mongodb.com' },
-  'JavaScript':                              { url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript' },
-  'PostgreSQL':                              { url: 'https://www.postgresql.org' },
-  'SQLAlchemy':                              { url: 'https://www.sqlalchemy.org' },
-  'JWT':                                     { url: 'https://jwt.io' },
-  'Stanford Code In Place':                  { url: 'https://codeinplace.stanford.edu', logo: 'stanford' },
-  "Queen's Sports Analytics Organization":  { url: 'https://www.instagram.com/p/DH4J-30SmkA/?img_index=6', logo: 'qsao' },
-  'Chinese Lion Dancing':                    { url: 'https://www.chinadailyhk.com/hk/article/603804' },
-  'Tech Plus UW':                            { url: 'https://www.techplusuw.com', logo: 'techplusuw' },
-  'UW FinTech':                              { url: 'https://www.instagram.com/uwfintech/?hl=en', logo: 'fintech' },
-  'UW Data Science':                         { url: 'https://www.uwdatascience.ca/', logo: 'uw_dsc' },
-};
-
-const logoOverrides: Record<string, string> = {
-  'uw_cube': 'cube',
-  'uw cube': 'cube',
-};
-
-function resolveLogoFileName(logoName: string) {
-  const cleaned = String(logoName).trim().toLowerCase();
-  const normalized = logoOverrides[cleaned] ?? cleaned.replace(/\s+/g, '-');
-  return normalized.replace(/[^a-z0-9_-]/g, '');
-}
-
-function escapeHtml(value: string) {
-  return value.replace(/[&<>"']/g, (char) => {
-    const entities: Record<string, string> = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;',
-    };
-    return entities[char] ?? char;
-  });
-}
-
-function renderLogoImg(logoName: string, options: { width?: number; height?: number; className?: string; alt?: string } = {}) {
-  const fileName = resolveLogoFileName(String(logoName).trim());
-  if (!fileName) return '';
-  const width = options.width ?? 20;
-  const height = options.height ?? 20;
-  const className = options.className ?? 'inline-block align-middle mx-1 logo-placeholder';
-  const alt = options.alt ?? logoName;
-  const pngSrc = `/logos/${fileName}.png`;
-  const svgSrc = `/logos/${fileName}.svg`;
-
-  return `<img src="${escapeHtml(pngSrc)}" data-logo-fallback-src="${escapeHtml(svgSrc)}" alt="${escapeHtml(String(alt))}" width="${width}" height="${height}" loading="lazy" class="${escapeHtml(className)}" />`;
-}
-
-function formatSummaryText(text: string) {
-  const statPattern = /(\d+(?:\.\d+)?(?:st|nd|rd|th|[KMB%+]\+?))/gi;
-  return toPlainLabel(text).replace(statPattern, '<strong><em>$1</em></strong>');
-}
-
-function formatStatsAndCompanies(text: string) {
-  const statPattern = /(\d+(?:\.\d+)?(?:st|nd|rd|th|[KMB%+]\+?))/gi;
-  let result = text.replace(statPattern, '<strong><em>$1</em></strong>');
-
-  result = result.replace(
-    /\[LINK:\s*([^\]]+?)\s*\](.+?)\[\/LINK\]/gi,
-    '<a href="$1" class="company-link" target="_blank" rel="noopener noreferrer"><strong><em>$2</em></strong></a>'
-  );
-
-  result = result.replace(/\[IMAGE:\s*([^\]|]+?)(?:\|([^\]]+))?\s*\]/gi, (_, fileName, link) => {
-    const safeName = String(fileName).trim().replace(/^\/+/, '');
-    const src = safeName.startsWith('http') ? safeName : `/photos/elrich_photos/${safeName}`;
-    if (link) {
-      const href = String(link).trim();
-      return `<a href="${href}" class="highlight-preview-link" target="_blank" rel="noopener noreferrer"><img src="${src}" alt="Preview" loading="lazy" class="highlight-preview" /></a>`;
-    }
-    return `<img src="${src}" alt="Preview" loading="lazy" class="highlight-preview" />`;
-  });
-
-  result = result.replace(/\[LOGO:([^\]]+)\]/gi, (_, logoName) => {
-    return renderLogoImg(String(logoName).trim());
-  });
-
-  const companyKeys = Object.keys(companyData).sort((a, b) => b.length - a.length);
-  const companyMap  = new Map(companyKeys.map((k) => [k.toLowerCase(), k]));
-  const companyPattern = new RegExp(
-    `(${companyKeys.map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`,
-    'gi'
-  );
-
-  const tokens = result.split(/(<[^>]+>)/g);
-  let insideAnchor = false;
-  const rebuilt: string[] = [];
-
-  for (const token of tokens) {
-    if (/^<a\b/i.test(token))  { insideAnchor = true;  rebuilt.push(token); continue; }
-    if (/^<\/a/i.test(token))  { insideAnchor = false; rebuilt.push(token); continue; }
-    if (token.startsWith('<') || insideAnchor) { rebuilt.push(token); continue; }
-    rebuilt.push(token.replace(companyPattern, (match) => {
-      const key  = companyMap.get(match.toLowerCase());
-      if (!key) return match;
-      const data = companyData[key];
-      return `<a href="${data.url}" target="_blank" rel="noopener" class="company-link"><strong><em>${match}</em></strong></a>`;
-    }));
-  }
-  result = rebuilt.join('');
-  result = result.replace(/View project\s*→/gi, '<a href="/projects" class="view-project-link">View project →</a>');
-  return result;
-}
-
-// Contact links used in both connect sections
-const contactLinks = [
-  { href: 'mailto:elrichchen123@gmail.com', label: 'Email',
-    icon: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm0 2v.01L12 13l8-5.99V7H4z"/></svg>` },
-  { href: 'https://github.com/Elrich-Chen', label: 'GitHub',
-    icon: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>` },
-  { href: 'https://linkedin.com/in/elrichchen', label: 'LinkedIn',
-    icon: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 23.2 24 22.222 0h.003z"/></svg>` },
-  { href: 'https://x.com/ChenElrich_', label: 'X',
-    icon: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>` },
-];
+import PostHog from '../components/posthog.astro';
 ---
 
-<Base title="Elrich Chen" description="CS @ UWaterloo | AI automations for DoneMaker | Aspiring Backend Engineer" fullscreen={true} homeLoading={true}>
-
-  <!-- One WebGL ASCII layer for the whole page (fixed); mounted from Base.astro -->
-  <div class="home-ascii-first-screen">
-    <section id="section-hero" class="hero-atop-ascii-section" aria-label="Introduction">
-      <div class="hero-atop-inner">
-        <h1 class="hero-name">Elrich Chen</h1>
-        <div class="hero-tagline">
-          <a href="https://uwaterloo.ca/future-students/programs/computer-science" target="_blank" rel="noopener noreferrer" class="tagline-link">CS @ UWaterloo</a>
-          <span class="tagline-dot">·</span>
-          <span class="tagline-plain">Builder</span>
-          <span class="tagline-dot">·</span>
-          <a href="https://www.ycombinator.com/companies/medme-health" target="_blank" rel="noopener noreferrer" class="tagline-link">SWE @ MedMe Health (YC W21)</a>
-        </div>
-        <div class="hero-scroll-hint" aria-hidden="true">
-          <span class="hint-label">scroll</span>
-          <span class="hint-arrow">↓</span>
-        </div>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Elrich Chen — Portfolio in Progress</title>
+    <meta name="description" content="Portfolio currently under construction. Check back soon." />
+    <meta name="robots" content="noindex, follow" />
+    <link rel="icon" type="image/svg+xml" href="/e.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <main class="wip" aria-label="Portfolio in progress">
+      <div class="wip-atmosphere" aria-hidden="true">
+        <div class="wip-noise"></div>
+        <div class="wip-grid"></div>
+        <div class="wip-orb wip-orb--a"></div>
+        <div class="wip-orb wip-orb--b"></div>
+        <div class="wip-scan"></div>
       </div>
-    </section>
-  </div>
 
-  <!-- ── BODY: stacked transparent cards ──────────────────────────────────── -->
-  <ScrollStack itemDistance={44} itemStackDistance={12}>
+      <div class="wip-stage">
+        <p class="wip-brand">Elrich Chen</p>
 
-    {highlights?.data?.what_makes_me_different?.length > 0 && (
-      <div class="scroll-stack-card home-pitch-card" id="section-recent">
-        <header class="home-card-intro home-card-intro--recent">
-          <div class="card-pillar-row">
-            <span class="card-pillar-num" aria-hidden="true">{cardMeta.recent.kicker}</span>
-            <div class="card-pillar-copy">
-              <h2 class="panel-header">{cardMeta.recent.title}</h2>
-              <p class="card-subtitle">{cardMeta.recent.subtitle}</p>
-            </div>
-          </div>
-        </header>
-        <ul class="highlight-list" role="list">
-          {highlights.data.what_makes_me_different.map((item: any, rowIndex: number) => {
-            const mainPoint = typeof item === 'string' ? item : (item.point || '');
-            const subPoints: string[] = typeof item === 'string' ? [] : (item.details || []);
-            const parts = mainPoint.split(/\[LOGO:([^\]]+)\]/g);
-            const plainLabel = toPlainLabel(mainPoint);
-            const rowNum = String(rowIndex + 1).padStart(2, '0');
-            return (
-              <li class="highlight-item-group">
-                {subPoints.length > 0 ? (
-                  <details class="highlight-details" data-highlight-section="recent" data-highlight-label={plainLabel}>
-                    <summary class="highlight-summary">
-                      <span class="highlight-row-index" aria-hidden="true">{rowNum}</span>
-                      <span class="highlight-main-point highlight-punchline">
-                        {parts.map((part: string, i: number) => {
-                          if (i % 2 === 1) {
-                            return <span set:html={renderLogoImg(part, { width: 22, height: 22, className: 'highlight-inline-logo' })}></span>;
-                          }
-                          return <span set:html={formatSummaryText(part)}></span>;
-                        })}
-                      </span>
-                      <span class="highlight-expand-affordance" aria-hidden="true">
-                        <span class="expand-label">Proof</span>
-                        <span class="details-cue details-cue--chevron">
-                          <svg class="highlight-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-                          </svg>
-                        </span>
-                      </span>
-                    </summary>
-                    <div class="highlight-details-body">
-                      <p class="highlight-expanded-main" set:html={formatStatsAndCompanies(mainPoint)}></p>
-                      <ul class="highlight-sub-points">
-                        {subPoints.map((sub: string) => (
-                          <li class="highlight-sub-item" set:html={formatStatsAndCompanies(sub)}></li>
-                        ))}
-                      </ul>
-                    </div>
-                  </details>
-                ) : (
-                  <div class="highlight-row highlight-row--no-bullet">
-                    <span class="highlight-row-index" aria-hidden="true">{rowNum}</span>
-                    <div class="highlight-main-point highlight-punchline">
-                      {parts.map((part: string, i: number) => {
-                        if (i % 2 === 1) {
-                          return <span set:html={renderLogoImg(part, { width: 22, height: 22, className: 'highlight-inline-logo' })}></span>;
-                        }
-                        return <span set:html={formatStatsAndCompanies(part)}></span>;
-                      })}
-                    </div>
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-        <a href={cardMeta.recent.cta.href} class="home-card-cta">{cardMeta.recent.cta.label} →</a>
-      </div>
-    )}
+        <p class="wip-status">
+          <span class="wip-pulse" aria-hidden="true"></span>
+          <span>Work in progress</span>
+        </p>
 
-    {highlights?.data?.building?.length > 0 && (
-      <div class="scroll-stack-card home-pitch-card" id="section-building">
-        <header class="home-card-intro home-card-intro--building">
-          <div class="card-pillar-row">
-            <span class="card-pillar-num" aria-hidden="true">{cardMeta.building.kicker}</span>
-            <div class="card-pillar-copy">
-              <h2 class="panel-header">{cardMeta.building.title}</h2>
-              <p class="card-subtitle">{cardMeta.building.subtitle}</p>
-            </div>
-          </div>
-        </header>
-        <ul class="highlight-list" role="list">
-          {highlights.data.building.map((item: any, rowIndex: number) => {
-            const mainPoint = typeof item === 'string' ? item : (item.point || '');
-            let subPoints: string[] = typeof item === 'string' ? [] : (item.details || []);
-            if (mainPoint.includes('TechPlus UW')) {
-              subPoints = ["Organised mentorship & dinner for <strong><em>200+</em></strong> members for the F25 term.", ...subPoints];
-            }
-            const parts = mainPoint.split(/\[LOGO:([^\]]+)\]/g);
-            const plainLabel = toPlainLabel(mainPoint);
-            const rowNum = String(rowIndex + 1).padStart(2, '0');
-            return (
-              <li class="highlight-item-group">
-                {subPoints.length > 0 ? (
-                  <details class="highlight-details" data-highlight-section="building" data-highlight-label={plainLabel}>
-                    <summary class="highlight-summary">
-                      <span class="highlight-row-index" aria-hidden="true">{rowNum}</span>
-                      <span class="highlight-main-point highlight-punchline">
-                        {parts.map((part: string, i: number) => {
-                          if (i % 2 === 1) {
-                            return <span set:html={renderLogoImg(part, { width: 22, height: 22, className: 'highlight-inline-logo' })}></span>;
-                          }
-                          return <span set:html={formatSummaryText(part)}></span>;
-                        })}
-                      </span>
-                      <span class="highlight-expand-affordance" aria-hidden="true">
-                        <span class="expand-label">Proof</span>
-                        <span class="details-cue details-cue--chevron">
-                          <svg class="highlight-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-                          </svg>
-                        </span>
-                      </span>
-                    </summary>
-                    <div class="highlight-details-body">
-                      <p class="highlight-expanded-main" set:html={formatStatsAndCompanies(mainPoint)}></p>
-                      <ul class="highlight-sub-points">
-                        {subPoints.map((sub: string) => (
-                          <li class="highlight-sub-item" set:html={formatStatsAndCompanies(sub)}></li>
-                        ))}
-                      </ul>
-                    </div>
-                  </details>
-                ) : (
-                  <div class="highlight-row highlight-row--no-bullet">
-                    <span class="highlight-row-index" aria-hidden="true">{rowNum}</span>
-                    <div class="highlight-main-point highlight-punchline">
-                      {parts.map((part: string, i: number) => {
-                        if (i % 2 === 1) {
-                          return <span set:html={renderLogoImg(part, { width: 22, height: 22, className: 'highlight-inline-logo' })}></span>;
-                        }
-                        return <span set:html={formatStatsAndCompanies(part)}></span>;
-                      })}
-                    </div>
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-        <a href={cardMeta.building.cta.href} class="home-card-cta">{cardMeta.building.cta.label} →</a>
-      </div>
-    )}
+        <h1 class="wip-title">
+          <span class="wip-line" style="--i: 0">Portfolio</span>
+          <span class="wip-line wip-line--accent" style="--i: 1">in progress</span>
+        </h1>
 
-    {testimonials.length > 0 && (
-      <div class="scroll-stack-card home-pitch-card" id="section-clients">
-        <header class="home-card-intro home-card-intro--clients">
-          <div class="card-pillar-row">
-            <span class="card-pillar-num" aria-hidden="true">{cardMeta.clients.kicker}</span>
-            <div class="card-pillar-copy">
-              <h2 class="panel-header">{cardMeta.clients.title}</h2>
-              <p class="card-subtitle">{cardMeta.clients.subtitle}</p>
-            </div>
-          </div>
-        </header>
-        <div class="proof-grid">
-          {testimonials.map((t) => (
-            <details class="proof-card" data-testimonial-company={t.data.company} data-testimonial-project={t.data.project || 'unspecified'}>
-              <summary class="proof-summary">
-                <div class="proof-summary-head">
-                  <div class="proof-identity">
-                    {t.data.companyLogo && (
-                      <span set:html={renderLogoImg(t.data.companyLogo, { width: 32, height: 32, className: 'proof-logo', alt: '' })}></span>
-                    )}
-                    <div class="proof-names">
-                      <span class="proof-company">{t.data.company}</span>
-                      {t.data.project && <span class="proof-project">{t.data.project}</span>}
-                    </div>
-                  </div>
-                  <div class="proof-rating-block" aria-label={`${t.data.rating} out of 5 stars`}>
-                    <span class="proof-stars" aria-hidden="true">{'★'.repeat(t.data.rating)}{'☆'.repeat(5 - t.data.rating)}</span>
-                    <span class="proof-rating-value">{t.data.rating}/5</span>
-                  </div>
-                </div>
-                <span class="proof-expand-affordance" aria-hidden="true">
-                  <span class="expand-label">Quote</span>
-                  <span class="details-cue details-cue--chevron">
-                    <svg class="highlight-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                  </span>
-                </span>
-              </summary>
-              <div class="proof-body">
-                <p class="quote-text">"{t.data.text}"</p>
-                <p class="quote-author">— {t.data.author}, {t.data.title} · {t.data.company}</p>
-                {t.data.techStack && t.data.techStack.length > 0 && (
-                  <div class="tech-chips" aria-label={`Tech stack for ${t.data.project || t.data.company}`}>
-                    {t.data.techStack.map((tech) => <span>{tech}</span>)}
-                  </div>
-                )}
-              </div>
-            </details>
-          ))}
-        </div>
-        <a href={cardMeta.clients.cta.href} class="home-card-cta">{cardMeta.clients.cta.label} →</a>
-      </div>
-    )}
-
-  </ScrollStack>
-
-  <!-- ── LET'S CONNECT — standalone footer section ─────────────────────────── -->
-  <section id="section-connect1" class="connect-section">
-    <p class="contact-eyebrow">◆ Email</p>
-    <h2 class="contact-heading">Let's connect.</h2>
-    <p class="contact-body">
-      Reach me directly at
-      <a href="mailto:elrichchen123@gmail.com" class="contact-inline-link">elrichchen123@gmail.com</a>.
-    </p>
-    <a href="mailto:elrichchen123@gmail.com" class="contact-cta">Send an email</a>
-    <div class="contact-icons">
-      {contactLinks.map((link) => (
-        <a
-          href={link.href}
-          aria-label={link.label}
-          class="contact-icon"
-          target={link.href.startsWith('mailto:') ? undefined : '_blank'}
-          rel={link.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+        <div
+          class="wip-meter"
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="67"
+          aria-label="Build progress"
         >
-          <span class="contact-icon-svg" set:html={link.icon}></span>
-        </a>
-      ))}
-    </div>
-  </section>
+          <div class="wip-meter-track">
+            <div class="wip-meter-fill"></div>
+            <div class="wip-meter-glint"></div>
+          </div>
+          <div class="wip-meter-meta">
+            <span>Rebuilding</span>
+            <span class="wip-meter-pct" data-wip-pct>67%</span>
+          </div>
+        </div>
 
-  <script is:inline>
-  document.addEventListener('error', (event) => {
-    const el = event.target;
-    if (!(el instanceof HTMLImageElement)) return;
-    const fallbackSrc = el.dataset.logoFallbackSrc;
-    if (!fallbackSrc) return;
-    if (el.dataset.logoFallbackAttempted === 'true') {
-      el.style.display = 'none';
-      return;
-    }
-    el.dataset.logoFallbackAttempted = 'true';
-    el.src = fallbackSrc;
-  }, true);
+        <p class="wip-note">
+          Everything is being rebuilt from scratch. Reach me at
+          <a href="mailto:eklchen@uwaterloo.ca" class="wip-mail">eklchen@uwaterloo.ca</a>
+          in the meantime.
+        </p>
+      </div>
+    </main>
 
-    document.addEventListener('DOMContentLoaded', () => {
-      // Track email CTA clicks (primary conversion event)
-      document.querySelectorAll('a[href^="mailto:"]').forEach((el) => {
-        el.addEventListener('click', () => {
-          if (el.classList.contains('home-card-cta')) return;
-          window.posthog?.capture('contact_email_clicked', {
-            location: el.classList.contains('contact-cta') ? 'cta_button' : el.classList.contains('contact-icon') ? 'icon' : 'inline_link'
+    <PostHog />
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+        const pct = document.querySelector('[data-wip-pct]');
+        if (!(pct instanceof HTMLElement) || prefersReducedMotion) return;
+
+        const target = 67;
+        const duration = 3200;
+        const start = performance.now();
+
+        const tick = (now: number) => {
+          const t = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - t, 3);
+          pct.textContent = `${Math.round(eased * target)}%`;
+          if (t < 1) requestAnimationFrame(tick);
+        };
+
+        requestAnimationFrame(tick);
+
+        document.querySelectorAll('a[href^="mailto:"]').forEach((el) => {
+          el.addEventListener('click', () => {
+            window.posthog?.capture('contact_email_clicked', { location: 'wip_holding' });
           });
         });
       });
+    </script>
+  </body>
+</html>
 
-      // Track social icon clicks
-      document.querySelectorAll('.contact-icon').forEach((el) => {
-        const href = el.getAttribute('href') || '';
-        const label = el.getAttribute('aria-label') || 'unknown';
-        if (href.startsWith('mailto:') || label.toLowerCase() === 'email') return;
-        el.addEventListener('click', () => {
-          window.posthog?.capture('social_link_clicked', {
-            platform: label
-          });
-        });
-      });
-
-      document.querySelectorAll('.home-card-cta').forEach((el) => {
-        el.addEventListener('click', () => {
-          window.posthog?.capture('home_card_cta_clicked', {
-            card_id: el.getAttribute('data-card-id') || 'unknown',
-            label: el.getAttribute('data-cta-label') || el.textContent?.trim() || 'unknown',
-            href: el.getAttribute('href') || ''
-          });
-        });
-      });
-
-      document.querySelectorAll('.highlight-details').forEach((el) => {
-        el.addEventListener('toggle', () => {
-          if (!(el instanceof HTMLDetailsElement) || !el.open) return;
-          window.posthog?.capture('home_highlight_expanded', {
-            section: el.getAttribute('data-highlight-section') || 'unknown',
-            item_label: el.getAttribute('data-highlight-label') || 'unknown'
-          });
-        });
-      });
-
-      document.querySelectorAll('.proof-card').forEach((el) => {
-        el.addEventListener('toggle', () => {
-          if (!(el instanceof HTMLDetailsElement) || !el.open) return;
-          window.posthog?.capture('home_testimonial_expanded', {
-            company: el.getAttribute('data-testimonial-company') || 'unknown',
-            project: el.getAttribute('data-testimonial-project') || 'unspecified'
-          });
-        });
-      });
-
-      const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-      const easeOutExpo = 'cubic-bezier(0.22, 1, 0.36, 1)';
-      const openMs = 560;
-      const closeMs = 480;
-
-      const stripInlineHeight = (body) => {
-        body.style.transition = '';
-        body.style.height = '';
-        body.style.opacity = '';
-        body.style.overflow = '';
-      };
-
-      const smoothToggle = (el, body, summary) => {
-        if (prefersReducedMotion) return;
-        if (el.dataset.smoothToggle === 'attached') return;
-        el.dataset.smoothToggle = 'attached';
-
-        if (el.open) el.classList.add('is-open');
-
-        summary.addEventListener('click', (event) => {
-          event.preventDefault();
-          if (el.dataset.animating === 'true') return;
-
-          const opening = !el.open;
-          el.dataset.animating = 'true';
-
-          if (opening) {
-            el.open = true;
-            el.classList.add('is-open');
-            const target = body.scrollHeight;
-            body.style.overflow = 'hidden';
-            body.style.height = '0px';
-            body.style.opacity = '0';
-            requestAnimationFrame(() => {
-              body.style.transition =
-                `height ${openMs}ms ${easeOutExpo}, opacity ${openMs - 80}ms ease`;
-              body.style.height = target + 'px';
-              body.style.opacity = '1';
-            });
-            const onEnd = (ev) => {
-              if (ev.propertyName !== 'height') return;
-              body.removeEventListener('transitionend', onEnd);
-              stripInlineHeight(body);
-              el.dataset.animating = 'false';
-            };
-            body.addEventListener('transitionend', onEnd);
-          } else {
-            const start = body.scrollHeight;
-            body.style.overflow = 'hidden';
-            body.style.height = start + 'px';
-            body.style.opacity = '1';
-            el.classList.remove('is-open');
-            requestAnimationFrame(() => {
-              body.style.transition =
-                `height ${closeMs}ms ${easeOutExpo}, opacity ${closeMs - 80}ms ease`;
-              body.style.height = '0px';
-              body.style.opacity = '0';
-            });
-            const onEnd = (ev) => {
-              if (ev.propertyName !== 'height') return;
-              body.removeEventListener('transitionend', onEnd);
-              el.open = false;
-              stripInlineHeight(body);
-              el.dataset.animating = 'false';
-            };
-            body.addEventListener('transitionend', onEnd);
-          }
-        });
-      };
-
-      document.querySelectorAll('.highlight-details').forEach((el) => {
-        if (!(el instanceof HTMLDetailsElement)) return;
-        const body = el.querySelector(':scope > .highlight-details-body');
-        const summary = el.querySelector(':scope > summary');
-        if (body instanceof HTMLElement && summary instanceof HTMLElement) {
-          smoothToggle(el, body, summary);
-        }
-      });
-
-      document.querySelectorAll('.proof-card').forEach((el) => {
-        if (!(el instanceof HTMLDetailsElement)) return;
-        const body = el.querySelector(':scope > .proof-body');
-        const summary = el.querySelector(':scope > summary');
-        if (body instanceof HTMLElement && summary instanceof HTMLElement) {
-          smoothToggle(el, body, summary);
-        }
-      });
-
-    });
-  </script>
-
-</Base>
-
-<style>
-  /* ── Scroll sections ─────────────────────────────────────────────────────── */
-  .scroll-section {
-    width: 100vw;
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    padding: 3rem 0;
-    z-index: 5;
-  }
-
-  /* Hero block over the fixed page-wide ASCII backdrop (backdrop is sibling, not clipped here). */
-  .home-ascii-first-screen {
-    /*
-     * Nav clearance lives on `main.main-fullscreen` in Base.astro.
-     * Old pattern used a negative margin that pulled this card up so its top hugged the
-     * navbar; inner `padding-top` did not inset the ASCII layer because it is `position:absolute`
-     * and paints over the padding box → no visible gap above the video.
-     * Positive margin stacks below fullscreen padding for a clear grain strip under the pill nav.
-     */
-    --hero-ascii-after-nav-gap: clamp(7.5rem, 8vw + 6rem, 20rem);
-    position: relative;
-    width: 100vw;
-    max-width: none;
-    left: 50%;
-    transform: translateX(-50%);
+<style is:global>
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
-    margin-top: var(--hero-ascii-after-nav-gap);
-    padding-top: 0;
-    min-height: clamp(22rem, 62dvh, 38rem);
-    display: flex;
-    flex-direction: column;
+  }
+
+  html,
+  body {
+    margin: 0;
+    min-height: 100%;
+    background: #07080c;
+    color: #f4f1ea;
+  }
+
+  body {
+    min-height: 100dvh;
+    font-family: 'Syne', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  .wip {
+    --wip-ink: 244 241 234;
+    --wip-muted: 168 174 186;
+    --wip-accent: 255 176 92;
+    --wip-accent-deep: 220 118 48;
+
     position: relative;
-    z-index: 2;
+    isolation: isolate;
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: clamp(1.5rem, 5vw, 3rem);
+    overflow: hidden;
+    color: rgb(var(--wip-ink));
   }
 
-  @media (min-width: 900px) {
-    .home-ascii-first-screen {
-      min-height: clamp(26rem, 52dvh, 44rem);
-    }
-  }
-
-  @media (min-width: 1200px) {
-    .home-ascii-first-screen {
-      min-height: clamp(26rem, 50dvh, 42rem);
-    }
-  }
-
-  @media (min-width: 1536px) {
-    .home-ascii-first-screen {
-      min-height: clamp(26rem, 48dvh, 40rem);
-    }
-  }
-
-  @media (min-width: 1920px) {
-    .home-ascii-first-screen {
-      min-height: clamp(26rem, 46dvh, 38rem);
-    }
-  }
-
-  .hero-atop-ascii-section {
-    position: relative;
-    z-index: 5;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    flex: 1 1 auto;
-    min-height: 0;
-    /* Shorter hero block → slightly less vertical padding so copy + ASCII stay balanced */
-    padding: clamp(1.85rem, 7dvh, 4.75rem) clamp(1rem, 4vw, 1.5rem) clamp(1.25rem, 4dvh, 2.25rem);
-    user-select: none;
-  }
-
-  .hero-atop-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    width: min(100%, calc(100vw - 2rem));
-    max-width: 72rem;
-    margin-inline: auto;
-    position: relative;
-  }
-
-  /* Allow mouse events through to the name so TextPressure cursor tracking works,
-     but disable them on the tagline / scroll-hint decorations */
-  .hero-tagline {
+  .wip-atmosphere {
+    position: absolute;
+    inset: 0;
     pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 55% at 50% 35%, rgba(36, 28, 18, 0.9), transparent 70%),
+      linear-gradient(160deg, #0a0b10 0%, #12141c 45%, #08090d 100%);
   }
 
-  .hero-name {
+  .wip-noise {
+    position: absolute;
+    inset: 0;
+    opacity: 0.18;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+
+  .wip-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 52px 52px;
+    mask-image: radial-gradient(ellipse 65% 55% at 50% 45%, black 15%, transparent 72%);
+    animation: wip-grid-drift 28s linear infinite;
+  }
+
+  .wip-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(64px);
+    opacity: 0.5;
+  }
+
+  .wip-orb--a {
+    width: min(48vw, 30rem);
+    height: min(48vw, 30rem);
+    top: 4%;
+    left: 8%;
+    background: radial-gradient(circle, rgba(255, 150, 60, 0.32), transparent 68%);
+    animation: wip-orb-float 12s ease-in-out infinite;
+  }
+
+  .wip-orb--b {
+    width: min(40vw, 24rem);
+    height: min(40vw, 24rem);
+    right: 4%;
+    bottom: 8%;
+    background: radial-gradient(circle, rgba(90, 130, 190, 0.22), transparent 68%);
+    animation: wip-orb-float 15s ease-in-out infinite reverse;
+  }
+
+  .wip-scan {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(255, 200, 140, 0.06) 48%,
+      transparent 52%
+    );
+    background-size: 100% 220%;
+    animation: wip-scan 5.5s ease-in-out infinite;
+  }
+
+  .wip-stage {
     position: relative;
     z-index: 1;
-    font-family: 'Syne', sans-serif;
-    /* Single line: old 14vw made “ELRICH CHEN” wider than the viewport */
-    white-space: nowrap;
-    font-size: clamp(1.45rem, 2.85vw + 0.95rem, 5.35rem);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1;
-    margin: 0;
-    text-align: center;
-    text-transform: uppercase;
-    color: #ffffff;
-    user-select: none;
-    text-shadow:
-      0 0.06em 0.28em rgba(0, 0, 0, 0.72),
-      0 0.02em 0.06em rgba(0, 0, 0, 0.9);
+    width: min(100%, 38rem);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: clamp(0.95rem, 2.5vw, 1.45rem);
   }
 
-  .hero-tagline {
+  .wip-brand {
+    margin: 0;
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: clamp(1.35rem, 3.2vw, 1.85rem);
+    font-style: italic;
+    letter-spacing: 0.01em;
+    color: rgb(var(--wip-ink));
+    opacity: 0;
+    animation: wip-enter 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards;
+  }
+
+  .wip-status {
     display: inline-flex;
     align-items: center;
     gap: 0.55rem;
-    padding: 0.45rem 1.25rem;
-    border-radius: 9999px;
-    /* Dark glass in both themes — sits over ASCII video; gold links need contrast */
-    background: rgba(10, 12, 20, 0.62);
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    box-shadow:
-      0 4px 24px rgba(0, 0, 0, 0.28),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    font-size: clamp(1.1rem, 2.6vw, 1.45rem);
-    letter-spacing: 0.13em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.88);
-    font-weight: 500;
-    pointer-events: none;
-    white-space: normal;
-    flex-wrap: wrap;
-    justify-content: center;
-    max-width: 100%;
-    text-wrap: balance;
-  }
-
-  .tagline-link {
-    color: rgb(255, 210, 138);
-    font-weight: 700;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    text-decoration-color: rgba(255, 210, 138, 0.55);
-    pointer-events: auto;
-    transition: color 0.2s ease, text-decoration-color 0.2s ease;
-  }
-
-  .tagline-link:hover {
-    color: rgb(255, 228, 168);
-    text-decoration-color: rgba(255, 210, 138, 0.9);
-  }
-
-  .tagline-plain {
-    color: rgba(255, 255, 255, 0.82);
-  }
-
-  .tagline-dot {
-    color: rgba(255, 255, 255, 0.35);
-    opacity: 1;
-  }
-
-  /* Same glass pill in light + dark (video backdrop is always dark) */
-  :global(html.light) .hero-tagline,
-  :global(html.dark) .hero-tagline {
-    background: rgba(10, 12, 20, 0.62);
-    border-color: rgba(255, 255, 255, 0.16);
-    color: rgba(255, 255, 255, 0.88);
-  }
-
-  :global(html.light) .hero-tagline .tagline-plain,
-  :global(html.dark) .hero-tagline .tagline-plain {
-    color: rgba(255, 255, 255, 0.82);
-  }
-
-  :global(html.light) .hero-tagline .tagline-dot,
-  :global(html.dark) .hero-tagline .tagline-dot {
-    color: rgba(255, 255, 255, 0.35);
-  }
-
-  /* Link text = gold in both themes (same as .company-link on pitch cards) */
-  :global(html.light) .hero-tagline .tagline-link,
-  :global(html.dark) .hero-tagline .tagline-link,
-  .hero-tagline .tagline-link {
-    color: rgb(255, 210, 138) !important;
-    text-decoration-color: rgba(255, 210, 138, 0.55) !important;
-  }
-
-  :global(html.light) .hero-tagline .tagline-link:hover,
-  :global(html.dark) .hero-tagline .tagline-link:hover,
-  .hero-tagline .tagline-link:hover {
-    color: rgb(255, 228, 168) !important;
-    text-decoration-color: rgba(255, 210, 138, 0.9) !important;
-  }
-
-  .hero-scroll-hint {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.3rem;
-    margin-top: 0.5rem;
-    opacity: 0.55;
-  }
-
-  .hint-label {
-    font-size: 0.65rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.65);
-  }
-
-  .hint-arrow {
-    font-size: 1.2rem;
-    color: rgba(255, 255, 255, 0.55);
-    animation: hint-bounce 1.8s ease-in-out infinite;
-  }
-
-  @keyframes hint-bounce {
-    0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(8px); }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .hero-scroll-hint { animation: none; }
-  }
-
-  /* ── Home pitch cards (translucent glass over ASCII) ───────────────────── */
-  .home-pitch-card {
-    --card-fg: 248 250 252;
-    --card-muted: 186 198 214;
-    --card-accent: 148 180 220;
-    color: rgb(var(--card-fg));
-    backdrop-filter: blur(18px) saturate(135%);
-    -webkit-backdrop-filter: blur(18px) saturate(135%);
-    box-shadow:
-      0 4px 24px rgba(0, 0, 0, 0.28),
-      inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  }
-
-  #section-recent {
-    background: rgba(12, 18, 32, 0.48);
-    border-color: rgba(120, 168, 230, 0.28);
-    --card-accent: 120 168 230;
-  }
-  #section-building {
-    background: rgba(28, 20, 12, 0.5);
-    border-color: rgba(220, 168, 96, 0.26);
-    --card-accent: 220 168 96;
-  }
-  #section-clients {
-    background: rgba(10, 22, 16, 0.48);
-    border-color: rgba(130, 196, 150, 0.26);
-    --card-accent: 130 196 150;
-  }
-
-  @media (max-width: 768px) {
-    #section-recent { background: rgba(12, 18, 32, 0.4); }
-    #section-building { background: rgba(28, 20, 12, 0.42); }
-    #section-clients { background: rgba(10, 22, 16, 0.4); }
-  }
-
-  @media (max-width: 480px) {
-    #section-recent { background: rgba(12, 18, 32, 0.36); }
-    #section-building { background: rgba(28, 20, 12, 0.38); }
-    #section-clients { background: rgba(10, 22, 16, 0.36); }
-  }
-
-  .home-card-intro {
-    margin-bottom: 1.1rem;
-    padding-bottom: 0.95rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .card-pillar-row {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0.85rem;
-    align-items: start;
-  }
-
-  .card-pillar-num {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(1.65rem, 4.5vw, 2.15rem);
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: -0.04em;
-    color: rgba(var(--card-accent), 0.92);
-    text-shadow: 0 0 28px rgba(var(--card-accent), 0.35);
-  }
-
-  .card-pillar-copy {
-    display: grid;
-    gap: 0.35rem;
-    min-width: 0;
-  }
-
-  #section-recent .highlight-sub-points,
-  #section-building .highlight-sub-points {
-    border-left: none;
-    padding-left: 0;
-  }
-
-  .highlight-details.is-open .highlight-chevron,
-  .proof-card.is-open .highlight-chevron {
-    transform: rotate(180deg);
-  }
-
-  .details-cue.details-cue--chevron {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.15rem;
-    color: rgb(var(--card-muted));
-    letter-spacing: 0;
-    text-transform: none;
-    font-size: 0;
-    transition: color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .details-cue.details-cue--chevron .highlight-chevron {
-    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .highlight-chevron {
-    display: block;
-  }
-
-  .highlight-details.is-open .details-cue--chevron,
-  .proof-card.is-open .details-cue--chevron,
-  .highlight-details.is-open .expand-label,
-  .proof-card.is-open .expand-label {
-    color: rgb(var(--card-fg));
-  }
-
-  .highlight-details[data-animating="true"] > .highlight-details-body,
-  .proof-card[data-animating="true"] > .proof-body {
-    display: block;
-  }
-
-  .highlight-row--no-bullet {
-    gap: 0.65rem;
-    grid-template-columns: auto 1fr;
-  }
-
-  .panel-header {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(1.05rem, 2.8vw, 1.28rem);
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    text-transform: none;
-    color: rgb(var(--card-fg));
     margin: 0;
-    line-height: 1.15;
-    text-wrap: balance;
-  }
-
-  .card-subtitle {
-    max-width: 36rem;
-    margin: 0;
-    color: rgb(var(--card-muted));
-    font-size: clamp(0.78rem, 2.2vw, 0.86rem);
-    line-height: 1.5;
-    text-wrap: pretty;
-  }
-
-  .scan-chips,
-  .tech-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
-  }
-
-  .scan-chips span,
-  .tech-chips span {
-    display: inline-flex;
-    align-items: center;
-    min-height: 1.45rem;
-    padding: 0.22rem 0.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.16);
+    padding: 0.35rem 0.8rem 0.35rem 0.55rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.1);
-    color: rgb(var(--card-muted));
-    font-size: 0.68rem;
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 0.66rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(var(--wip-muted), 0.95);
+    opacity: 0;
+    animation: wip-enter 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
+  }
+
+  .wip-pulse {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: rgb(var(--wip-accent));
+    box-shadow: 0 0 0 0 rgba(255, 176, 92, 0.55);
+    animation: wip-pulse 1.8s ease-out infinite;
+  }
+
+  .wip-title {
+    margin: 0;
+    display: grid;
+    gap: 0.02em;
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 0.92;
     text-transform: uppercase;
   }
 
-  /* ── Highlight lists ─────────────────────────────────────────────────── */
-  .highlight-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+  .wip-line {
+    display: block;
+    font-size: clamp(2.75rem, 12vw, 5.75rem);
+    opacity: 0;
+    transform: translateY(0.5em);
+    animation: wip-title-in 1.05s cubic-bezier(0.22, 1, 0.36, 1) calc(0.25s + var(--i) * 0.12s) forwards;
   }
 
-  .highlight-item-group {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.06);
-    overflow: hidden;
+  .wip-line--accent {
+    color: rgb(var(--wip-accent));
+    text-shadow: 0 0 0.4em rgba(255, 176, 92, 0.35);
+    animation-name: wip-title-in, wip-accent-glow;
+    animation-duration: 1.05s, 3.2s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1), ease-in-out;
+    animation-delay: calc(0.25s + var(--i) * 0.12s), 1.4s;
+    animation-fill-mode: forwards, none;
+    animation-iteration-count: 1, infinite;
   }
 
-  .highlight-row,
-  .highlight-summary {
+  .wip-meter {
+    width: min(100%, 22rem);
     display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: start;
-    gap: 0.55rem 0.65rem;
-    padding: 0.72rem 0.8rem;
+    gap: 0.55rem;
+    opacity: 0;
+    animation: wip-enter 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.55s forwards;
   }
 
-  .highlight-summary {
-    cursor: pointer;
-    list-style: none;
-  }
-
-  .highlight-summary::-webkit-details-marker,
-  .proof-summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .highlight-summary:focus-visible,
-  .proof-summary:focus-visible,
-  .home-card-cta:focus-visible {
-    outline: 2px solid rgba(var(--card-accent), 0.85);
-    outline-offset: 3px;
-  }
-
-  .highlight-row-index {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.62rem;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    color: rgba(var(--card-accent), 0.75);
-    padding-top: 0.2rem;
-    line-height: 1;
-  }
-
-  .highlight-main-point {
-    flex: 1;
-    min-width: 0;
-    font-size: clamp(0.86rem, 2.4vw, 0.94rem);
-    line-height: 1.45;
-    color: rgb(var(--card-fg));
-    font-weight: 500;
-  }
-
-  .highlight-punchline :global(strong em),
-  .highlight-punchline :global(strong > em) {
-    color: rgba(var(--card-accent), 1);
-    font-style: normal;
-    font-weight: 800;
-    letter-spacing: 0.01em;
-  }
-
-  .highlight-inline-logo,
-  :global(.highlight-inline-logo) {
-    vertical-align: -0.2em;
-    margin-inline: 0.15rem 0.25rem !important;
-    border-radius: 6px;
+  .wip-meter-track {
+    position: relative;
+    height: 3px;
+    overflow: hidden;
+    border-radius: 999px;
     background: rgba(255, 255, 255, 0.12);
   }
 
-  .highlight-expand-affordance,
-  .proof-expand-affordance {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    align-self: center;
-    flex-shrink: 0;
-  }
-
-  .expand-label {
-    font-size: 0.58rem;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: rgb(var(--card-muted));
-    transition: color 0.35s ease;
-  }
-
-  .details-cue {
-    align-self: center;
-    flex-shrink: 0;
-    color: rgb(var(--card-muted));
-    font-size: 0.66rem;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
-  .highlight-details-body {
-    padding: 0 0.8rem 0.85rem;
-    margin-left: 2.35rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  .highlight-expanded-main {
-    margin: 0.65rem 0 0.5rem;
-    color: rgb(var(--card-muted));
-    font-size: 0.8rem;
-    line-height: 1.5;
-  }
-
-  .highlight-expanded-main :global(a),
-  .highlight-sub-item :global(a) {
-    color: rgb(var(--card-fg));
-  }
-
-  .highlight-sub-points {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
-
-  .highlight-sub-item {
-    position: relative;
-    padding-left: 0.85rem;
-    font-size: 0.8rem;
-    line-height: 1.5;
-    color: rgb(var(--card-muted));
-  }
-
-  .highlight-sub-item::before {
-    content: '';
+  .wip-meter-fill {
     position: absolute;
-    left: 0;
-    top: 0.55em;
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: rgba(var(--card-accent), 0.85);
+    inset: 0 auto 0 0;
+    width: 0%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, rgb(var(--wip-accent-deep)), rgb(var(--wip-accent)), #ffe0b0);
+    box-shadow: 0 0 18px rgba(255, 176, 92, 0.45);
+    animation:
+      wip-fill 3.6s cubic-bezier(0.22, 1, 0.36, 1) 0.75s forwards,
+      wip-breathe 2.8s ease-in-out 4.4s infinite;
   }
 
-  .home-card-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    width: fit-content;
-    margin-top: 1rem;
-    padding: 0.5rem 0.85rem;
-    border: 1px solid rgba(var(--card-accent), 0.45);
-    border-radius: 999px;
-    background: rgba(var(--card-accent), 0.18);
-    color: rgb(var(--card-fg));
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    text-decoration: none;
-    text-transform: uppercase;
-    transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  .wip-meter-glint {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 28%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+    transform: translateX(-120%);
+    animation: wip-glint 2.4s ease-in-out 1.2s infinite;
   }
 
-  .home-card-cta:hover {
-    transform: translateY(-2px);
-    background: rgba(var(--card-accent), 0.32);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-  }
-
-  /* ── Contact panels ────────────────────────────────────────────────────── */
-  .contact-panel { gap: 0; }
-
-  .contact-eyebrow {
-    font-size: 1rem;
+  .wip-meter-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    font-size: 0.66rem;
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgb(var(--connect-fg));
-    margin: 0 0 0.75rem;
+    color: rgba(var(--wip-muted), 0.9);
   }
 
-  .contact-heading {
-    font-size: 3rem;
-    font-weight: 700;
-    margin: 0 0 1rem;
-    color: rgb(var(--connect-fg));
-  }
-
-  .contact-body {
-    font-size: 1.35rem;
-    line-height: 1.6;
-    color: rgb(var(--connect-fg));
-    margin: 0 0 1.5rem;
-  }
-
-  .contact-inline-link {
-    color: rgb(var(--connect-fg));
-    font-weight: 600;
-    text-decoration: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.35);
-  }
-
-  .contact-inline-link:hover {
-    border-bottom-color: rgba(255, 255, 255, 0.65);
-  }
-
-  .contact-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.5rem 1.1rem;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    color: rgb(var(--connect-fg));
+  .wip-meter-pct {
     font-size: 0.85rem;
-    font-weight: 600;
-    text-decoration: none;
-    background: rgba(255, 255, 255, 0.14);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-    margin-bottom: 1rem;
-  }
-
-  .contact-cta:hover {
-    transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.22);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  }
-
-  .contact-icons {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-  }
-
-  .contact-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: rgb(var(--connect-fg));
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    text-decoration: none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-  }
-
-  .contact-icon:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
-    background: rgba(255, 255, 255, 0.18);
-    border-color: rgba(255, 255, 255, 0.32);
-  }
-
-  .contact-icon-svg {
-    display: inline-flex;
-    width: 24px;
-    height: 24px;
-  }
-
-  .contact-icon svg { width: 100%; height: 100%; }
-
-  /* ── Standalone connect section (over ASCII — light text in both themes) ── */
-  .connect-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 5rem 1.5rem 6rem;
-    position: relative;
-    z-index: 5;
-    --connect-fg: 255 255 255;
-    --connect-muted: 190 200 215;
-  }
-
-  .connect-section .contact-eyebrow { margin-bottom: 0.5rem; }
-  .connect-section .contact-heading { margin-bottom: 0.75rem; }
-  .connect-section .contact-body    { margin-bottom: 1.25rem; }
-  .connect-section .contact-icons   { margin-top: 0.25rem; justify-content: center; }
-
-  /* ── Client proof cards ────────────────────────────────────────────────── */
-  .proof-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0.55rem;
-  }
-
-  .proof-card {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.06);
-    overflow: hidden;
-  }
-
-  .proof-summary {
-    display: grid;
-    gap: 0.5rem;
-    padding: 0.72rem 0.8rem;
-    cursor: pointer;
-    list-style: none;
-  }
-
-  .proof-summary-head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.65rem;
-  }
-
-  .proof-identity {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    min-width: 0;
-    flex: 1;
-  }
-
-  .proof-logo {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    object-fit: contain;
-    background: rgba(255, 255, 255, 0.14);
-    flex-shrink: 0;
-  }
-
-  .proof-names {
-    display: grid;
-    gap: 0.15rem;
-    min-width: 0;
-  }
-
-  .proof-company {
-    display: block;
-    color: rgb(var(--card-fg));
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(0.88rem, 2.5vw, 0.98rem);
-    font-weight: 800;
-    line-height: 1.2;
-    letter-spacing: 0.01em;
-    text-wrap: balance;
-  }
-
-  .proof-project {
-    display: block;
-    color: rgb(var(--card-muted));
-    font-size: 0.72rem;
-    font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: 0.04em;
-  }
-
-  .proof-rating-block {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.12rem;
-    flex-shrink: 0;
-  }
-
-  .proof-stars {
-    color: #f5c842;
-    font-size: 0.82rem;
     letter-spacing: 0.06em;
-    line-height: 1;
-    text-shadow: 0 0 12px rgba(245, 200, 66, 0.35);
+    color: rgb(var(--wip-accent));
+    font-variant-numeric: tabular-nums;
   }
 
-  .proof-rating-value {
-    font-size: 0.58rem;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: rgb(var(--card-muted));
-  }
-
-  .proof-expand-affordance {
-    justify-content: flex-end;
-    width: 100%;
-  }
-
-  .proof-body {
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 0.75rem 0.8rem 0.85rem;
-  }
-
-  .quote-text {
-    font-size: clamp(0.86rem, 2.4vw, 0.92rem);
-    line-height: 1.55;
-    color: rgb(var(--card-fg));
-    font-style: italic;
+  .wip-note {
     margin: 0;
+    max-width: 28rem;
+    font-size: clamp(0.95rem, 2.2vw, 1.08rem);
+    line-height: 1.55;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: rgba(var(--wip-muted), 0.98);
+    opacity: 0;
+    animation: wip-enter 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.75s forwards;
   }
 
-  .quote-author {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: rgb(var(--card-muted));
-    margin: 0.65rem 0 0;
+  .wip-mail {
+    color: rgb(var(--wip-accent));
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(255, 176, 92, 0.4);
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
   }
 
-  .home-pitch-card .tech-chips {
-    margin-top: 0.75rem;
+  .wip-mail:hover {
+    color: #ffe4b8;
+    text-decoration-color: rgba(255, 228, 184, 0.85);
   }
 
-  .home-pitch-card .tech-chips span {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.14);
-    color: rgb(var(--card-fg));
+  @keyframes wip-enter {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes wip-title-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5em);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes wip-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(255, 176, 92, 0.55);
+    }
+    70% {
+      box-shadow: 0 0 0 12px rgba(255, 176, 92, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 176, 92, 0);
+    }
+  }
+
+  @keyframes wip-fill {
+    0% {
+      width: 0%;
+    }
+    70%,
+    100% {
+      width: 67%;
+    }
+  }
+
+  @keyframes wip-breathe {
+    0%,
+    100% {
+      filter: brightness(1);
+      box-shadow: 0 0 18px rgba(255, 176, 92, 0.35);
+    }
+    50% {
+      filter: brightness(1.18);
+      box-shadow: 0 0 26px rgba(255, 176, 92, 0.6);
+    }
+  }
+
+  @keyframes wip-glint {
+    0%,
+    35% {
+      transform: translateX(-120%);
+    }
+    70%,
+    100% {
+      transform: translateX(380%);
+    }
+  }
+
+  @keyframes wip-accent-glow {
+    0%,
+    100% {
+      color: rgb(var(--wip-accent));
+      text-shadow: 0 0 0.35em rgba(255, 176, 92, 0.3);
+    }
+    50% {
+      color: #ffe4b8;
+      text-shadow: 0 0 0.55em rgba(255, 210, 150, 0.55);
+    }
+  }
+
+  @keyframes wip-scan {
+    0%,
+    100% {
+      background-position: 0% 0%;
+    }
+    50% {
+      background-position: 0% 100%;
+    }
+  }
+
+  @keyframes wip-grid-drift {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-52px, -52px, 0);
+    }
+  }
+
+  @keyframes wip-orb-float {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(4%, -6%, 0) scale(1.08);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .hint-arrow { animation: none; }
-  }
-
-  @media (max-width: 640px) {
-    .panel-left  { margin-left:  1.25rem; }
-    .panel-right { margin-right: 1.25rem; }
-  }
-
-  @media (max-width: 1024px) {
-    .hero-tagline {
-      padding: 0.45rem 0.9rem;
-      font-size: clamp(0.9rem, 2.35vw, 1.2rem);
-      letter-spacing: 0.08em;
-      row-gap: 0.3rem;
-      column-gap: 0.45rem;
+    .wip-grid,
+    .wip-orb,
+    .wip-scan,
+    .wip-pulse,
+    .wip-meter-fill,
+    .wip-meter-glint,
+    .wip-line--accent {
+      animation: none;
     }
 
-    .home-pitch-card .panel-header {
-      font-size: 1.1rem;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .hero-tagline {
-      row-gap: 0.35rem;
-      column-gap: 0.45rem;
-      max-width: calc(100vw - 1rem);
+    .wip-brand,
+    .wip-status,
+    .wip-line,
+    .wip-meter,
+    .wip-note {
+      opacity: 1;
+      transform: none;
+      animation: none;
     }
 
-    .tagline-dot {
-      display: none;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .hero-atop-inner {
-      gap: 0.55rem;
-      width: calc(100vw - 0.75rem);
+    .wip-line--accent {
+      color: rgb(var(--wip-accent));
     }
 
-    .hero-tagline {
-      row-gap: 0.25rem;
-      column-gap: 0.35rem;
-      padding: 0.38rem 0.56rem;
-      font-size: clamp(0.58rem, 2.35vw, 0.69rem);
-      letter-spacing: 0.05em;
-      line-height: 1.2;
-      max-width: calc(100vw - 0.75rem);
-    }
-
-    .tagline-dot {
-      display: none;
-    }
-
-    .tagline-link,
-    .tagline-plain {
-      white-space: normal;
-      overflow-wrap: anywhere;
-      text-wrap: balance;
-    }
-
-    .card-pillar-row {
-      gap: 0.65rem;
-    }
-
-    .card-pillar-num {
-      font-size: 1.5rem;
-    }
-
-    .home-pitch-card .panel-header {
-      font-size: 1rem;
-    }
-
-    .home-card-intro {
-      margin-bottom: 0.9rem;
-      padding-bottom: 0.8rem;
-    }
-
-    .highlight-list {
-      gap: 0.45rem;
-    }
-
-    .highlight-row,
-    .highlight-summary {
-      gap: 0.45rem 0.5rem;
-      padding: 0.68rem 0.72rem;
-    }
-
-    .highlight-main-point,
-    .quote-text {
-      font-size: 0.88rem;
-      line-height: 1.48;
-    }
-
-    .highlight-sub-item {
-      font-size: 0.82rem;
-      line-height: 1.48;
-    }
-
-    .highlight-details-body {
-      margin-left: 1.85rem;
-      padding: 0 0.72rem 0.72rem;
-    }
-
-    .expand-label {
-      font-size: 0.54rem;
-    }
-
-    .proof-summary-head {
-      flex-wrap: wrap;
-    }
-
-    .proof-rating-block {
-      flex-direction: row;
-      align-items: center;
-      gap: 0.35rem;
-    }
-
-    .proof-summary,
-    .proof-body {
-      padding: 0.68rem 0.72rem;
-    }
-
-    .home-card-cta {
-      margin-top: 0.85rem;
-      min-height: 2.5rem;
-      padding: 0.55rem 0.9rem;
-    }
-
-    .contact-heading {
-      font-size: 2rem;
-    }
-
-    .contact-body {
-      font-size: 0.95rem;
-    }
-
-    .connect-section {
-      padding: 4rem 1rem 5rem;
+    .wip-meter-fill {
+      width: 67%;
     }
   }
 </style>
