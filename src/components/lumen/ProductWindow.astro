@@ -1,0 +1,339 @@
+---
+---
+
+<div class="product-pin h-[180vh] relative">
+  <section class="section--product min-h-screen sticky top-0 flex items-center px-8 lg:px-16 overflow-hidden">
+    <p class="section-index absolute top-16 left-8 lg:left-16 m-0 text-[11px] font-medium tracking-[0.16em] uppercase text-lumen-fg-muted pointer-events-none">— 03 / 04</p>
+    
+    <div class="section-inner max-w-lumen-container mx-auto w-full">
+      <div class="product-header mb-10 flex flex-col gap-3">
+        <p class="eyebrow text-lumen-accent text-[12px] font-medium tracking-[0.18em] uppercase leading-none">— In practice</p>
+        <h2 class="product-h2 font-serif text-[clamp(32px,4vw,48px)] font-normal leading-[1.1] tracking-tight text-lumen-fg m-0">Open it. Ask it. Move on.</h2>
+        <p class="product-caption text-[14px] text-lumen-fg-muted flex items-center gap-1.5">
+          Live demo — press <kbd class="kbd">⌘</kbd><kbd class="kbd">K</kbd> from any app.
+        </p>
+      </div>
+
+      <div id="product-window" class="window-chrome product-window-trigger bg-lumen-surface border border-lumen-border rounded-xl overflow-hidden shadow-2xl origin-center transform scale-[0.8]">
+        <!-- Window Tabs -->
+        <div class="window-tabs flex items-center gap-3.5 p-3.5 border-b border-white border-opacity-[0.05]">
+          <div class="window-controls flex gap-1.5">
+            <span class="window-dot w-[11px] h-[11px] rounded-full bg-white bg-opacity-[0.15]"></span>
+            <span class="window-dot w-[11px] h-[11px] rounded-full bg-white bg-opacity-[0.15]"></span>
+            <span class="window-dot w-[11px] h-[11px] rounded-full bg-white bg-opacity-[0.15]"></span>
+          </div>
+          <div class="window-tab window-tab--active inline-flex items-baseline gap-2.5 px-2.5 py-1 rounded bg-white bg-opacity-[0.05] font-mono text-xs text-lumen-fg">
+            <span>rate-limit.ts</span>
+            <span class="window-tab-meta text-lumen-fg-muted text-[11px]">main · 42:1</span>
+          </div>
+        </div>
+
+        <!-- Window Body -->
+        <div class="window-body grid grid-cols-1 md:grid-cols-[200px,1fr] min-h-[480px]">
+          <aside class="window-rail hidden md:flex flex-col gap-6 p-5 border-r border-white border-opacity-[0.05]">
+            <div class="rail-section">
+              <p class="rail-heading">Context</p>
+              <ul class="rail-list">
+                <li class="rail-item rail-item--active">
+                  <span class="rail-icon rail-icon--active"></span>
+                  <span>rate-limit.ts</span>
+                </li>
+                <li class="rail-item">
+                  <span class="rail-icon"></span>
+                  <span>edge.config.ts</span>
+                </li>
+                <li class="rail-item">
+                  <span class="rail-icon"></span>
+                  <span>next.config.mjs</span>
+                </li>
+                <li class="rail-item">
+                  <span class="rail-icon"></span>
+                  <span>package.json</span>
+                </li>
+              </ul>
+            </div>
+            <div class="rail-section">
+              <p class="rail-heading">Recent</p>
+              <ul class="rail-list">
+                <li class="rail-item">
+                  <span class="rail-icon"></span>
+                  <span>dashboard.tsx</span>
+                </li>
+                <li class="rail-item">
+                  <span class="rail-icon"></span>
+                  <span>schema.prisma</span>
+                </li>
+              </ul>
+            </div>
+          </aside>
+
+          <div class="window-main p-7 lg:p-8 overflow-hidden">
+            <div class="mock">
+              <div class="mock-line">
+                <span class="mock-tag">you</span>
+                <div class="mock-text">Where did we drop the rate-limit middleware?</div>
+              </div>
+
+              <div class="mock-line">
+                <span class="mock-tag mock-tag--accent">lumen</span>
+                <div class="mock-text">
+                  <p>Found it — <code>server/middleware/rate-limit.ts:42</code>, removed in PR #4821 when you switched to edge runtime.</p>
+                  <pre class="mock-diff"><span class="diff-meta">server/middleware/rate-limit.ts</span><span class="diff-rm">- <span class="tok-kw">import</span> {'{'} rateLimit {'}'} <span class="tok-kw">from</span> <span class="tok-str">'./rate-limit'</span></span><span class="diff-rm">- <span class="tok-kw">export const</span> middleware = rateLimit({'{'} limit: <span class="tok-num">100</span> {'}'})</span></pre>
+                  <p>Want me to re-enable it for <code>/api/*</code> only?</p>
+                  <div class="mock-actions">
+                    <button class="btn-chip btn-chip--primary">Yes, draft a PR</button>
+                    <button class="btn-chip">Show me the routes first</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mock-line">
+                <span class="mock-tag">you</span>
+                <div class="mock-text">Yes, draft the PR.</div>
+              </div>
+
+              <div class="mock-line">
+                <span class="mock-tag mock-tag--accent">lumen</span>
+                <div class="mock-text text-lumen-fg">
+                  <ul class="flex flex-col gap-1.5 list-none p-0 m-0">
+                    <li class="flex items-center gap-2">
+                      <svg class="w-4 h-4 text-lumen-accent" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3.5 8.5l3 3 6-6"></path>
+                      </svg>
+                      <span>Created branch <code>fix/rate-limit-api</code></span>
+                    </li>
+                    <li class="flex items-center gap-2">
+                      <svg class="w-4 h-4 text-lumen-accent" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3.5 8.5l3 3 6-6"></path>
+                      </svg>
+                      <span>Re-enabled middleware for <code>/api/*</code></span>
+                    </li>
+                    <li class="flex items-center gap-2">
+                      <svg class="w-4 h-4 text-lumen-accent" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3.5 8.5l3 3 6-6"></path>
+                      </svg>
+                      <span>Opened PR <code>#4877</code> → main</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="window-status">
+          <span class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+            <span>lumen ready</span>
+          </span>
+          <span>main · 23 files · 1.2k loc</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<style>
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 22px;
+    padding: 0 0.25rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--lumen-border-strong);
+    border-bottom-width: 2px;
+    background: var(--lumen-surface);
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--lumen-fg);
+  }
+
+  .rail-heading {
+    margin: 0 0 0.5rem;
+    padding: 0 0.5rem;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--lumen-fg-muted);
+  }
+
+  .rail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .rail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: 0.375rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    color: var(--lumen-fg-muted);
+    cursor: default;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .rail-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--lumen-fg);
+  }
+
+  .rail-item--active {
+    position: relative;
+    color: var(--lumen-fg);
+    background-color: rgba(249, 115, 22, 0.07);
+  }
+
+  .rail-item--active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.25rem;
+    bottom: 0.25rem;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--lumen-accent);
+  }
+
+  .rail-icon {
+    width: 7px;
+    height: 7px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .rail-icon--active {
+    background-color: var(--lumen-accent);
+    opacity: 0.85;
+  }
+
+  .mock {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 64ch;
+    font-size: 15px;
+    line-height: 1.625;
+  }
+
+  .mock-line {
+    display: flex;
+    gap: 0.875rem;
+  }
+
+  .mock-tag {
+    width: 52px;
+    padding-top: 0.125rem;
+    text-align: right;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: var(--lumen-fg-muted);
+    user-select: none;
+  }
+
+  .mock-tag--accent {
+    color: var(--lumen-accent);
+  }
+
+  .mock-text {
+    flex: 1;
+    color: var(--lumen-fg);
+  }
+
+  .mock-text code {
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-size: 0.88em;
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .mock-diff {
+    margin: 0.875rem 0;
+    padding: 0.625rem;
+    overflow-x: auto;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 0.375rem;
+    background-color: rgba(0, 0, 0, 0.28);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12.5px;
+    line-height: 1.625;
+    white-space: pre;
+  }
+
+  .diff-meta {
+    display: block;
+    margin-bottom: 0.25rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 11px;
+    color: var(--lumen-fg-muted);
+  }
+
+  .diff-rm {
+    display: block;
+    margin-inline: -0.625rem;
+    padding-inline: 0.625rem;
+    color: #ff9191;
+    background-color: rgba(255, 80, 80, 0.06);
+  }
+
+  .tok-kw { color: #f9af64; }
+  .tok-str { color: #a0dcaa; }
+  .tok-num { color: #b4c8ff; }
+
+  .mock-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.875rem;
+  }
+
+  .btn-chip {
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--lumen-fg);
+    font-size: 13px;
+    font-weight: 500;
+    transition: background-color 0.2s ease, filter 0.2s ease;
+  }
+
+  .btn-chip:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .btn-chip--primary {
+    border-color: transparent;
+    background: var(--lumen-accent);
+    color: var(--lumen-bg);
+  }
+
+  .btn-chip--primary:hover {
+    filter: brightness(1.1);
+  }
+
+  .window-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+    pointer-events: none;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    color: var(--lumen-fg-muted);
+  }
+</style>

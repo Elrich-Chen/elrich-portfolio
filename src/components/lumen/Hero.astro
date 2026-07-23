@@ -1,0 +1,142 @@
+---
+---
+
+<section id="hero" class="relative min-h-screen grid grid-rows-[auto,1fr] p-6 lg:p-16 pb-8 overflow-hidden">
+  <div class="flex items-center h-8">
+    <a href="/" class="inline-flex items-center gap-2 text-lumen-fg no-underline font-medium text-[15px] tracking-tight">
+      <span class="w-[22px] h-[22px] rounded-md bg-lumen-fg text-lumen-bg flex items-center justify-center font-semibold text-[13px]">◆</span>
+      <span>Lumen</span>
+    </a>
+  </div>
+
+  <div class="hero-grid grid grid-cols-1 lg:grid-cols-[1fr,1.35fr] items-center gap-8 lg:gap-12 w-full flex-1">
+    <div class="hero-copy max-w-[640px] flex flex-col gap-6 relative z-10">
+      <p class="text-[12px] font-medium tracking-[0.18em] uppercase leading-none text-lumen-accent">— Introducing</p>
+      <h1 class="font-serif text-[clamp(52px,6.4vw,96px)] font-normal tracking-[-0.02em] leading-[1.02]">
+        AI that <br/>lives on your <span class="text-lumen-accent italic">desktop.</span>
+      </h1>
+      <p class="hero-subtext text-[17px] text-lumen-fg-muted max-w-[46ch]">
+        Lives where you work. Sees what you see. Acts when you ask.
+      </p>
+      <div class="hero-ctas flex flex-wrap gap-3 mt-1 w-full lg:w-auto">
+        <a href="#cta" class="inline-flex items-center justify-center h-10 px-6 rounded-md bg-lumen-accent text-lumen-bg text-[14px] font-medium no-underline hover:brightness-110 transition-all flex-1 lg:flex-none">Get started</a>
+        <a href="#demo" class="inline-flex items-center justify-center h-10 px-6 rounded-md border border-lumen-border-strong text-lumen-fg text-[14px] font-medium no-underline hover:bg-white hover:bg-opacity-[0.05] hover:border-lumen-fg hover:border-opacity-[0.25] transition-all flex-1 lg:flex-none">See it think</a>
+      </div>
+    </div>
+
+    <div class="spline-col relative w-full h-full min-h-[360px] lg:h-[72svh] lg:max-h-[72svh] lg:min-h-[520px] lg:-mr-[calc(4rem+6vw)] order-[-1] lg:order-none">
+      <div class="spline-wrap relative w-full h-full overflow-hidden">
+        <canvas id="spline-canvas" class="absolute inset-0 z-0 block h-full w-full"></canvas>
+        <div
+          id="spline-poster"
+          class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-lumen-bg transition-opacity duration-[400ms] ease-lumen"
+        >
+          <div class="h-9 w-9 animate-spin rounded-full border-[1.5px] border-lumen-fg/10 border-t-lumen-fg/30"></div>
+        </div>
+        <div
+          id="spline-fallback"
+          class="pointer-events-none absolute inset-0 z-[5] hidden items-center justify-center bg-[radial-gradient(circle_at_60%_40%,rgba(249,115,22,0.18),transparent_55%)]"
+          aria-hidden="true"
+        >
+          <span class="font-serif text-[clamp(64px,12vw,140px)] italic text-lumen-accent/80">◆</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(120%_80%_at_100%_50%,transparent_55%,rgba(10,10,12,0.35)_100%)] z-[2] mix-blend-normal hidden lg:block"></div>
+</section>
+
+<script>
+  const canvas = document.getElementById('spline-canvas') as HTMLCanvasElement | null;
+  const poster = document.getElementById('spline-poster');
+  const fallback = document.getElementById('spline-fallback');
+  const heroEl = document.getElementById('hero');
+  const isTouch = window.matchMedia('(hover: none)').matches;
+  const CAMERA_ZOOM = 0.6;
+
+  const showFallback = () => {
+    if (poster) poster.style.display = 'none';
+    if (fallback) {
+      fallback.classList.remove('hidden');
+      fallback.classList.add('flex');
+    }
+    if (canvas) canvas.style.display = 'none';
+  };
+
+  if (isTouch || !canvas) {
+    showFallback();
+  } else {
+    let app: any;
+    // @ts-ignore — Spline runtime loaded from CDN
+    import('https://unpkg.com/@splinetool/runtime/build/runtime.js')
+      .then(({ Application }) => {
+        app = new Application(canvas);
+        return app.load('https://prod.spline.design/jQxUG3hwx263Jw5Z/scene.splinecode');
+      })
+      .then(() => {
+        if (poster) {
+          poster.style.opacity = '0';
+          setTimeout(() => poster.remove(), 400);
+        }
+
+        try {
+          const cam = app?._camera || app?.camera;
+          if (cam) {
+            const f = 1 / CAMERA_ZOOM;
+            if (cam.isOrthographicCamera) {
+              cam.zoom *= CAMERA_ZOOM;
+            } else if (cam.position) {
+              cam.position.x *= f;
+              cam.position.y *= f;
+              cam.position.z *= f;
+            }
+            cam.updateProjectionMatrix?.();
+          }
+        } catch {}
+
+        const forward = (e: PointerEvent) => {
+          canvas.dispatchEvent(
+            new PointerEvent('pointermove', {
+              clientX: e.clientX,
+              clientY: e.clientY,
+              pointerType: 'mouse',
+              bubbles: true,
+              cancelable: true,
+            })
+          );
+        };
+        window.addEventListener('pointermove', forward, { passive: true });
+
+        if (heroEl && 'IntersectionObserver' in window) {
+          const tryPause = () => {
+            try {
+              if (typeof app.stop === 'function') app.stop();
+              else if (app._renderer?.setAnimationLoop) app._renderer.setAnimationLoop(null);
+            } catch {}
+          };
+          const tryResume = () => {
+            try {
+              if (typeof app.play === 'function') app.play();
+              else if (typeof app.start === 'function') app.start();
+            } catch {}
+          };
+
+          const observer = new IntersectionObserver(
+            (entries) => {
+              const inView = entries[0]?.isIntersecting;
+              canvas.style.visibility = inView ? '' : 'hidden';
+              if (inView) tryResume();
+              else tryPause();
+            },
+            { rootMargin: '50px' }
+          );
+          observer.observe(heroEl);
+        }
+      })
+      .catch((err) => {
+        console.error('Spline failed to load:', err);
+        showFallback();
+      });
+  }
+</script>

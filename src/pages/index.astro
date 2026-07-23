@@ -1,300 +1,153 @@
 ---
-import PostHog from '../components/posthog.astro';
+import LumenLayout from '../layouts/LumenLayout.astro';
+import Hero from '../components/lumen/Hero.astro';
+import Statement from '../components/lumen/Statement.astro';
+import Principles from '../components/lumen/Principles.astro';
+import ProductWindow from '../components/lumen/ProductWindow.astro';
+import CTA from '../components/lumen/CTA.astro';
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Elrich Chen — Portfolio in Progress</title>
-    <meta name="description" content="Portfolio currently under construction. Check back soon." />
-    <meta name="robots" content="noindex, follow" />
-    <link rel="icon" type="image/svg+xml" href="/e.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@500;700;800&display=swap" rel="stylesheet" />
-  </head>
-  <body>
-    <main class="wip" aria-label="Portfolio in progress">
-      <div class="wip-atmosphere" aria-hidden="true">
-        <div class="wip-noise"></div>
-        <div class="wip-grid"></div>
-        <div class="wip-orb wip-orb--a"></div>
-        <div class="wip-orb wip-orb--b"></div>
-      </div>
+<LumenLayout>
+  <Hero />
+  <Statement />
+  <Principles />
+  <ProductWindow />
+  <CTA />
 
-      <div class="wip-stage">
-        <p class="wip-brand">Elrich Chen</p>
+  <script>
+    import { gsap } from 'gsap';
+    import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-        <h1 class="wip-title">
-          <span class="wip-line">Portfolio</span>
-          <span class="wip-line wip-line--accent">in progress</span>
-        </h1>
+    gsap.registerPlugin(ScrollTrigger);
 
-        <div
-          class="wip-meter"
-          role="progressbar"
-          aria-valuemin="0"
-          aria-valuemax="100"
-          aria-valuenow="67"
-          aria-label="Build progress"
-        >
-          <div class="wip-meter-track">
-            <div class="wip-meter-fill"></div>
-          </div>
-          <div class="wip-meter-meta">
-            <span>Rebuilding</span>
-            <span class="wip-meter-pct">67%</span>
-          </div>
-        </div>
+    const boot = () => initAnimations();
+    if (document.readyState === 'complete') boot();
+    else window.addEventListener('load', boot, { once: true });
 
-        <p class="wip-note">
-          Everything is being rebuilt from scratch. Reach me at
-          <a href="mailto:eklchen@uwaterloo.ca" class="wip-mail">eklchen@uwaterloo.ca</a>
-          in the meantime.
-        </p>
-      </div>
-    </main>
+    function initAnimations() {
+      const desktopMQ = window.matchMedia('(min-width: 1024px)');
 
-    <PostHog />
-
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('a[href^="mailto:"]').forEach((el) => {
-          el.addEventListener('click', () => {
-            window.posthog?.capture('contact_email_clicked', { location: 'wip_holding' });
-          });
+      // Hero fade on scroll (desktop)
+      if (desktopMQ.matches) {
+        gsap.to('.hero-copy', {
+          scrollTrigger: {
+            trigger: '#hero',
+            start: 'top top',
+            end: 'bottom top',
+            scrub: true,
+          },
+          opacity: 0,
+          y: -50,
+          scale: 0.95,
         });
+
+        gsap.to('.spline-col', {
+          scrollTrigger: {
+            trigger: '#hero',
+            start: 'top top',
+            end: 'bottom top',
+            scrub: true,
+          },
+          opacity: 0,
+          scale: 0.9,
+        });
+      }
+
+      // Nav appears after hero
+      const hero = document.getElementById('hero');
+      if (hero) {
+        ScrollTrigger.create({
+          trigger: hero,
+          start: 'bottom 20%',
+          onEnter: () => {
+            gsap.to('#site-nav', {
+              opacity: 1,
+              y: 0,
+              pointerEvents: 'auto',
+              duration: 0.4,
+              ease: 'power2.out',
+            });
+          },
+          onLeaveBack: () => {
+            gsap.to('#site-nav', {
+              opacity: 0,
+              y: '-100%',
+              pointerEvents: 'none',
+              duration: 0.4,
+              ease: 'power2.in',
+            });
+          },
+        });
+      }
+
+      // Page thread progress
+      gsap.to('#page-thread', {
+        scrollTrigger: {
+          trigger: document.documentElement,
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: true,
+        },
+        scaleY: 1,
+        ease: 'none',
       });
-    </script>
-  </body>
-</html>
 
-<style is:global>
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-  }
+      // Statement word reveal — CSS sticky handles pinning; GSAP only animates
+      if (desktopMQ.matches) {
+        const words = gsap.utils.toArray<HTMLElement>('.statement-word');
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: '.statement-pin',
+            start: 'top top',
+            end: 'bottom bottom',
+            scrub: 1,
+          },
+        });
 
-  html,
-  body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    background: #07080c;
-    color: #f4f1ea;
-  }
+        words.forEach((word, i) => {
+          tl.to(word, { opacity: 1, duration: 0.5 }, i * 0.15);
+        });
 
-  body {
-    min-height: 100svh;
-    min-height: 100dvh;
-    overflow: hidden;
-    font-family: 'Syne', system-ui, sans-serif;
-    -webkit-font-smoothing: antialiased;
-  }
+        tl.to('.statement-rule', { scaleX: 1, duration: 0.8 }, '+=0.2');
+        tl.to('.statement-caption', { opacity: 1, y: 0, duration: 0.8 }, '-=0.4');
+      }
 
-  a {
-    color: inherit;
-  }
+      // Principles horizontal scroll
+      if (desktopMQ.matches) {
+        const track = document.getElementById('principles-track');
+        if (track) {
+          gsap.to(track, {
+            scrollTrigger: {
+              trigger: '.principles-pin',
+              start: 'top top',
+              end: 'bottom bottom',
+              scrub: 1,
+            },
+            x: () => -(track.scrollWidth - window.innerWidth + 120),
+            ease: 'none',
+          });
+        }
+      }
 
-  .wip {
-    --wip-ink: 244 241 234;
-    --wip-muted: 168 174 186;
-    --wip-accent: 255 176 92;
-    --wip-accent-deep: 220 118 48;
+      // Product window scale-up
+      if (desktopMQ.matches) {
+        gsap.fromTo(
+          '#product-window',
+          { scale: 0.8 },
+          {
+            scrollTrigger: {
+              trigger: '.product-pin',
+              start: 'top top',
+              end: 'bottom bottom',
+              scrub: 1,
+            },
+            scale: 1,
+            ease: 'none',
+          }
+        );
+      }
 
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-    isolation: isolate;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: clamp(1.25rem, 4vw, 3rem);
-    overflow: hidden;
-    color: rgb(var(--wip-ink));
-  }
-
-  .wip-atmosphere {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    background:
-      radial-gradient(ellipse 80% 55% at 50% 35%, rgba(36, 28, 18, 0.9), transparent 70%),
-      linear-gradient(160deg, #0a0b10 0%, #12141c 45%, #08090d 100%);
-  }
-
-  .wip-noise {
-    position: absolute;
-    inset: 0;
-    opacity: 0.18;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    mix-blend-mode: overlay;
-  }
-
-  .wip-grid {
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-    background-size: 52px 52px;
-    mask-image: radial-gradient(ellipse 65% 55% at 50% 45%, black 15%, transparent 72%);
-  }
-
-  .wip-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(64px);
-    opacity: 0.5;
-  }
-
-  .wip-orb--a {
-    width: min(48vw, 30rem);
-    height: min(48vw, 30rem);
-    top: 4%;
-    left: 8%;
-    background: radial-gradient(circle, rgba(255, 150, 60, 0.32), transparent 68%);
-  }
-
-  .wip-orb--b {
-    width: min(40vw, 24rem);
-    height: min(40vw, 24rem);
-    right: 4%;
-    bottom: 8%;
-    background: radial-gradient(circle, rgba(90, 130, 190, 0.22), transparent 68%);
-  }
-
-  .wip-stage {
-    position: relative;
-    z-index: 1;
-    width: min(100%, 38rem);
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    gap: clamp(0.95rem, 2.5vw, 1.45rem);
-  }
-
-  .wip-brand {
-    margin: 0;
-    font-family: 'Instrument Serif', Georgia, serif;
-    font-size: clamp(1.35rem, 3.2vw, 1.85rem);
-    font-style: italic;
-    font-weight: 400;
-    letter-spacing: 0.01em;
-    color: rgb(var(--wip-ink));
-  }
-
-  .wip-title {
-    margin: 0;
-    display: grid;
-    gap: 0.02em;
-    justify-items: center;
-    font-weight: 800;
-    letter-spacing: -0.045em;
-    line-height: 0.92;
-    text-transform: uppercase;
-    text-align: center;
-  }
-
-  .wip-line {
-    display: block;
-    font-size: clamp(2.4rem, 10vw, 5.75rem);
-    white-space: nowrap;
-  }
-
-  .wip-line--accent {
-    color: rgb(var(--wip-accent));
-  }
-
-  .wip-meter {
-    width: min(100%, 22rem);
-    display: grid;
-    gap: 0.55rem;
-  }
-
-  .wip-meter-track {
-    position: relative;
-    height: 3px;
-    overflow: hidden;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.12);
-  }
-
-  .wip-meter-fill {
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 67%;
-    border-radius: inherit;
-    background: linear-gradient(90deg, rgb(var(--wip-accent-deep)), rgb(var(--wip-accent)), #ffe0b0);
-    transform-origin: left center;
-    animation: wip-fill 1.6s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-
-  .wip-meter-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 1rem;
-    font-size: 0.66rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: rgba(var(--wip-muted), 0.9);
-  }
-
-  .wip-meter-pct {
-    font-size: 0.85rem;
-    letter-spacing: 0.06em;
-    color: rgb(var(--wip-accent));
-    font-variant-numeric: tabular-nums;
-  }
-
-  .wip-note {
-    margin: 0 auto;
-    max-width: 28rem;
-    font-size: clamp(0.95rem, 2.2vw, 1.08rem);
-    line-height: 1.55;
-    font-weight: 500;
-    letter-spacing: 0.01em;
-    color: rgba(var(--wip-muted), 0.98);
-    text-wrap: balance;
-  }
-
-  .wip-mail {
-    color: rgb(var(--wip-accent));
-    font-weight: 700;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    text-decoration-color: rgba(255, 176, 92, 0.4);
-    transition: color 0.2s ease, text-decoration-color 0.2s ease;
-  }
-
-  .wip-mail:hover {
-    color: #ffe4b8;
-    text-decoration-color: rgba(255, 228, 184, 0.85);
-  }
-
-  @keyframes wip-fill {
-    from {
-      transform: scaleX(0);
+      window.addEventListener('resize', () => ScrollTrigger.refresh());
     }
-    to {
-      transform: scaleX(1);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .wip-meter-fill {
-      animation: none;
-    }
-  }
-</style>
+  </script>
+</LumenLayout>

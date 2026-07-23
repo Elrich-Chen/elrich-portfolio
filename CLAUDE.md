@@ -1,62 +1,45 @@
-# CLAUDE.md – elrichchen.com Portfolio
+# CLAUDE.md – Lumen
 
 ## Project Overview
-Personal developer portfolio for Elrich Chen, built with Astro 5 + TailwindCSS 3 + MDX.
-Deployed at elrichchen.com.
+Lumen marketing site (Astro 5 + TailwindCSS 3). Built from Kombai designs.
+Legacy portfolio content and photos are retained under `src/content/` and `public/` for reuse.
 
 ## Tech Stack
 - **Framework**: Astro 5 (`npm run dev` → localhost:4321)
-- **Styling**: TailwindCSS 3, PostCSS, Autoprefixer
-- **Content**: Astro Content Collections (MDX/Markdown)
-- **Image optimization**: Sharp
+- **Styling**: TailwindCSS 3 + `src/styles/lumen.css`
+- **Motion**: GSAP + ScrollTrigger
+- **Analytics**: PostHog
 - **Build**: `npm run build` → `./dist/`
-- **Language**: TypeScript
 
 ## Project Structure
 ```
 src/
-  components/      # Astro UI components (HeroLoom, Nav, Polaroid, Prose, SideContact, Signature, ThemeToggle, PixelTrail, TargetCursor)
-  content/         # Content collections
-    bio/           # bio.md
-    experiences/   # *.md  (role, company, url?, logo?, start, end?, bullets[])
-    projects/      # *.md  (name, href?, logo?, year?, tags[], body)
-    hobbies/       # *.md  (title, date, tags, summary, body)
-    highlights/    # home.md (what_makes_me_different[], building[])
-    photos/        # photo entries
-    testimonials/  # testimonial entries
-    config.ts      # Collection schemas
-  layouts/         # Base.astro
-  pages/           # index.astro, about.astro, projects.astro, photos.astro, hobbies/
-  styles/          # Global CSS
-  utils/           # Utility functions
+  components/lumen/   # Hero, Statement, Principles, ProductWindow, CTA
+  components/posthog.astro
+  content/            # Retained portfolio content collections
+  layouts/LumenLayout.astro
+  pages/index.astro   # Lumen landing page
+  styles/lumen.css
 public/
-  logos/           # Company/project logos (PNG/SVG)
-  photos/          # Photo assets
-  projects/        # Project screenshots/assets
-  Elrich_Chen_SoftwareDev_Resume-3.pdf
+  photos/             # Photo assets
+  logos/              # Logo assets
+  projects/           # Project assets
+.kombai/              # Kombai design canvas
 ```
 
 ## Key Commands
-| Command         | Action                          |
+| Command | Action |
 |-----------------|---------------------------------|
-| `npm run dev`   | Dev server at localhost:4321    |
-| `npm run build` | Production build to ./dist/     |
-| `npm run preview` | Preview production build      |
+| `npm run dev` | Dev server at localhost:4321 |
+| `npm run build` | Production build to ./dist/ |
+| `npm run preview` | Preview production build |
 
-## Content Editing
-- **Bio**: `src/content/bio/bio.md`
-- **Experiences**: `src/content/experiences/*.md` – fields: `role`, `company`, `url`, `logo`, `start`, `end`, `bullets`
-- **Projects**: `src/content/projects/*.md` – fields: `name`, `href`, `logo`, `year`, `tags`, body
-- **Hobbies**: `src/content/hobbies/*.md` – fields: `title`, `date`, `tags`, `summary`, body
-- **Home highlights**: `src/content/highlights/home.md` – arrays: `what_makes_me_different`, `building`
-- **Logos**: place in `public/logos/` and reference as `/logos/name.png`
-
-## 🚫 FORBIDDEN PATTERNS (LESSONS LEARNED)
-<!-- Add lessons here as they are learned -->
-
-## Conventions
-- Astro components use `.astro` extension; TypeScript utilities use `.ts`
-- TailwindCSS utility classes preferred over custom CSS
-- Content-driven pages use Astro content collections, not hardcoded data
-- Images served from `public/` directory; reference with absolute paths (e.g. `/logos/x.png`)
-- No React/Vue/Svelte – pure Astro components only
+## Content (retained)
+- Bio: `src/content/bio/`
+- Experiences: `src/content/experiences/`
+- Projects: `src/content/projects/`
+- Hobbies: `src/content/hobbies/`
+- Highlights: `src/content/highlights/`
+- Photos metadata: `src/content/photos/`
+- Testimonials: `src/content/testimonials/`
+- Assets: `public/photos/`, `public/logos/`, `public/projects/`
