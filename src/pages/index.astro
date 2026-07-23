@@ -13,7 +13,7 @@ import PostHog from '../components/posthog.astro';
     <link rel="icon" type="image/svg+xml" href="/e.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&display=swap" rel="stylesheet" />
   </head>
   <body>
     <main class="wip" aria-label="Portfolio in progress">
@@ -22,20 +22,19 @@ import PostHog from '../components/posthog.astro';
         <div class="wip-grid"></div>
         <div class="wip-orb wip-orb--a"></div>
         <div class="wip-orb wip-orb--b"></div>
-        <div class="wip-scan"></div>
       </div>
 
       <div class="wip-stage">
         <p class="wip-brand">Elrich Chen</p>
 
         <p class="wip-status">
-          <span class="wip-pulse" aria-hidden="true"></span>
+          <span class="wip-dot" aria-hidden="true"></span>
           <span>Work in progress</span>
         </p>
 
         <h1 class="wip-title">
-          <span class="wip-line" style="--i: 0">Portfolio</span>
-          <span class="wip-line wip-line--accent" style="--i: 1">in progress</span>
+          <span class="wip-line">Portfolio</span>
+          <span class="wip-line wip-line--accent">in progress</span>
         </h1>
 
         <div
@@ -48,11 +47,10 @@ import PostHog from '../components/posthog.astro';
         >
           <div class="wip-meter-track">
             <div class="wip-meter-fill"></div>
-            <div class="wip-meter-glint"></div>
           </div>
           <div class="wip-meter-meta">
             <span>Rebuilding</span>
-            <span class="wip-meter-pct" data-wip-pct>67%</span>
+            <span class="wip-meter-pct">67%</span>
           </div>
         </div>
 
@@ -68,23 +66,6 @@ import PostHog from '../components/posthog.astro';
 
     <script>
       document.addEventListener('DOMContentLoaded', () => {
-        const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-        const pct = document.querySelector('[data-wip-pct]');
-        if (!(pct instanceof HTMLElement) || prefersReducedMotion) return;
-
-        const target = 67;
-        const duration = 3200;
-        const start = performance.now();
-
-        const tick = (now: number) => {
-          const t = Math.min((now - start) / duration, 1);
-          const eased = 1 - Math.pow(1 - t, 3);
-          pct.textContent = `${Math.round(eased * target)}%`;
-          if (t < 1) requestAnimationFrame(tick);
-        };
-
-        requestAnimationFrame(tick);
-
         document.querySelectorAll('a[href^="mailto:"]').forEach((el) => {
           el.addEventListener('click', () => {
             window.posthog?.capture('contact_email_clicked', { location: 'wip_holding' });
@@ -169,7 +150,6 @@ import PostHog from '../components/posthog.astro';
       linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
     background-size: 52px 52px;
     mask-image: radial-gradient(ellipse 65% 55% at 50% 45%, black 15%, transparent 72%);
-    animation: wip-grid-drift 28s linear infinite;
   }
 
   .wip-orb {
@@ -185,7 +165,6 @@ import PostHog from '../components/posthog.astro';
     top: 4%;
     left: 8%;
     background: radial-gradient(circle, rgba(255, 150, 60, 0.32), transparent 68%);
-    animation: wip-orb-float 12s ease-in-out infinite;
   }
 
   .wip-orb--b {
@@ -194,20 +173,6 @@ import PostHog from '../components/posthog.astro';
     right: 4%;
     bottom: 8%;
     background: radial-gradient(circle, rgba(90, 130, 190, 0.22), transparent 68%);
-    animation: wip-orb-float 15s ease-in-out infinite reverse;
-  }
-
-  .wip-scan {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      180deg,
-      transparent 0%,
-      rgba(255, 200, 140, 0.06) 48%,
-      transparent 52%
-    );
-    background-size: 100% 220%;
-    animation: wip-scan 5.5s ease-in-out infinite;
   }
 
   .wip-stage {
@@ -225,13 +190,10 @@ import PostHog from '../components/posthog.astro';
 
   .wip-brand {
     margin: 0;
-    font-family: 'Instrument Serif', Georgia, serif;
-    font-size: clamp(1.35rem, 3.2vw, 1.85rem);
-    font-style: italic;
-    letter-spacing: 0.01em;
+    font-size: clamp(1.1rem, 2.4vw, 1.35rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
     color: rgb(var(--wip-ink));
-    opacity: 0;
-    animation: wip-enter 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards;
   }
 
   .wip-status {
@@ -248,17 +210,13 @@ import PostHog from '../components/posthog.astro';
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: rgba(var(--wip-muted), 0.95);
-    opacity: 0;
-    animation: wip-enter 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
   }
 
-  .wip-pulse {
+  .wip-dot {
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 50%;
     background: rgb(var(--wip-accent));
-    box-shadow: 0 0 0 0 rgba(255, 176, 92, 0.55);
-    animation: wip-pulse 1.8s ease-out infinite;
   }
 
   .wip-title {
@@ -277,28 +235,16 @@ import PostHog from '../components/posthog.astro';
     display: block;
     font-size: clamp(2.4rem, 10vw, 5.75rem);
     white-space: nowrap;
-    opacity: 0;
-    transform: translateY(0.5em);
-    animation: wip-title-in 1.05s cubic-bezier(0.22, 1, 0.36, 1) calc(0.25s + var(--i) * 0.12s) forwards;
   }
 
   .wip-line--accent {
     color: rgb(var(--wip-accent));
-    text-shadow: 0 0 0.4em rgba(255, 176, 92, 0.35);
-    animation-name: wip-title-in, wip-accent-glow;
-    animation-duration: 1.05s, 3.2s;
-    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1), ease-in-out;
-    animation-delay: calc(0.25s + var(--i) * 0.12s), 1.4s;
-    animation-fill-mode: forwards, none;
-    animation-iteration-count: 1, infinite;
   }
 
   .wip-meter {
     width: min(100%, 22rem);
     display: grid;
     gap: 0.55rem;
-    opacity: 0;
-    animation: wip-enter 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.55s forwards;
   }
 
   .wip-meter-track {
@@ -312,23 +258,11 @@ import PostHog from '../components/posthog.astro';
   .wip-meter-fill {
     position: absolute;
     inset: 0 auto 0 0;
-    width: 0%;
+    width: 67%;
     border-radius: inherit;
     background: linear-gradient(90deg, rgb(var(--wip-accent-deep)), rgb(var(--wip-accent)), #ffe0b0);
-    box-shadow: 0 0 18px rgba(255, 176, 92, 0.45);
-    animation:
-      wip-fill 3.6s cubic-bezier(0.22, 1, 0.36, 1) 0.75s forwards,
-      wip-breathe 2.8s ease-in-out 4.4s infinite;
-  }
-
-  .wip-meter-glint {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 28%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
-    transform: translateX(-120%);
-    animation: wip-glint 2.4s ease-in-out 1.2s infinite;
+    transform-origin: left center;
+    animation: wip-fill 1.6s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
   .wip-meter-meta {
@@ -359,8 +293,6 @@ import PostHog from '../components/posthog.astro';
     letter-spacing: 0.01em;
     color: rgba(var(--wip-muted), 0.98);
     text-wrap: balance;
-    opacity: 0;
-    animation: wip-enter 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.75s forwards;
   }
 
   .wip-mail {
@@ -377,141 +309,18 @@ import PostHog from '../components/posthog.astro';
     text-decoration-color: rgba(255, 228, 184, 0.85);
   }
 
-  @keyframes wip-enter {
-    from {
-      opacity: 0;
-      transform: translateY(14px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes wip-title-in {
-    from {
-      opacity: 0;
-      transform: translateY(0.5em);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes wip-pulse {
-    0% {
-      box-shadow: 0 0 0 0 rgba(255, 176, 92, 0.55);
-    }
-    70% {
-      box-shadow: 0 0 0 12px rgba(255, 176, 92, 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(255, 176, 92, 0);
-    }
-  }
-
   @keyframes wip-fill {
-    0% {
-      width: 0%;
-    }
-    70%,
-    100% {
-      width: 67%;
-    }
-  }
-
-  @keyframes wip-breathe {
-    0%,
-    100% {
-      filter: brightness(1);
-      box-shadow: 0 0 18px rgba(255, 176, 92, 0.35);
-    }
-    50% {
-      filter: brightness(1.18);
-      box-shadow: 0 0 26px rgba(255, 176, 92, 0.6);
-    }
-  }
-
-  @keyframes wip-glint {
-    0%,
-    35% {
-      transform: translateX(-120%);
-    }
-    70%,
-    100% {
-      transform: translateX(380%);
-    }
-  }
-
-  @keyframes wip-accent-glow {
-    0%,
-    100% {
-      color: rgb(var(--wip-accent));
-      text-shadow: 0 0 0.35em rgba(255, 176, 92, 0.3);
-    }
-    50% {
-      color: #ffe4b8;
-      text-shadow: 0 0 0.55em rgba(255, 210, 150, 0.55);
-    }
-  }
-
-  @keyframes wip-scan {
-    0%,
-    100% {
-      background-position: 0% 0%;
-    }
-    50% {
-      background-position: 0% 100%;
-    }
-  }
-
-  @keyframes wip-grid-drift {
     from {
-      transform: translate3d(0, 0, 0);
+      transform: scaleX(0);
     }
     to {
-      transform: translate3d(-52px, -52px, 0);
-    }
-  }
-
-  @keyframes wip-orb-float {
-    0%,
-    100% {
-      transform: translate3d(0, 0, 0) scale(1);
-    }
-    50% {
-      transform: translate3d(4%, -6%, 0) scale(1.08);
+      transform: scaleX(1);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .wip-grid,
-    .wip-orb,
-    .wip-scan,
-    .wip-pulse,
-    .wip-meter-fill,
-    .wip-meter-glint,
-    .wip-line--accent {
-      animation: none;
-    }
-
-    .wip-brand,
-    .wip-status,
-    .wip-line,
-    .wip-meter,
-    .wip-note {
-      opacity: 1;
-      transform: none;
-      animation: none;
-    }
-
-    .wip-line--accent {
-      color: rgb(var(--wip-accent));
-    }
-
     .wip-meter-fill {
-      width: 67%;
+      animation: none;
     }
   }
 </style>
