@@ -1,0 +1,265 @@
+---
+import { getCollection } from 'astro:content';
+import { getImage } from 'astro:assets';
+import ExpRole from './ExpRole.astro';
+import { formatExperienceDates } from '../../lib/experience';
+
+const experiences = (await getCollection('experiences')).sort((a, b) => {
+  const ao = a.data.order ?? 999;
+  const bo = b.data.order ?? 999;
+  if (ao !== bo) return ao - bo;
+  return b.data.start.localeCompare(a.data.start);
+});
+
+const roles = experiences.filter((item) => !item.data.archived);
+const archived = experiences.filter((item) => item.data.archived);
+
+// Same pattern as Projects.astro: `image` is a plain public/ path string in
+// the content frontmatter, matched against an optimized src/assets copy by
+// filename so the hover-preview tooltip never hotlinks a full-res original.
+// No experience entries have `image:` set yet — add one (and drop a
+// matching file in src/assets/experiences/) to light up its tooltip.
+const previewSources = import.meta.glob('/src/assets/experiences/*', { eager: true });
+
+const previewSrcByFilename = new Map<string, string>();
+await Promise.all(
+  experiences.map(async (item) => {
+    const filename = item.data.image?.split('/').pop();
+    if (!filename || previewSrcByFilename.has(filename)) return;
+    const mod = previewSources[`/src/assets/experiences/${filename}`] as { default?: ImageMetadata } | undefined;
+    if (!mod?.default) return;
+    const optimized = await getImage({ src: mod.default, width: 480, format: 'webp', quality: 65 });
+    previewSrcByFilename.set(filename, optimized.src);
+  })
+);
+
+const toProps = (item: (typeof experiences)[number]) => {
+  const filename = item.data.image?.split('/').pop();
+  return {
+    id: item.slug,
+    href: `/experience/${item.slug}`,
+    org: item.data.company,
+    title: item.data.role,
+    dates: formatExperienceDates(item.data.start, item.data.end, item.data.dates),
+    body: (item.body?.trim() || item.data.tagline || '').replace(/\n+/g, ' '),
+    previewSrc: filename ? previewSrcByFilename.get(filename) ?? '' : '',
+    logo: item.data.logo ?? '',
+  };
+};
+---
+
+<section class="section section--experience" id="experience" aria-labelledby="experience-heading">
+  <div class="section-inner experience-inner" data-reveal>
+    <div class="section-head">
+      <p class="section-index" aria-hidden="true">— 02 / 05</p>
+      <p class="eyebrow">— Experience</p>
+      <h2 id="experience-heading" class="experience-h2">
+        Work that <em class="accent">stuck</em>.
+      </h2>
+    </div>
+    <p class="experience-caption">Expand a role, or open the full case.</p>
+
+    <ul class="exp-list" role="list" data-accordion>
+      {roles.map((role, i) => (
+        <ExpRole {...toProps(role)} open={i === 0} />
+      ))}
+    </ul>
+
+    {archived.length > 0 && (
+      <div class="exp-archive" data-archive>
+        <button
+          type="button"
+          class="exp-archive-toggle"
+          aria-expanded="false"
+          aria-controls="exp-archive-panel"
+          id="exp-archive-toggle"
+        >
+          <span class="exp-archive-label" data-archive-label>Show more</span>
+          <span class="exp-archive-arrow" aria-hidden="true">→</span>
+        </button>
+
+        <div
+          class="exp-archive-panel"
+          id="exp-archive-panel"
+          role="region"
+          aria-labelledby="exp-archive-toggle"
+        >
+          <ul class="exp-list exp-list--archive" role="list" data-accordion>
+            {archived.map((role) => (
+              <ExpRole {...toProps(role)} open={false} />
+            ))}
+          </ul>
+        </div>
+      </div>
+    )}
+
+    <div class="project-preview" data-exp-preview aria-hidden="true">
+      <img class="project-preview-img" data-exp-preview-img alt="" decoding="async" />
+    </div>
+  </div>
+</section>
+
+<script is:inline data-astro-rerun>
+  (function () {
+    if (window.__lumenExpAbort) window.__lumenExpAbort.abort();
+    const ac = new AbortController();
+    window.__lumenExpAbort = ac;
+    const { signal } = ac;
+    const metaByItem = new WeakMap();
+    const itemByTrigger = new WeakMap();
+
+    const setMeta = (item, open) => {
+      const meta = metaByItem.get(item);
+      if (!meta) return;
+      const { trigger, link } = meta;
+      if (open) item.setAttribute('data-open', '');
+      else item.removeAttribute('data-open');
+      if (trigger) trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (link) {
+        if (open) link.removeAttribute('tabindex');
+        else link.setAttribute('tabindex', '-1');
+      }
+    };
+
+    const setOpen = (item, open) => {
+      if (item.hasAttribute('data-open') === open) return;
+      setMeta(item, open);
+    };
+
+    const roots = Array.from(document.querySelectorAll('[data-accordion]'));
+    const activeByRoot = new WeakMap();
+
+    roots.forEach((root) => {
+      let active = root.querySelector('[data-accordion-item][data-open]');
+      if (active) activeByRoot.set(root, active);
+
+      root.querySelectorAll('[data-accordion-item]').forEach((item) => {
+        const trigger = item.querySelector('.exp-trigger');
+        const link = item.querySelector('.exp-case-link');
+        if (!trigger) return;
+        metaByItem.set(item, { trigger, link });
+        itemByTrigger.set(trigger, item);
+
+        if (!item.hasAttribute('data-open') && link) {
+          link.setAttribute('tabindex', '-1');
+        }
+      });
+
+      root.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const trigger = target.closest('.exp-trigger');
+        if (!trigger || !root.contains(trigger)) return;
+        const item = itemByTrigger.get(trigger);
+        if (!item) return;
+
+        const current = activeByRoot.get(root);
+        if (current === item) {
+          setOpen(item, false);
+          activeByRoot.delete(root);
+          return;
+        }
+        if (current) setOpen(current, false);
+        setOpen(item, true);
+        activeByRoot.set(root, item);
+      }, { signal });
+    });
+
+    const archive = document.querySelector('[data-archive]');
+    if (!archive) return;
+    const toggle = archive.querySelector('.exp-archive-toggle');
+    const label = archive.querySelector('[data-archive-label]');
+    if (!toggle || !label) return;
+
+    toggle.addEventListener('click', () => {
+      const willOpen = !archive.hasAttribute('data-open');
+      toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      archive.toggleAttribute('data-open', willOpen);
+      label.textContent = willOpen ? 'Show less' : 'Show more';
+
+      if (willOpen) {
+        // Collapse active role in every list so archive becomes the focus.
+        roots.forEach((root) => {
+          const current = activeByRoot.get(root);
+          if (!current) return;
+          setOpen(current, false);
+          activeByRoot.delete(root);
+        });
+
+        const list = archive.querySelector('.exp-list--archive');
+        const first = list && list.querySelector('[data-accordion-item]');
+        if (list && first && !first.hasAttribute('data-open')) {
+          setOpen(first, true);
+          activeByRoot.set(list, first);
+        }
+      }
+    }, { signal });
+
+    // Cursor-following preview tooltip, same mechanism as Projects.astro:
+    // one shared node repositioned via transform on pointermove, only wired
+    // up for a real pointer, and only for triggers that actually have a
+    // preview image (most don't yet — see the frontmatter comment above).
+    const preview = document.querySelector('[data-exp-preview]');
+    const previewImg = document.querySelector('[data-exp-preview-img]');
+    const previewTriggers = Array.from(document.querySelectorAll('[data-exp-trigger-preview]'))
+      .filter((el) => el.getAttribute('data-preview-src'));
+
+    if (preview && previewImg && previewTriggers.length && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      let activeTrigger = null;
+      let targetX = 0;
+      let targetY = 0;
+      let rafId = null;
+      const OFFSET_X = 24;
+      const OFFSET_Y = 24;
+
+      const applyPosition = () => {
+        rafId = null;
+        const rect = preview.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        let x = targetX + OFFSET_X;
+        let y = targetY + OFFSET_Y;
+        if (x + rect.width > vw - 12) x = targetX - rect.width - OFFSET_X;
+        if (y + rect.height > vh - 12) y = targetY - rect.height - OFFSET_Y;
+        x = Math.max(12, x);
+        y = Math.max(12, y);
+        preview.style.transform = 'translate3d(' + x + 'px, ' + y + 'px, 0)';
+      };
+
+      const queuePosition = () => {
+        if (rafId !== null) return;
+        rafId = requestAnimationFrame(applyPosition);
+      };
+
+      previewTriggers.forEach((trigger) => {
+        const src = trigger.getAttribute('data-preview-src');
+
+        trigger.addEventListener('pointerenter', (event) => {
+          activeTrigger = trigger;
+          previewImg.src = src;
+          targetX = event.clientX;
+          targetY = event.clientY;
+          applyPosition();
+          preview.classList.add('is-active');
+        }, { signal });
+
+        trigger.addEventListener('pointermove', (event) => {
+          if (activeTrigger !== trigger) return;
+          targetX = event.clientX;
+          targetY = event.clientY;
+          queuePosition();
+        }, { signal, passive: true });
+
+        trigger.addEventListener('pointerleave', () => {
+          if (activeTrigger !== trigger) return;
+          activeTrigger = null;
+          preview.classList.remove('is-active');
+        }, { signal });
+      });
+
+      signal.addEventListener('abort', () => {
+        if (rafId !== null) cancelAnimationFrame(rafId);
+      });
+    }
+  })();
+</script>

@@ -1,339 +1,493 @@
 ---
+import { Image } from 'astro:assets';
+import ramenPhoto from '../../assets/hobbies/ramen.jpeg';
+import gymPhoto from '../../assets/hobbies/gym.jpeg';
+import ravingPhoto from '../../assets/hobbies/raving.jpeg';
+
+import cooking1 from '../../assets/hobbies/cooking/cooking-1.jpg';
+import cooking2 from '../../assets/hobbies/cooking/cooking-2.jpg';
+
+import sports1 from '../../assets/hobbies/sports/sports-1.jpg';
+import sports2 from '../../assets/hobbies/sports/sports-2.jpg';
+import sports3 from '../../assets/hobbies/sports/sports-3.jpg';
+
+import gardening1 from '../../assets/hobbies/gardening/gardening-1.jpg';
+import gardening2 from '../../assets/hobbies/gardening/gardening-2.jpg';
+import gardening3 from '../../assets/hobbies/gardening/gardening-3.jpg';
+import gardening4 from '../../assets/hobbies/gardening/gardening-4.jpg';
+
+import brunoMars1 from '../../assets/hobbies/music/bruno-mars-1.jpg';
+import brunoMars2 from '../../assets/hobbies/music/bruno-mars-2.jpg';
+import brunoMarsVideo1Poster from '../../assets/hobbies/music/bruno-mars-video-1-poster.jpg';
+import brunoMarsVideo2Poster from '../../assets/hobbies/music/bruno-mars-video-2-poster.jpg';
+import martinGarrix1 from '../../assets/hobbies/music/martin-garrix-1.jpg';
+import martinGarrix2 from '../../assets/hobbies/music/martin-garrix-2.jpg';
+
+// Each hobby now carries a `media` list instead of a single image — the
+// first item is shown by default, the rest surface as a thumbnail strip
+// in the corner of the frame (see .hobby-thumbs). Images use the same
+// blurred-backdrop + contained-foreground pair as before; videos reuse
+// the poster as the blurred backdrop and autoplay (muted) once selected.
+const hobbies = [
+  {
+    id: 'eating',
+    label: 'Cooking',
+    title: 'Kitchen over takeout.',
+    note: 'Weeknight meals, plating included. The real fuel protocol.',
+    media: [
+      { type: 'image', src: cooking1, alt: 'Cooking' },
+      { type: 'image', src: cooking2, alt: 'Cooking' },
+      { type: 'image', src: ramenPhoto, alt: 'A bowl of ramen' },
+    ],
+  },
+  {
+    id: 'sports',
+    label: 'Sports',
+    title: 'Move so I can eat.',
+    note: 'Runs around the city, pickup basketball, calisthenics, boxing — whatever keeps the week honest.',
+    media: [
+      { type: 'image', src: sports1, alt: 'Sports' },
+      { type: 'image', src: sports2, alt: 'On a run' },
+      { type: 'image', src: sports3, alt: 'On a run' },
+      { type: 'image', src: gymPhoto, alt: 'At the gym' },
+    ],
+  },
+  {
+    id: 'gardening',
+    label: 'Gardening',
+    title: 'Dirt under the nails.',
+    note: 'Slow growth. Water, wait, repeat.',
+    media: [
+      { type: 'image', src: gardening1, alt: 'Gardening' },
+      { type: 'image', src: gardening2, alt: 'Gardening' },
+      { type: 'image', src: gardening3, alt: 'Gardening' },
+      { type: 'image', src: gardening4, alt: 'Gardening' },
+    ],
+  },
+  {
+    id: 'music',
+    label: 'Music',
+    title: 'Volume up, brain off.',
+    note: 'Bruno Mars, Martin Garrix, and everything loud in between.',
+    media: [
+      { type: 'image', src: ravingPhoto, alt: 'At a show' },
+      {
+        type: 'video',
+        src: '/video/hobbies/bruno-mars-1.mp4',
+        poster: brunoMarsVideo1Poster,
+        alt: 'Bruno Mars concert clip',
+      },
+      { type: 'image', src: brunoMars1, alt: 'Bruno Mars concert' },
+      {
+        type: 'video',
+        src: '/video/hobbies/bruno-mars-2.mp4',
+        poster: brunoMarsVideo2Poster,
+        alt: 'Bruno Mars concert clip',
+      },
+      { type: 'image', src: brunoMars2, alt: 'Bruno Mars concert' },
+      { type: 'image', src: martinGarrix1, alt: 'Martin Garrix concert' },
+      { type: 'image', src: martinGarrix2, alt: 'Martin Garrix concert' },
+    ],
+  },
+] as const;
 ---
 
-<div class="product-pin h-[180vh] relative">
-  <section id="demo" class="section--product min-h-screen sticky top-0 flex items-center px-8 lg:px-16 overflow-hidden">
-    <p class="section-index absolute top-16 left-8 lg:left-16 m-0 text-[11px] font-medium tracking-[0.16em] uppercase text-lumen-fg-muted pointer-events-none">— 03 / 04</p>
-    
-    <div class="section-inner max-w-lumen-container mx-auto w-full">
-      <div class="product-header mb-10 flex flex-col gap-3">
-        <p class="eyebrow text-lumen-accent text-[12px] font-medium tracking-[0.18em] uppercase leading-none">— In practice</p>
-        <h2 class="product-h2 font-serif text-[clamp(32px,4vw,48px)] font-normal leading-[1.1] tracking-tight text-lumen-fg m-0">Open it. Ask it. Move on.</h2>
-        <p class="product-caption text-[14px] text-lumen-fg-muted flex items-center gap-1.5">
-          Live demo — press <kbd class="kbd">⌘</kbd><kbd class="kbd">K</kbd> from any app.
-        </p>
+<div id="hobbies">
+  <section class="section section--product" aria-labelledby="product-heading">
+    <div class="section-inner">
+      <div class="product-header" data-reveal>
+        <div class="section-head">
+          <p class="section-index" aria-hidden="true">— 04 / 05</p>
+          <p class="eyebrow">— Off the clock</p>
+          <h2 id="product-heading" class="product-h2">Life, mid-scroll.</h2>
+        </div>
+        <p class="product-caption">Hover a tab. The photo flips to that hobby.</p>
       </div>
 
-      <div id="product-window" class="window-chrome product-window-trigger bg-lumen-surface border border-lumen-border rounded-xl overflow-hidden shadow-2xl origin-center transform scale-[0.8]">
-        <!-- Window Tabs -->
-        <div class="window-tabs flex items-center gap-3.5 p-3.5 border-b border-white border-opacity-[0.05]">
-          <div class="window-controls flex gap-1.5">
-            <span class="window-dot w-[11px] h-[11px] rounded-full bg-white bg-opacity-[0.15]"></span>
-            <span class="window-dot w-[11px] h-[11px] rounded-full bg-white bg-opacity-[0.15]"></span>
-            <span class="window-dot w-[11px] h-[11px] rounded-full bg-white bg-opacity-[0.15]"></span>
+      <div class="window-chrome" data-reveal data-hobby-window>
+        <div class="window-body window-body--hobbies" data-hobby-body>
+          <span class="hobby-connector" data-hobby-connector aria-hidden="true"></span>
+          <div class="hobby-tabbar" data-hobby-tabbar>
+            {hobbies.map((hobby, i) => (
+              <button
+                type="button"
+                class:list={['hobby-tab', { 'hobby-tab--active': i === 0 }]}
+                data-hobby-btn
+                data-hobby={hobby.id}
+                aria-pressed={i === 0 ? 'true' : 'false'}
+                id={hobby.id === 'eating' ? 'eat' : hobby.id}
+              >
+                <span class="hobby-tab-title">{hobby.label}</span>
+                <span class="hobby-tab-desc-wrap">
+                  <span class="hobby-tab-desc">{hobby.note}</span>
+                </span>
+              </button>
+            ))}
           </div>
-          <div class="window-tab window-tab--active inline-flex items-baseline gap-2.5 px-2.5 py-1 rounded bg-white bg-opacity-[0.05] font-mono text-xs text-lumen-fg">
-            <span>rate-limit.ts</span>
-            <span class="window-tab-meta text-lumen-fg-muted text-[11px]">main · 42:1</span>
-          </div>
-        </div>
 
-        <!-- Window Body -->
-        <div class="window-body grid grid-cols-1 md:grid-cols-[200px,1fr] min-h-[480px]">
-          <aside class="window-rail hidden md:flex flex-col gap-6 p-5 border-r border-white border-opacity-[0.05]">
-            <div class="rail-section">
-              <p class="rail-heading">Context</p>
-              <ul class="rail-list">
-                <li class="rail-item rail-item--active">
-                  <span class="rail-icon rail-icon--active"></span>
-                  <span>rate-limit.ts</span>
-                </li>
-                <li class="rail-item">
-                  <span class="rail-icon"></span>
-                  <span>edge.config.ts</span>
-                </li>
-                <li class="rail-item">
-                  <span class="rail-icon"></span>
-                  <span>next.config.mjs</span>
-                </li>
-                <li class="rail-item">
-                  <span class="rail-icon"></span>
-                  <span>package.json</span>
-                </li>
-              </ul>
-            </div>
-            <div class="rail-section">
-              <p class="rail-heading">Recent</p>
-              <ul class="rail-list">
-                <li class="rail-item">
-                  <span class="rail-icon"></span>
-                  <span>dashboard.tsx</span>
-                </li>
-                <li class="rail-item">
-                  <span class="rail-icon"></span>
-                  <span>schema.prisma</span>
-                </li>
-              </ul>
-            </div>
-          </aside>
-
-          <div class="window-main p-7 lg:p-8 overflow-hidden">
-            <div class="mock">
-              <div class="mock-line">
-                <span class="mock-tag">you</span>
-                <div class="mock-text">Where did we drop the rate-limit middleware?</div>
-              </div>
-
-              <div class="mock-line">
-                <span class="mock-tag mock-tag--accent">lumen</span>
-                <div class="mock-text">
-                  <p>Found it — <code>server/middleware/rate-limit.ts:42</code>, removed in PR #4821 when you switched to edge runtime.</p>
-                  <pre class="mock-diff"><span class="diff-meta">server/middleware/rate-limit.ts</span><span class="diff-rm">- <span class="tok-kw">import</span> {'{'} rateLimit {'}'} <span class="tok-kw">from</span> <span class="tok-str">'./rate-limit'</span></span><span class="diff-rm">- <span class="tok-kw">export const</span> middleware = rateLimit({'{'} limit: <span class="tok-num">100</span> {'}'})</span></pre>
-                  <p>Want me to re-enable it for <code>/api/*</code> only?</p>
-                  <div class="mock-actions">
-                    <button class="btn-chip btn-chip--primary">Yes, draft a PR</button>
-                    <button class="btn-chip">Show me the routes first</button>
+          <!--
+            Right column: a plain flex stack (.hobby-media-col). The photo
+            lives in .hobby-card-stage; .hobby-caption-stage below it shows
+            this is where to add more content (text, links, stats…) — just
+            append another block here, same crossfade pattern, no border
+            needed since it all sits directly on the page background.
+          -->
+          <div class="hobby-media-col">
+            <div class="hobby-card-stage" data-hobby-media>
+              <div class="hobby-card-mat" aria-hidden="true"></div>
+              {hobbies.map((hobby, i) => (
+                <article
+                  class:list={['hobby-card', { 'hobby-card--active': i === 0 }]}
+                  data-hobby-pane={hobby.id}
+                  aria-hidden={i === 0 ? 'false' : 'true'}
+                >
+                  <div class="hobby-card-media">
+                    {hobby.media.length > 0 ? (
+                      hobby.media.map((item, mi) => (
+                        <div
+                          class:list={['hobby-media-item', { 'hobby-media-item--active': mi === 0 }]}
+                          data-media-item
+                          data-media-index={mi}
+                        >
+                          {item.type === 'image' ? (
+                            <>
+                              {/* Blurred backdrop: blur(32px) destroys detail anyway,
+                                  so a small source is enough and far cheaper to decode. */}
+                              <Image
+                                src={item.src}
+                                alt=""
+                                aria-hidden="true"
+                                class="hobby-card-img hobby-card-img--bg"
+                                loading={i === 0 && mi === 0 ? 'eager' : 'lazy'}
+                                decoding="async"
+                                width={480}
+                                format="webp"
+                                quality={55}
+                              />
+                              <Image
+                                src={item.src}
+                                alt={item.alt}
+                                class="hobby-card-img hobby-card-img--fg"
+                                loading={i === 0 && mi === 0 ? 'eager' : 'lazy'}
+                                fetchpriority={i === 0 && mi === 0 ? 'high' : 'auto'}
+                                decoding="async"
+                                width={1400}
+                                widths={[480, 900, 1400]}
+                                sizes="(max-width: 768px) 92vw, 55vw"
+                                format="webp"
+                                quality={78}
+                              />
+                            </>
+                          ) : (
+                            <>
+                              <Image
+                                src={item.poster}
+                                alt=""
+                                aria-hidden="true"
+                                class="hobby-card-img hobby-card-img--bg"
+                                loading="lazy"
+                                decoding="async"
+                                width={480}
+                                format="webp"
+                                quality={55}
+                              />
+                              <video
+                                class="hobby-card-video"
+                                data-hobby-video
+                                src={item.src}
+                                poster={item.poster.src}
+                                muted
+                                loop
+                                playsinline
+                                preload="metadata"
+                                controls
+                                aria-label={item.alt}
+                              />
+                            </>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div class="hobby-card-empty" aria-hidden="true">
+                        <span class="hobby-card-empty-mark">◆</span>
+                        <span>Drop a photo here</span>
+                      </div>
+                    )}
                   </div>
-                </div>
+
+                  {hobby.media.length > 1 && (
+                    <div class="hobby-thumbs" data-hobby-thumbs role="tablist" aria-label={`${hobby.label} photos`}>
+                      {hobby.media.map((item, mi) => (
+                        <button
+                          type="button"
+                          class:list={['hobby-thumb', { 'hobby-thumb--active': mi === 0 }]}
+                          data-thumb-index={mi}
+                          role="tab"
+                          aria-selected={mi === 0 ? 'true' : 'false'}
+                          aria-label={`${hobby.label} photo ${mi + 1} of ${hobby.media.length}`}
+                        >
+                          <Image
+                            src={item.type === 'image' ? item.src : item.poster}
+                            alt=""
+                            class="hobby-thumb-img"
+                            loading="lazy"
+                            decoding="async"
+                            width={120}
+                            format="webp"
+                            quality={50}
+                          />
+                          {item.type === 'video' && (
+                            <span class="hobby-thumb-play" aria-hidden="true">▶</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+
+            <div class="hobby-media-meta">
+              <div class="hobby-caption-stage">
+                {hobbies.map((hobby, i) => (
+                  <p
+                    class:list={['hobby-caption', { 'hobby-caption--active': i === 0 }]}
+                    data-hobby-caption={hobby.id}
+                  >
+                    {hobby.title}
+                  </p>
+                ))}
               </div>
 
-              <div class="mock-line">
-                <span class="mock-tag">you</span>
-                <div class="mock-text">Yes, draft the PR.</div>
-              </div>
-
-              <div class="mock-line">
-                <span class="mock-tag mock-tag--accent">lumen</span>
-                <div class="mock-text text-lumen-fg">
-                  <ul class="flex flex-col gap-1.5 list-none p-0 m-0">
-                    <li class="flex items-center gap-2">
-                      <svg class="w-4 h-4 text-lumen-accent" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3.5 8.5l3 3 6-6"></path>
-                      </svg>
-                      <span>Created branch <code>fix/rate-limit-api</code></span>
-                    </li>
-                    <li class="flex items-center gap-2">
-                      <svg class="w-4 h-4 text-lumen-accent" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3.5 8.5l3 3 6-6"></path>
-                      </svg>
-                      <span>Re-enabled middleware for <code>/api/*</code></span>
-                    </li>
-                    <li class="flex items-center gap-2">
-                      <svg class="w-4 h-4 text-lumen-accent" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3.5 8.5l3 3 6-6"></path>
-                      </svg>
-                      <span>Opened PR <code>#4877</code> → main</span>
-                    </li>
-                  </ul>
-                </div>
+              <div class="hobby-progress" role="img" aria-label={`Hobby 1 of ${hobbies.length}`} data-hobby-progress>
+                {hobbies.map((hobby, i) => (
+                  <span
+                    class:list={['hobby-progress-dot', { 'hobby-progress-dot--active': i === 0 }]}
+                    data-hobby-dot={hobby.id}
+                  ></span>
+                ))}
               </div>
             </div>
           </div>
-        </div>
-
-        <div class="window-status">
-          <span class="flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-            <span>lumen ready</span>
-          </span>
-          <span>main · 23 files · 1.2k loc</span>
         </div>
       </div>
     </div>
   </section>
 </div>
 
-<style>
-  .kbd {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 22px;
-    padding: 0 0.25rem;
-    border-radius: 0.25rem;
-    border: 1px solid var(--lumen-border-strong);
-    border-bottom-width: 2px;
-    background: var(--lumen-surface);
-    font-family: inherit;
-    font-size: 11.5px;
-    font-weight: 500;
-    color: var(--lumen-fg);
-  }
+<script is:inline data-astro-rerun>
+  (function () {
+    const root = document.querySelector('[data-hobby-window]');
+    if (!root) return;
 
-  .rail-heading {
-    margin: 0 0 0.5rem;
-    padding: 0 0.5rem;
-    font-size: 10.5px;
-    font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--lumen-fg-muted);
-  }
+    // ClientRouter soft-nav re-runs this script; abort the previous run's
+    // listeners/observer/timers so they don't stack on repeat navigation.
+    if (window.__lumenHobbiesAbort) window.__lumenHobbiesAbort.abort();
+    const ac = new AbortController();
+    window.__lumenHobbiesAbort = ac;
+    const { signal } = ac;
 
-  .rail-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  .rail-item {
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-    padding: 0.375rem 0.875rem;
-    border-radius: 0.375rem;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 12px;
-    color: var(--lumen-fg-muted);
-    cursor: default;
-    transition: background-color 0.2s ease, color 0.2s ease;
-  }
+    const hobbyIds = ['eating', 'sports', 'gardening', 'music'];
+    const body = root.querySelector('[data-hobby-body]');
+    const btns = root.querySelectorAll('[data-hobby-btn]');
+    const panes = root.querySelectorAll('[data-hobby-pane]');
+    const captions = root.querySelectorAll('[data-hobby-caption]');
+    const dots = root.querySelectorAll('[data-hobby-dot]');
+    const progress = root.querySelector('[data-hobby-progress]');
+    const connector = root.querySelector('[data-hobby-connector]');
+    const media = root.querySelector('[data-hobby-media]');
 
-  .rail-item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: var(--lumen-fg);
-  }
+    // Pause every video inside a pane — used when its tab loses focus so
+    // nothing keeps playing (silently, since they're muted) off-screen.
+    const pauseVideosIn = (pane) => {
+      pane.querySelectorAll('[data-hobby-video]').forEach((v) => v.pause());
+    };
 
-  .rail-item--active {
-    position: relative;
-    color: var(--lumen-fg);
-    background-color: rgba(249, 115, 22, 0.07);
-  }
+    // Per-pane thumbnail strip: swap which media item is "active" without
+    // touching the outer hobby-tab selection at all.
+    panes.forEach((pane) => {
+      const items = Array.from(pane.querySelectorAll('[data-media-item]'));
+      const thumbs = Array.from(pane.querySelectorAll('[data-hobby-thumbs] .hobby-thumb'));
+      if (!thumbs.length) return;
 
-  .rail-item--active::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0.25rem;
-    bottom: 0.25rem;
-    width: 2px;
-    border-radius: 2px;
-    background: var(--lumen-accent);
-  }
+      thumbs.forEach((thumb) => {
+        thumb.addEventListener('click', () => {
+          const idx = thumb.getAttribute('data-thumb-index');
 
-  .rail-icon {
-    width: 7px;
-    height: 7px;
-    border-radius: 2px;
-    flex-shrink: 0;
-    background-color: rgba(255, 255, 255, 0.15);
-  }
+          thumbs.forEach((t) => {
+            const on = t === thumb;
+            t.classList.toggle('hobby-thumb--active', on);
+            t.setAttribute('aria-selected', on ? 'true' : 'false');
+          });
 
-  .rail-icon--active {
-    background-color: var(--lumen-accent);
-    opacity: 0.85;
-  }
+          items.forEach((item) => {
+            const on = item.getAttribute('data-media-index') === idx;
+            item.classList.toggle('hobby-media-item--active', on);
+            const video = item.querySelector('[data-hobby-video]');
+            if (video) {
+              if (on) video.play().catch(() => {});
+              else video.pause();
+            }
+          });
+        }, { signal });
+      });
+    });
 
-  .mock {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    max-width: 64ch;
-    font-size: 15px;
-    line-height: 1.625;
-  }
+    // Stretch the connector from the active tab's own box all the way to
+    // the photo's mat, so the two touch with zero gap and read as one
+    // continuous shape instead of two separate highlighted boxes.
+    // On stacked (mobile) layout the photo sits below, so we just wrap
+    // the active tab itself.
+    const moveConnector = (btn, { animate = true } = {}) => {
+      if (!connector || !btn || !body || !media) return;
+      const bodyRect = body.getBoundingClientRect();
+      const btnRect = btn.getBoundingClientRect();
+      const mediaRect = media.getBoundingClientRect();
+      const stacked = mediaRect.top >= btnRect.bottom - 1;
+      const left = btnRect.left - bodyRect.left;
+      // Overlap the mat by 2px so same-color seams don't show a hairline gap
+      // at the T-junction (the concave fillets sit in that overlapped region).
+      const width = stacked
+        ? btnRect.width
+        : Math.max(0, mediaRect.left - btnRect.left + 2);
 
-  .mock-line {
-    display: flex;
-    gap: 0.875rem;
-  }
+      connector.classList.toggle('hobby-connector--no-transition', !animate);
+      connector.style.left = left + 'px';
+      connector.style.top = (btnRect.top - bodyRect.top) + 'px';
+      connector.style.width = width + 'px';
+      connector.style.height = btnRect.height + 'px';
+      if (!animate) {
+        void connector.offsetHeight; // flush before re-enabling transition
+        connector.classList.remove('hobby-connector--no-transition');
+      }
+    };
 
-  .mock-tag {
-    width: 52px;
-    padding-top: 0.125rem;
-    text-align: right;
-    font-size: 13px;
-    letter-spacing: 0.04em;
-    color: var(--lumen-fg-muted);
-    user-select: none;
-  }
+    const select = (id, { animate = true } = {}) => {
+      if (!hobbyIds.includes(id)) return;
+      let activeBtn = null;
 
-  .mock-tag--accent {
-    color: var(--lumen-accent);
-  }
+      btns.forEach((btn) => {
+        const on = btn.getAttribute('data-hobby') === id;
+        btn.classList.toggle('hobby-tab--active', on);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        if (on) activeBtn = btn;
+      });
 
-  .mock-text {
-    flex: 1;
-    color: var(--lumen-fg);
-  }
+      if (connector && activeBtn) {
+        const shouldAnimate = animate && !reduceMotion;
+        // Read layout (getBoundingClientRect) on the next frame instead of
+        // right here — the classList.toggle() calls above just invalidated
+        // layout (grid-template-rows), so reading geometry immediately would
+        // force a synchronous, whole-page reflow on every click/hover/focus.
+        requestAnimationFrame(() => {
+          if (signal.aborted) return;
+          moveConnector(activeBtn, { animate: shouldAnimate });
+          connector.classList.add('hobby-connector--ready');
+          // After the tab description expands (320ms), snap the connector to
+          // the final size so it doesn't end mid-transition at the wrong height.
+          if (shouldAnimate) {
+            window.setTimeout(() => {
+              if (signal.aborted) return;
+              moveConnector(activeBtn, { animate: false });
+            }, 340);
+          }
+        });
+      }
 
-  .mock-text code {
-    padding: 0.125rem 0.375rem;
-    border-radius: 0.25rem;
-    font-size: 0.88em;
-    background-color: rgba(255, 255, 255, 0.05);
-  }
+      panes.forEach((pane) => {
+        const on = pane.getAttribute('data-hobby-pane') === id;
+        pane.classList.toggle('hobby-card--active', on);
+        pane.setAttribute('aria-hidden', on ? 'false' : 'true');
+        if (!on) pauseVideosIn(pane);
+      });
 
-  .mock-diff {
-    margin: 0.875rem 0;
-    padding: 0.625rem;
-    overflow-x: auto;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 0.375rem;
-    background-color: rgba(0, 0, 0, 0.28);
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 12.5px;
-    line-height: 1.625;
-    white-space: pre;
-  }
+      captions.forEach((caption) => {
+        caption.classList.toggle('hobby-caption--active', caption.getAttribute('data-hobby-caption') === id);
+      });
 
-  .diff-meta {
-    display: block;
-    margin-bottom: 0.25rem;
-    padding-bottom: 0.25rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    font-size: 11px;
-    color: var(--lumen-fg-muted);
-  }
+      let activeIndex = 0;
+      dots.forEach((dot, i) => {
+        const on = dot.getAttribute('data-hobby-dot') === id;
+        dot.classList.toggle('hobby-progress-dot--active', on);
+        if (on) activeIndex = i;
+      });
+      if (progress) progress.setAttribute('aria-label', `Hobby ${activeIndex + 1} of ${dots.length}`);
+    };
 
-  .diff-rm {
-    display: block;
-    margin-inline: -0.625rem;
-    padding-inline: 0.625rem;
-    color: #ff9191;
-    background-color: rgba(255, 80, 80, 0.06);
-  }
+    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-  .tok-kw { color: #f9af64; }
-  .tok-str { color: #a0dcaa; }
-  .tok-num { color: #b4c8ff; }
+    const activate = (btn) => {
+      const id = btn.getAttribute('data-hobby');
+      select(id);
+      if (history.replaceState) {
+        history.replaceState(null, '', '#' + (id === 'eating' ? 'eat' : id));
+      }
+    };
 
-  .mock-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 0.875rem;
-  }
+    // Hover-intent delay: a mouse just passing over the tab list on its way
+    // elsewhere shouldn't fire a full switch for every row it crosses.
+    let hoverTimer = null;
+    const clearHoverTimer = () => {
+      if (hoverTimer !== null) {
+        window.clearTimeout(hoverTimer);
+        hoverTimer = null;
+      }
+    };
+    signal.addEventListener('abort', clearHoverTimer);
 
-  .btn-chip {
-    padding: 0.375rem 0.75rem;
-    border-radius: 0.375rem;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background-color: rgba(255, 255, 255, 0.05);
-    color: var(--lumen-fg);
-    font-size: 13px;
-    font-weight: 500;
-    transition: background-color 0.2s ease, filter 0.2s ease;
-  }
+    btns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        clearHoverTimer();
+        activate(btn);
+      }, { signal });
+      btn.addEventListener('focus', () => {
+        clearHoverTimer();
+        activate(btn);
+      }, { signal });
+      if (canHover) {
+        btn.addEventListener('mouseenter', () => {
+          clearHoverTimer();
+          hoverTimer = window.setTimeout(() => {
+            hoverTimer = null;
+            activate(btn);
+          }, 60);
+        }, { signal });
+        btn.addEventListener('mouseleave', clearHoverTimer, { signal });
+      }
+    });
 
-  .btn-chip:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
+    // Place the connector instantly on load/resize, no glide-in from origin.
+    const activeBtn = root.querySelector('.hobby-tab--active[data-hobby-btn]');
+    if (activeBtn) select(activeBtn.getAttribute('data-hobby'), { animate: false });
+    window.addEventListener('resize', () => {
+      const current = root.querySelector('.hobby-tab--active[data-hobby-btn]');
+      if (current) moveConnector(current, { animate: false });
+    }, { signal, passive: true });
 
-  .btn-chip--primary {
-    border-color: transparent;
-    background: var(--lumen-accent);
-    color: var(--lumen-bg);
-  }
+    // Keep the connector glued to the active tab while its description
+    // expands/collapses (grid-template-rows transition), not just on click.
+    // No CSS transition here — we'd fight the expand animation otherwise.
+    if ('ResizeObserver' in window) {
+      const ro = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.target.classList.contains('hobby-tab--active')) {
+            moveConnector(entry.target, { animate: false });
+          }
+        }
+      });
+      btns.forEach((btn) => ro.observe(btn));
+      signal.addEventListener('abort', () => ro.disconnect());
+    }
 
-  .btn-chip--primary:hover {
-    filter: brightness(1.1);
-  }
-
-  .window-status {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    background: rgba(255, 255, 255, 0.02);
-    pointer-events: none;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 11px;
-    color: var(--lumen-fg-muted);
-  }
-</style>
+    // Hero links: #eat / #sports / #gardening / #music
+    const fromHash = () => {
+      const raw = (location.hash || '').replace(/^#/, '');
+      if (!raw) return;
+      select(raw === 'eat' ? 'eating' : raw);
+    };
+    fromHash();
+    window.addEventListener('hashchange', fromHash, { signal });
+  })();
+</script>

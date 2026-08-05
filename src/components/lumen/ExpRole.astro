@@ -1,0 +1,59 @@
+---
+interface Props {
+  id: string;
+  href: string;
+  org: string;
+  title: string;
+  dates: string;
+  body: string;
+  open?: boolean;
+  previewSrc?: string;
+  logo?: string;
+}
+
+const { id, href, org, title, dates, body, open = false, previewSrc = '', logo = '' } = Astro.props;
+---
+
+<li class="exp-item" data-accordion-item {...(open ? { 'data-open': true } : {})}>
+  <h3 class="exp-heading">
+    <div class="exp-row">
+      <button
+        type="button"
+        class="exp-trigger"
+        id={`exp-trigger-${id}`}
+        aria-expanded={open ? 'true' : 'false'}
+        aria-controls={`exp-panel-${id}`}
+        data-exp-trigger-preview
+        data-preview-src={previewSrc}
+      >
+        <span class="exp-trigger-main">
+          <span class="exp-org-wrap">
+            {logo && (
+              <span class="exp-org-logo" aria-hidden="true">
+                <img src={logo} alt="" loading="lazy" decoding="async" />
+              </span>
+            )}
+            <span class="exp-org">{org}</span>
+          </span>
+          <span class="exp-title">{title}</span>
+        </span>
+        <span class="exp-trigger-aside">
+          <span class="exp-dates">{dates}</span>
+          <span class="exp-icon" aria-hidden="true"></span>
+        </span>
+      </button>
+    </div>
+  </h3>
+
+  <div
+    class="exp-panel"
+    id={`exp-panel-${id}`}
+    role="region"
+    aria-labelledby={`exp-trigger-${id}`}
+  >
+    <div class="exp-panel-inner">
+      {body && <p class="exp-body">{body}</p>}
+      <a class="exp-case-link" href={href}>Read full case →</a>
+    </div>
+  </div>
+</li>

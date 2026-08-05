@@ -1,68 +1,53 @@
 ---
 ---
 
-<div class="principles-pin h-[300vh] relative">
-  <section id="features" class="section--principles h-screen sticky top-0 flex items-center px-8 lg:px-16 overflow-hidden">
-    <p class="section-index absolute top-16 left-8 lg:left-16 m-0 text-[11px] font-medium tracking-[0.16em] uppercase text-lumen-fg-muted pointer-events-none">— 02 / 04</p>
-    
-    <div class="section-inner max-w-lumen-container mx-auto w-full relative">
-      <div id="principles-track" class="principles-grid grid grid-cols-1 lg:grid-cols-[1.1fr,0.95fr,1.05fr] items-start gap-12 lg:gap-14 w-full lg:w-[150vw] transition-transform duration-100 ease-linear">
-        
-        <!-- Principle 01 -->
-        <article class="principle flex flex-col gap-2 group">
-          <p class="principle-number font-serif text-[56px] italic text-lumen-accent leading-none m-0 transition-all duration-[320ms] ease-lumen group-hover:-translate-y-1 group-hover:brightness-110">01</p>
-          <h3 class="principle-title text-[24px] font-medium leading-[1.25] tracking-tight text-lumen-fg m-0 inline-block bg-gradient-to-r from-lumen-accent to-lumen-accent bg-[length:0%_1px] bg-no-repeat bg-bottom pb-1 transition-all duration-[420ms] ease-lumen group-hover:bg-[length:100%_1px]">
-            Speaks first, asks second.
-          </h3>
-          <p class="principle-desc text-[16px] leading-[1.55] text-lumen-fg-muted m-0 mt-2 max-w-[36ch] transition-colors duration-[320ms] group-hover:text-lumen-fg/80">
-            Reads what you're working on. Suggests the next step before you can frame the question.
-          </p>
-          <div class="principle-detail mt-5 flex items-center gap-2 flex-wrap">
-            <kbd class="kbd inline-flex items-center justify-center min-w-[20px] h-[22px] px-1.5 bg-lumen-surface border border-lumen-border-strong border-b-2 rounded-md font-sans text-[11.5px] font-medium text-lumen-fg">⌘</kbd>
-            <kbd class="kbd inline-flex items-center justify-center min-w-[20px] h-[22px] px-1.5 bg-lumen-surface border border-lumen-border-strong border-b-2 rounded-md font-sans text-[11.5px] font-medium text-lumen-fg">.</kbd>
-            <span class="text-[13px] text-lumen-fg-muted ml-1">from any app</span>
-          </div>
-        </article>
-
-        <!-- Principle 02 -->
-        <article class="principle flex flex-col gap-2 group lg:mt-16">
-          <p class="principle-number font-serif text-[56px] italic text-lumen-accent leading-none m-0 transition-all duration-[320ms] ease-lumen group-hover:-translate-y-1 group-hover:brightness-110">02</p>
-          <h3 class="principle-title text-[24px] font-medium leading-[1.25] tracking-tight text-lumen-fg m-0 inline-block bg-gradient-to-r from-lumen-accent to-lumen-accent bg-[length:0%_1px] bg-no-repeat bg-bottom pb-1 transition-all duration-[420ms] ease-lumen group-hover:bg-[length:100%_1px]">
-            Lives in your context.
-          </h3>
-          <p class="principle-desc text-[16px] leading-[1.55] text-lumen-fg-muted m-0 mt-2 max-w-[36ch] transition-colors duration-[320ms] group-hover:text-lumen-fg/80">
-            Files, browser tabs, terminal output — Lumen sees what you see, so you don't translate.
-          </p>
-          <div class="principle-detail mt-5 flex flex-wrap gap-1.5">
-            <span class="tag px-2.5 py-1 rounded bg-white bg-opacity-[0.04] border border-white border-opacity-[0.08] text-[12.5px] text-lumen-fg-muted">current file</span>
-            <span class="tag px-2.5 py-1 rounded bg-white bg-opacity-[0.04] border border-white border-opacity-[0.08] text-[12.5px] text-lumen-fg-muted">selection</span>
-            <span class="tag px-2.5 py-1 rounded bg-white bg-opacity-[0.04] border border-white border-opacity-[0.08] text-[12.5px] text-lumen-fg-muted">terminal</span>
-          </div>
-        </article>
-
-        <!-- Principle 03 -->
-        <article class="principle flex flex-col gap-2 group lg:mt-6">
-          <p class="principle-number font-serif text-[56px] italic text-lumen-accent leading-none m-0 transition-all duration-[320ms] ease-lumen group-hover:-translate-y-1 group-hover:brightness-110">03</p>
-          <h3 class="principle-title text-[24px] font-medium leading-[1.25] tracking-tight text-lumen-fg m-0 inline-block bg-gradient-to-r from-lumen-accent to-lumen-accent bg-[length:0%_1px] bg-no-repeat bg-bottom pb-1 transition-all duration-[420ms] ease-lumen group-hover:bg-[length:100%_1px]">
-            Learns your shorthand.
-          </h3>
-          <p class="principle-desc text-[16px] leading-[1.55] text-lumen-fg-muted m-0 mt-2 max-w-[36ch] transition-colors duration-[320ms] group-hover:text-lumen-fg/80">
-            The more you use it, the less you have to say. Custom commands, your phrasing, your stack.
-          </p>
-          <div class="principle-detail mt-5 flex flex-col gap-1.5">
-            <div class="flex items-center gap-2.5 font-mono text-[12.5px]">
-              <code class="text-lumen-accent bg-lumen-accent bg-opacity-[0.08] px-2 py-0.5 rounded">rfc</code>
-              <span class="text-lumen-fg-muted text-opacity-[0.60]">→</span>
-              <span class="text-lumen-fg-muted">opens RFC template</span>
+<div class="principles-pin">
+    <section class="section section--principles" aria-labelledby="principles-heading">
+      <p class="section-index" aria-hidden="true">— 04 / 05</p>
+      <h2 id="principles-heading" class="sr-only">What makes Lumen different</h2>
+      <div class="section-inner">
+        <div class="principles-grid">
+          <article class="principle" data-reveal>
+            <p class="principle-number">01</p>
+            <h3 class="principle-title">Speaks first, asks second.</h3>
+            <p class="principle-desc">Reads what you're working on. Suggests the next step before you can frame the
+              question.</p>
+            <div class="principle-detail principle-detail--shortcut">
+              <kbd class="kbd">⌘</kbd><kbd class="kbd">.</kbd>
+              <span class="principle-detail-label">from any app</span>
             </div>
-            <div class="flex items-center gap-2.5 font-mono text-[12.5px]">
-              <code class="text-lumen-accent bg-lumen-accent bg-opacity-[0.08] px-2 py-0.5 rounded">ship it</code>
-              <span class="text-lumen-fg-muted text-opacity-[0.60]">→</span>
-              <span class="text-lumen-fg-muted">runs CI, opens PR</span>
+          </article>
+          <article class="principle" data-reveal>
+            <p class="principle-number">02</p>
+            <h3 class="principle-title">Lives in your context.</h3>
+            <p class="principle-desc">Files, browser tabs, terminal output — Lumen sees what you see, so you don't
+              translate.</p>
+            <div class="principle-detail principle-detail--tags">
+              <span class="tag">current file</span>
+              <span class="tag">selection</span>
+              <span class="tag">terminal</span>
+              <span class="tag">clipboard</span>
             </div>
-          </div>
-        </article>
+          </article>
+          <article class="principle" data-reveal>
+            <p class="principle-number">03</p>
+            <h3 class="principle-title">Learns your shorthand.</h3>
+            <p class="principle-desc">The more you use it, the less you have to say. Custom commands, your phrasing,
+              your stack.</p>
+            <div class="principle-detail principle-detail--examples">
+              <div class="shorthand-row">
+                <code class="shorthand-key">rfc</code>
+                <span class="shorthand-arrow">→</span>
+                <span class="shorthand-val">opens RFC template</span>
+              </div>
+              <div class="shorthand-row">
+                <code class="shorthand-key">ship it</code>
+                <span class="shorthand-arrow">→</span>
+                <span class="shorthand-val">runs CI, opens PR</span>
+              </div>
+            </div>
+          </article>
+        </div>
       </div>
-    </div>
-  </section>
-</div>
+    </section>
+  </div>

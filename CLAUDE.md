@@ -35,12 +35,11 @@ public/
 | `npm run preview` | Preview production build |
 
 ## Content
-### Lumen (wired into homepage)
-- Changelog: `src/content/lumen-changelog/`
-- Status: `src/content/lumen-status/current.yaml`
+### Lumen page
+Ported from Kombai inspiration (`tmp-lumen-ref` / `.kombai/canvas/Lumen.canvas`). Sections: Hero → Statement → Principles → ProductWindow → CTA. Motion is vanilla scroll choreography (not GSAP). Optional waitlist: `PUBLIC_FORMSPREE_FORM_ID`.
 
-### Retained portfolio (unused on Lumen page)
-- Bio, experiences, projects, hobbies, highlights, photos, testimonials under `src/content/`
+### Retained (unused on Lumen page)
+- Portfolio collections under `src/content/` (including unused `lumen-changelog` / `lumen-status`)
 - Assets: `public/photos/`, `public/logos/`, `public/projects/`
 
 ## Env (see `.env.example`)

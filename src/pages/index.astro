@@ -2,156 +2,173 @@
 import LumenLayout from '../layouts/LumenLayout.astro';
 import Hero from '../components/lumen/Hero.astro';
 import Statement from '../components/lumen/Statement.astro';
-import Principles from '../components/lumen/Principles.astro';
 import ProductWindow from '../components/lumen/ProductWindow.astro';
-import Changelog from '../components/lumen/Changelog.astro';
-import Status from '../components/lumen/Status.astro';
+import WorkExperience from '../components/lumen/WorkExperience.astro';
+import Projects from '../components/lumen/Projects.astro';
 import CTA from '../components/lumen/CTA.astro';
 ---
 
 <LumenLayout>
   <Hero />
+  <WorkExperience />
   <Statement />
-  <Principles />
+  <Projects />
   <ProductWindow />
-  <Changelog />
-  <Status />
   <CTA />
 
-  <script>
-    import { gsap } from 'gsap';
-    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  <script is:inline data-astro-rerun>
+    (function () {
+      // ClientRouter soft-nav re-runs this script; abort the previous
+      // homepage listeners so they don't stack.
+      if (window.__lumenHomeAbort) window.__lumenHomeAbort.abort();
+      const ac = new AbortController();
+      window.__lumenHomeAbort = ac;
+      const { signal } = ac;
 
-    gsap.registerPlugin(ScrollTrigger);
-
-    const boot = () => initAnimations();
-    if (document.readyState === 'complete') boot();
-    else window.addEventListener('load', boot, { once: true });
-
-    function initAnimations() {
-      const desktopMQ = window.matchMedia('(min-width: 1024px)');
-
-      // Hero fade on scroll (desktop)
-      if (desktopMQ.matches) {
-        gsap.to('.hero-copy', {
-          scrollTrigger: {
-            trigger: '#hero',
-            start: 'top top',
-            end: 'bottom top',
-            scrub: true,
-          },
-          opacity: 0,
-          y: -50,
-          scale: 0.95,
-        });
-
-        gsap.to('.spline-col', {
-          scrollTrigger: {
-            trigger: '#hero',
-            start: 'top top',
-            end: 'bottom top',
-            scrub: true,
-          },
-          opacity: 0,
-          scale: 0.9,
-        });
-      }
-
-      // Nav appears after hero
-      const hero = document.getElementById('hero');
-      if (hero) {
-        ScrollTrigger.create({
-          trigger: hero,
-          start: 'bottom 20%',
-          onEnter: () => {
-            gsap.to('#site-nav', {
-              opacity: 1,
-              y: 0,
-              pointerEvents: 'auto',
-              duration: 0.4,
-              ease: 'power2.out',
-            });
-          },
-          onLeaveBack: () => {
-            gsap.to('#site-nav', {
-              opacity: 0,
-              y: '-100%',
-              pointerEvents: 'none',
-              duration: 0.4,
-              ease: 'power2.in',
-            });
-          },
-        });
-      }
-
-      // Page thread progress
-      gsap.to('#page-thread', {
-        scrollTrigger: {
-          trigger: document.documentElement,
-          start: 'top top',
-          end: 'bottom bottom',
-          scrub: true,
-        },
-        scaleY: 1,
-        ease: 'none',
+      const reveal = (el) => el.classList.add('in-view');
+      const els = document.querySelectorAll('[data-reveal]');
+      // Immediately show anything already on screen (hash jumps / back-nav),
+      // then observe the rest for first-visit scroll reveals.
+      els.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.top < window.innerHeight * 0.98 && r.bottom > 0) reveal(el);
       });
-
-      // Statement word reveal — CSS sticky handles pinning; GSAP only animates
-      if (desktopMQ.matches) {
-        const words = gsap.utils.toArray<HTMLElement>('.statement-word');
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: '.statement-pin',
-            start: 'top top',
-            end: 'bottom bottom',
-            scrub: 1,
-          },
-        });
-
-        words.forEach((word, i) => {
-          tl.to(word, { opacity: 1, duration: 0.5 }, i * 0.15);
-        });
-
-        tl.to('.statement-rule', { scaleX: 1, duration: 0.8 }, '+=0.2');
-        tl.to('.statement-caption', { opacity: 1, y: 0, duration: 0.8 }, '-=0.4');
-      }
-
-      // Principles horizontal scroll
-      if (desktopMQ.matches) {
-        const track = document.getElementById('principles-track');
-        if (track) {
-          gsap.to(track, {
-            scrollTrigger: {
-              trigger: '.principles-pin',
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 1,
-            },
-            x: () => -(track.scrollWidth - window.innerWidth + 120),
-            ease: 'none',
-          });
-        }
-      }
-
-      // Product window scale-up
-      if (desktopMQ.matches) {
-        gsap.fromTo(
-          '#product-window',
-          { scale: 0.8 },
-          {
-            scrollTrigger: {
-              trigger: '.product-pin',
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 1,
-            },
-            scale: 1,
-            ease: 'none',
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              reveal(entry.target);
+              io.unobserve(entry.target);
+            }
           }
-        );
+        }, { threshold: 0.15, rootMargin: '0px 0px -6% 0px' });
+        els.forEach((el) => {
+          if (!el.classList.contains('in-view')) io.observe(el);
+        });
+        signal.addEventListener('abort', () => io.disconnect());
+      } else {
+        els.forEach(reveal);
       }
 
-      window.addEventListener('resize', () => ScrollTrigger.refresh());
-    }
+      // Fixed nav + scroll-progress chrome.
+      const nav = document.querySelector('[data-nav]');
+      const hero = document.querySelector('.hero');
+      const heroPin = document.querySelector('.hero-pin');
+      const thread = document.querySelector('[data-page-thread]');
+
+      // Move 1 — scroll-driven hero dissolve
+      const heroCopyEl = document.querySelector('.hero .copy');
+      const heroSubtextEl = document.querySelector('.hero .subtext');
+      const heroCtasEl = document.querySelector('.hero .ctas');
+      const heroTypeHintEl = document.querySelector('.hero .type-hint');
+      const heroSplineEl = document.querySelector('.hero .spline-col');
+      const reduceMotion = false;
+      const desktopMQ = window.matchMedia('(min-width: 1024px)');
+      const clamp01 = (n) => Math.max(0, Math.min(1, n));
+      const smoothstep = (e0, e1, x) => {
+        const t = clamp01((x - e0) / (e1 - e0));
+        return t * t * (3 - 2 * t);
+      };
+
+      // Move 2 / 3 / 4 elements
+      const statementPin = document.querySelector('.statement-pin');
+      const statementWords = document.querySelectorAll('.statement-line .word');
+      const statementCaption = document.querySelector('.section--statement .statement-caption');
+      const principlesPin = document.querySelector('.principles-pin');
+      const principlesTrack = document.querySelector('.principles-pin .principles-grid');
+
+      // Cache layout positions once instead of querying getBoundingClientRect()
+      // per-frame for each pin. getBoundingClientRect() forces a synchronous
+      // layout, and doing it 4x per scroll frame (once for each pin) created
+      // layout-thrashing on top of the style writes that follow it. Cached
+      // offsetTop/offsetHeight + window.scrollY = zero forced layouts.
+      const positions = {};
+      const computePositions = () => {
+        positions.heroTop = hero ? hero.offsetTop : 0;
+        positions.heroHeight = hero ? hero.offsetHeight : 0;
+        positions.stmtTop = statementPin ? statementPin.offsetTop : 0;
+        positions.stmtHeight = statementPin ? statementPin.offsetHeight : 0;
+        positions.prinTop = principlesPin ? principlesPin.offsetTop : 0;
+        positions.prinHeight = principlesPin ? principlesPin.offsetHeight : 0;
+        positions.vpH = window.innerHeight;
+        positions.docH = Math.max(0, document.documentElement.scrollHeight - positions.vpH);
+        positions.heroEnd = heroPin
+          ? heroPin.offsetTop + heroPin.offsetHeight
+          : (hero ? hero.offsetTop + hero.offsetHeight : 0);
+      };
+      computePositions();
+      window.addEventListener('resize', computePositions, { passive: true, signal });
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(computePositions);
+      }
+
+      const updateHeroPin = () => {
+        if (!hero || reduceMotion || !desktopMQ.matches) return;
+        if (positions.heroHeight <= 0) return;
+        const p = clamp01((window.scrollY - positions.heroTop) / positions.heroHeight);
+        const exitA = smoothstep(0.10, 0.45, p);
+        const exitB = smoothstep(0.20, 0.75, p);
+        const exitC = smoothstep(0.30, 0.90, p);
+        if (heroSubtextEl) heroSubtextEl.style.transform = 'translateY(' + (exitA * 18) + 'px)';
+        if (heroCtasEl) heroCtasEl.style.transform = 'translateY(' + (exitA * 24) + 'px)';
+        if (heroTypeHintEl) heroTypeHintEl.style.transform = 'translateY(' + (exitA * 24) + 'px)';
+        if (heroCopyEl) {
+          heroCopyEl.style.opacity = 1 - exitB;
+          heroCopyEl.style.transform = 'translateY(' + (-exitB * 22) + 'px)';
+        }
+        if (heroSplineEl) {
+          heroSplineEl.style.opacity = 1 - exitC;
+          heroSplineEl.style.transform = 'scale(' + (1 - 0.06 * exitC) + ')';
+        }
+      };
+
+      const updateStatementPin = () => {
+        if (!statementPin || reduceMotion || !desktopMQ.matches) return;
+        const range = positions.stmtHeight - positions.vpH;
+        if (range <= 0) return;
+        const p = clamp01((window.scrollY - positions.stmtTop) / range);
+        const startGap = 0.10;
+        const span = 0.18;
+        statementWords.forEach((w, i) => {
+          const wp = smoothstep(i * startGap, i * startGap + span, p);
+          w.style.opacity = (0.32 + 0.68 * wp).toFixed(3);
+        });
+        if (statementCaption) {
+          const cp = smoothstep(0.72, 0.95, p);
+          statementCaption.style.opacity = cp.toFixed(3);
+          statementCaption.style.transform = 'translateY(' + ((1 - cp) * 16).toFixed(1) + 'px)';
+        }
+      };
+
+      const updatePrinciplesPin = () => {
+        if (!principlesPin || !principlesTrack || reduceMotion || !desktopMQ.matches) return;
+        const range = positions.prinHeight - positions.vpH;
+        if (range <= 0) return;
+        const p = clamp01((window.scrollY - positions.prinTop) / range);
+        principlesTrack.style.transform = 'translateX(' + (-p * 200).toFixed(2) + 'vw)';
+      };
+
+      let ticking = false;
+      const onScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          updateHeroPin();
+          updateStatementPin();
+          updatePrinciplesPin();
+          if (thread && positions.docH > 0) {
+            const pct = window.scrollY / positions.docH;
+            thread.style.transform = 'scaleY(' + Math.min(1, Math.max(0, pct)) + ')';
+          }
+          if (nav && hero) {
+            nav.classList.toggle('is-visible', window.scrollY > positions.heroEnd * 0.85);
+          }
+          ticking = false;
+        });
+      };
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true, signal });
+      window.addEventListener('resize', onScroll, { passive: true, signal });
+    })();
   </script>
 </LumenLayout>

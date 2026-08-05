@@ -1,95 +1,107 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import PostHog from '../components/posthog.astro';
 import '../styles/lumen.css';
 
-const { title = 'Lumen — AI that lives on your desktop' } = Astro.props;
+const { title = 'Elrich — Portfolio' } = Astro.props;
+
+/* Case pages: open from the bottom, close top→down (sheet drops away). */
+const sheet = {
+  forwards: {
+    old: {
+      name: 'lumenSheetIdle',
+      duration: '0.6s',
+      easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      fillMode: 'both',
+    },
+    new: {
+      name: 'lumenSheetIn',
+      duration: '0.6s',
+      easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      fillMode: 'both',
+    },
+  },
+  backwards: {
+    old: {
+      name: 'lumenSheetOut',
+      duration: '0.5s',
+      easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      fillMode: 'both',
+    },
+    new: {
+      name: 'lumenSheetIdle',
+      duration: '0.5s',
+      easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      fillMode: 'both',
+    },
+  },
+};
 ---
 
 <!doctype html>
-<html lang="en" class="lumen-site">
+<html lang="en" transition:name="lumen-sheet" transition:animate={sheet}>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
-    <meta name="description" content="AI desktop companion that lives where you work." />
+    <meta name="description" content="Designer & builder. Interfaces, experiments, and the quiet spaces between." />
     <link rel="icon" type="image/svg+xml" href="/e.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://prod.spline.design" crossorigin />
+    <link rel="preconnect" href="https://unpkg.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap"
       rel="stylesheet"
     />
+    <ClientRouter />
   </head>
-  <body id="top" class="min-h-screen bg-lumen-bg text-lumen-fg antialiased">
-    <div class="lumen-noise" aria-hidden="true"></div>
-    <div id="cursor-accent" class="cursor-accent" aria-hidden="true"></div>
+  <body>
+    <div class="page-noise" aria-hidden="true"></div>
+    <div class="page-thread" aria-hidden="true" data-page-thread></div>
 
-    <div
-      id="page-thread"
-      class="fixed top-0 right-6 z-[100] h-screen w-[1.5px] origin-top scale-y-0 bg-lumen-accent pointer-events-none"
-      aria-hidden="true"
-    ></div>
-
-    <nav
-      id="site-nav"
-      class="pointer-events-none fixed top-0 right-0 left-0 z-50 flex h-14 -translate-y-full items-center justify-between gap-6 border-b border-lumen-border bg-lumen-bg/90 px-8 opacity-0 backdrop-blur-md transition-all duration-[380ms] ease-lumen lg:px-16"
-    >
-      <a href="#top" class="flex items-center gap-2 text-[15px] font-medium tracking-tight text-lumen-fg no-underline">
-        <span class="flex h-[22px] w-[22px] items-center justify-center rounded-md bg-lumen-fg text-[13px] font-semibold text-lumen-bg">◆</span>
-        <span>Lumen</span>
+    <header class="site-nav" data-nav aria-label="Site navigation">
+      <a class="site-nav-brand" href="/#top">
+        <span class="logo-mark" aria-hidden="true">◆</span>
+        <span>Elrich</span>
       </a>
-
-      <div class="hidden items-center gap-7 sm:flex">
-        <a href="#features" class="text-[13.5px] text-lumen-fg-muted no-underline transition-colors hover:text-lumen-fg">Features</a>
-        <a href="#changelog" class="text-[13.5px] text-lumen-fg-muted no-underline transition-colors hover:text-lumen-fg">Changelog</a>
-        <a href="#status" class="text-[13.5px] text-lumen-fg-muted no-underline transition-colors hover:text-lumen-fg">Status</a>
+      <nav class="site-nav-links">
+        <a href="/#experience">Work</a>
+        <a href="/#projects">Projects</a>
+        <a href="/#hobbies">Life</a>
+      </nav>
+      <div class="site-nav-actions">
+        <a class="btn btn-primary btn-sm" href="/#cta-heading">Contact</a>
       </div>
+    </header>
 
-      <div class="flex items-center">
-        <a
-          href="#cta"
-          class="inline-flex h-[34px] items-center justify-center rounded-md bg-lumen-accent px-3.5 text-[13px] font-medium text-lumen-bg no-underline transition-all hover:brightness-110"
-        >
-          Get early access
-        </a>
-      </div>
-    </nav>
-
-    <main class="relative z-10">
-      <slot />
-    </main>
+    <slot />
 
     <PostHog />
 
-    <script>
-      const accent = document.getElementById('cursor-accent');
-      const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-
-      if (accent && canHover) {
-        let x = 0;
-        let y = 0;
-        let raf = 0;
-
-        const render = () => {
-          accent.style.transform = `translate3d(${x}px, ${y}px, 0) scale(1)`;
-          raf = 0;
-        };
-
-        window.addEventListener(
-          'pointermove',
-          (event) => {
-            x = event.clientX;
-            y = event.clientY;
-            accent.classList.add('is-active');
-            if (!raf) raf = requestAnimationFrame(render);
-          },
-          { passive: true }
-        );
-
-        window.addEventListener('pointerleave', () => {
-          accent.classList.remove('is-active');
+    <script is:inline>
+      // Soft navigations (case study ↔ home) swap the DOM without a full
+      // reload. [data-reveal] starts at opacity:0 — without re-revealing
+      // here, the homepage looks like a black screen after "Back".
+      document.addEventListener('astro:after-swap', function () {
+        document.querySelectorAll('[data-reveal]').forEach(function (el) {
+          el.style.transition = 'none';
+          el.classList.add('in-view');
         });
-      }
+      });
+
+      // Link clicks are "forward" by default, so ← Back was sliding the
+      // next page up from the bottom. Leaving a case page should always
+      // dismiss top→down; entering one should always rise from the bottom.
+      document.addEventListener('astro:before-preparation', function (event) {
+        var isCasePath = function (pathname) {
+          return pathname.indexOf('/projects/') === 0 || pathname.indexOf('/experience/') === 0;
+        };
+        var fromCase = !!document.querySelector('.case-study');
+        var toCase = isCasePath(event.to.pathname);
+        if (fromCase && !toCase) event.direction = 'back';
+        if (!fromCase && toCase) event.direction = 'forward';
+      });
     </script>
   </body>
 </html>

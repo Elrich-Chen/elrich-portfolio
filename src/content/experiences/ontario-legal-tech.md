@@ -1,15 +1,20 @@
 ---
 role: Software Developer
-company: Ontario Legal Tech | Personal Injury Law Startup
+company: Ontario Legal Tech
 start: 2025-02
 end: 2025-05
-location: Toronto/Remote
+dates: "2025"
+location: Toronto / Remote
+tagline: Legal software tools in TypeScript and Next.js
 bullets:
-  - Enabled lawyers to process cases efficiently using TypeScript, Next.js to engineer legal software tools.
-  - Improved team effectiveness by writing documentation for 2 tools to streamline developer handoffs.
-  - Applied UI/UX principles to redesign homepage and improve adoption of tools among non-technical staff.
+  - Enabled lawyers to process cases efficiently with TypeScript and Next.js tooling
+  - Wrote documentation for 2 tools to streamline developer handoffs
+  - Redesigned the homepage to improve adoption among non-technical staff
+tags:
+  - typescript
+  - nextjs
+archived: true
+order: 11
 ---
 
-Legal software tooling across frontend + documentation.
-
-
+Legal software tools in TypeScript and Next.js — docs, handoffs, and UI polish for non-technical staff.

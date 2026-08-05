@@ -1,0 +1,55 @@
+---
+import { getCollection } from 'astro:content';
+import LumenLayout from '../../layouts/LumenLayout.astro';
+import CaseStudy from '../../components/lumen/CaseStudy.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await project.render();
+const {
+  name,
+  tagline,
+  category,
+  image,
+  year,
+  role,
+  duration,
+  tags,
+  highlights,
+  href,
+  deployed,
+} = project.data;
+
+const meta = [role, year, duration].filter(Boolean) as string[];
+---
+
+<LumenLayout title={`${name} — Elrich`}>
+  <CaseStudy
+    title={name}
+    tagline={tagline}
+    eyebrow={`— Case Study${category ? ` · ${category}` : ''}`}
+    backHref="/#projects"
+    backLabel="← Projects"
+    meta={meta}
+    live={Boolean(deployed)}
+    image={image}
+    imageAlt={`${name} preview`}
+    externalHref={href}
+    externalLabel="Open project →"
+    highlights={highlights ?? []}
+    tags={tags ?? []}
+    ctaHref={href}
+    ctaLabel="Visit project"
+    footerBackHref="/#projects"
+    footerBackLabel="← Back to projects"
+  >
+    <Content />
+  </CaseStudy>
+</LumenLayout>

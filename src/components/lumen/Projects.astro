@@ -1,0 +1,247 @@
+---
+import { getCollection } from 'astro:content';
+import { getImage } from 'astro:assets';
+
+const rawProjects = (await getCollection('projects'))
+  .sort((a, b) => {
+    const ao = a.data.order ?? 999;
+    const bo = b.data.order ?? 999;
+    if (ao !== bo) return ao - bo;
+    return (b.data.year ?? '').localeCompare(a.data.year ?? '');
+  })
+  .slice(0, 8);
+
+// project.data.image is a plain public/ path string (content collection
+// schema predates astro:assets adoption). Match it against imported
+// src/assets copies by filename so the hover-preview thumbnail still goes
+// through Astro's real image pipeline (small, optimized webp) instead of
+// hotlinking the multi-megabyte originals — those decode-cost lessons from
+// the hobbies section apply just as much to a cursor-following tooltip.
+const previewSources = import.meta.glob('/src/assets/projects/*', { eager: true });
+
+const projects = await Promise.all(
+  rawProjects.map(async (project) => {
+    const filename = project.data.image?.split('/').pop();
+    const mod = filename ? previewSources[`/src/assets/projects/${filename}`] : null;
+    let previewSrc = '';
+    if (mod?.default) {
+      const optimized = await getImage({ src: mod.default, width: 480, format: 'webp', quality: 65 });
+      previewSrc = optimized.src;
+    }
+    return { ...project, previewSrc };
+  })
+);
+---
+
+<section class="section section--projects" id="projects" aria-labelledby="projects-heading">
+  <div class="section-inner projects-inner" data-reveal>
+    <div class="section-head">
+      <p class="section-index" aria-hidden="true">— 03 / 05</p>
+      <p class="eyebrow">— Projects</p>
+      <div class="projects-heading-row">
+        <h2 id="projects-heading" class="projects-h2">
+          Selected <em class="accent">work</em>.
+        </h2>
+        <div class="projects-spline" aria-hidden="true" data-projects-spline>
+          <canvas id="projects-spline-canvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <p class="projects-caption">Hover a row. Click through for the full case study.</p>
+
+    <ul class="project-list" role="list" data-project-list>
+      {projects.map((project) => (
+        <li>
+          <a
+            class="project-row"
+            href={`/projects/${project.slug}`}
+            data-project-row
+            data-preview-src={project.previewSrc}
+          >
+            <span class="project-row-name">{project.data.name}</span>
+            <span class="project-row-tagline">
+              {project.data.tagline ?? project.data.category ?? 'Case study'}
+            </span>
+            <span class="project-row-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <div class="project-preview" data-project-preview aria-hidden="true">
+      <img class="project-preview-img" data-project-preview-img alt="" decoding="async" />
+    </div>
+  </div>
+</section>
+
+<script type="module" is:inline>
+  (function () {
+    const isTouch = window.matchMedia('(hover: none)').matches;
+    const wrap = document.querySelector('[data-projects-spline]');
+    const canvas = document.getElementById('projects-spline-canvas');
+    const section = document.querySelector('.section--projects');
+    if (isTouch || !wrap || !canvas || !section) {
+      if (wrap) wrap.style.display = 'none';
+      return;
+    }
+
+    // Zoom is a fixed ratio, independent of the canvas's CSS pixel size —
+    // this was tuned for the old ~100px icon-scale container. Now that the
+    // container is ~300px+, it needs to zoom in much closer (higher value)
+    // or the cube just floats small in a much bigger box of empty canvas.
+    const CAMERA_ZOOM = 0.62;
+    let app;
+
+    import('https://unpkg.com/@splinetool/runtime/build/runtime.js')
+      .then(({ Application }) => {
+        app = new Application(canvas);
+        return app.load('https://prod.spline.design/LEvjG3OETYd2GsRw/scene.splinecode');
+      })
+      .then(() => {
+        try { app.setBackgroundColor?.('#080808'); } catch (e) {}
+
+        try {
+          const candidates = [app?._scene, app?.scene, app?._renderer?.scene].filter(Boolean);
+          const findCamera = (root) => {
+            let found = null;
+            root.traverse?.((obj) => {
+              if (found) return;
+              if (obj.isCamera || obj.type?.endsWith('Camera')) found = obj;
+            });
+            return found;
+          };
+          let cam = app?._camera || app?.camera || null;
+          for (const root of candidates) {
+            if (cam) break;
+            cam = findCamera(root);
+          }
+          if (cam) {
+            if (cam.isOrthographicCamera || cam.type === 'OrthographicCamera') {
+              cam.zoom = (cam.zoom || 1) * CAMERA_ZOOM;
+              cam.updateProjectionMatrix?.();
+            } else if (cam.position) {
+              const f = 1 / CAMERA_ZOOM;
+              cam.position.x *= f;
+              cam.position.y *= f;
+              cam.position.z *= f;
+              cam.updateProjectionMatrix?.();
+            }
+          }
+        } catch (e) {
+          console.warn('Projects Spline zoom skipped:', e);
+        }
+
+        if ('IntersectionObserver' in window) {
+          let active = true;
+          const tryPause = () => {
+            try {
+              if (typeof app.stop === 'function') { app.stop(); return; }
+              if (typeof app.pause === 'function') { app.pause(); return; }
+            } catch (e) {}
+          };
+          const tryResume = () => {
+            try {
+              if (typeof app.play === 'function') { app.play(); return; }
+              if (typeof app.start === 'function') { app.start(); return; }
+            } catch (e) {}
+          };
+          const io = new IntersectionObserver((entries) => {
+            const inView = entries[0].isIntersecting;
+            if (inView === active) return;
+            active = inView;
+            wrap.style.visibility = inView ? '' : 'hidden';
+            if (inView) tryResume(); else tryPause();
+          }, { rootMargin: '80px' });
+          io.observe(section);
+        }
+      })
+      .catch((err) => {
+        console.error('Projects Spline failed:', err);
+        wrap.style.display = 'none';
+      });
+  })();
+</script>
+
+<script is:inline data-astro-rerun>
+  (function () {
+    if (window.__lumenProjectPreviewAbort) window.__lumenProjectPreviewAbort.abort();
+    const ac = new AbortController();
+    window.__lumenProjectPreviewAbort = ac;
+    const { signal } = ac;
+
+    const list = document.querySelector('[data-project-list]');
+    const preview = document.querySelector('[data-project-preview]');
+    const previewImg = document.querySelector('[data-project-preview-img]');
+    if (!list || !preview || !previewImg) return;
+
+    // Cursor-following image tooltips only make sense with a real pointer —
+    // skip entirely on touch so there's no dead hover state to fight.
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+    const rows = Array.from(list.querySelectorAll('[data-project-row]'));
+    let activeRow = null;
+    let targetX = 0;
+    let targetY = 0;
+    let rafId = null;
+
+    const OFFSET_X = 24;
+    const OFFSET_Y = 24;
+
+    const applyPosition = () => {
+      rafId = null;
+      const rect = preview.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      let x = targetX + OFFSET_X;
+      let y = targetY + OFFSET_Y;
+      // Keep it fully on-screen instead of letting it clip off the right/
+      // bottom edge when hovering rows near the edge of the viewport.
+      if (x + rect.width > vw - 12) x = targetX - rect.width - OFFSET_X;
+      if (y + rect.height > vh - 12) y = targetY - rect.height - OFFSET_Y;
+      x = Math.max(12, x);
+      y = Math.max(12, y);
+      preview.style.transform = 'translate3d(' + x + 'px, ' + y + 'px, 0)';
+    };
+
+    const queuePosition = () => {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(applyPosition);
+    };
+
+    const onPointerMove = (event) => {
+      targetX = event.clientX;
+      targetY = event.clientY;
+      queuePosition();
+    };
+
+    rows.forEach((row) => {
+      const src = row.getAttribute('data-preview-src');
+      if (!src) return;
+
+      row.addEventListener('pointerenter', (event) => {
+        activeRow = row;
+        previewImg.src = src;
+        targetX = event.clientX;
+        targetY = event.clientY;
+        applyPosition();
+        preview.classList.add('is-active');
+      }, { signal });
+
+      row.addEventListener('pointerleave', () => {
+        if (activeRow !== row) return;
+        activeRow = null;
+        preview.classList.remove('is-active');
+      }, { signal });
+    });
+
+    list.addEventListener('pointermove', (event) => {
+      if (!activeRow) return;
+      onPointerMove(event);
+    }, { signal, passive: true });
+
+    signal.addEventListener('abort', () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    });
+  })();
+</script>

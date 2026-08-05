@@ -17,9 +17,16 @@ const experience = defineCollection({
     logo: z.string().optional(), // path in /public/, e.g., /logos/company.png
     start: z.string(), // e.g., 2024-05
     end: z.string().optional(),
+    dates: z.string().optional(), // display override, e.g. "2024 — Present"
     location: z.string().optional(),
+    tagline: z.string().optional(),
+    image: z.string().optional(),
+    gallery: z.array(z.string()).optional(), // extra photos shown on the case page only
+    tags: z.array(z.string()).default([]),
     bullets: z.array(z.string()).default([]),
     highlights: z.array(z.string()).optional(),
+    archived: z.boolean().default(false),
+    order: z.number().optional(),
   }),
 });
 

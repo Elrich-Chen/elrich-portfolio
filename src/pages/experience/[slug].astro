@@ -1,0 +1,60 @@
+---
+import { getCollection } from 'astro:content';
+import LumenLayout from '../../layouts/LumenLayout.astro';
+import CaseStudy from '../../components/lumen/CaseStudy.astro';
+import { formatExperienceDates } from '../../lib/experience';
+
+export async function getStaticPaths() {
+  const experiences = await getCollection('experiences');
+  return experiences.map((experience) => ({
+    params: { slug: experience.slug },
+    props: { experience },
+  }));
+}
+
+const { experience } = Astro.props;
+const { Content } = await experience.render();
+const {
+  role,
+  company,
+  url,
+  start,
+  end,
+  dates,
+  location,
+  tagline,
+  image,
+  gallery,
+  tags,
+  bullets,
+  highlights,
+} = experience.data;
+
+const range = formatExperienceDates(start, end, dates);
+const meta = [role, range, location].filter(Boolean) as string[];
+const aside = highlights?.length ? highlights : bullets;
+---
+
+<LumenLayout title={`${company} — Elrich`}>
+  <CaseStudy
+    title={company}
+    tagline={tagline ?? role}
+    eyebrow="— Experience"
+    backHref="/#experience"
+    backLabel="← Experience"
+    meta={meta}
+    image={image}
+    imageAlt={`${company} preview`}
+    gallery={gallery}
+    externalHref={url}
+    externalLabel="Visit org →"
+    highlights={aside}
+    tags={tags ?? []}
+    ctaHref={url}
+    ctaLabel="Visit organization"
+    footerBackHref="/#experience"
+    footerBackLabel="← Back to experience"
+  >
+    <Content />
+  </CaseStudy>
+</LumenLayout>

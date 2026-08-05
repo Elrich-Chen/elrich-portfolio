@@ -1,0 +1,134 @@
+---
+interface Props {
+  title: string;
+  tagline?: string;
+  eyebrow: string;
+  backHref: string;
+  backLabel: string;
+  meta?: string[];
+  live?: boolean;
+  image?: string;
+  imageAlt?: string;
+  gallery?: string[];
+  externalHref?: string;
+  externalLabel?: string;
+  highlights?: string[];
+  tags?: string[];
+  ctaHref?: string;
+  ctaLabel?: string;
+  footerBackHref: string;
+  footerBackLabel: string;
+}
+
+const {
+  title,
+  tagline,
+  eyebrow,
+  backHref,
+  backLabel,
+  meta = [],
+  live = false,
+  image,
+  imageAlt,
+  gallery = [],
+  externalHref,
+  externalLabel = 'Open →',
+  highlights = [],
+  tags = [],
+  ctaHref,
+  ctaLabel = 'Visit',
+  footerBackHref,
+  footerBackLabel,
+} = Astro.props;
+
+const hasAside = highlights.length > 0 || tags.length > 0 || Boolean(ctaHref);
+---
+
+<main class="case-study" id="top">
+  <header class="case-top">
+    <a class="case-back" href={backHref}>{backLabel}</a>
+    <a class="logo case-logo" href="/">
+      <span class="logo-mark" aria-hidden="true">◆</span>
+      <span>Elrich</span>
+    </a>
+  </header>
+
+  <div class="case-hero">
+    <p class="eyebrow">{eyebrow}</p>
+    <h1 class="case-title">{title}</h1>
+    {tagline && <p class="case-tagline">{tagline}</p>}
+
+    {(meta.length > 0 || live) && (
+      <div class="case-meta">
+        {meta.map((item) => (
+          <span>{item}</span>
+        ))}
+        {live && <span class="case-meta-live">Live</span>}
+      </div>
+    )}
+  </div>
+
+  {image && (
+    <div class="case-media">
+      <figure class="case-figure">
+        <img src={image} alt={imageAlt ?? `${title} preview`} loading="eager" />
+      </figure>
+      {externalHref && (
+        <a
+          class="case-figure case-figure--link"
+          href={externalHref}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="case-figure-label">{externalLabel}</span>
+        </a>
+      )}
+    </div>
+  )}
+
+  {gallery.length > 0 && (
+    <div class="case-gallery">
+      {gallery.map((src) => (
+        <img src={src} alt={`${title} photo`} loading="lazy" decoding="async" />
+      ))}
+    </div>
+  )}
+
+  <div class="case-body">
+    <div class="case-prose">
+      <slot />
+    </div>
+
+    {hasAside && (
+      <aside class="case-aside">
+        {highlights.length > 0 && (
+          <>
+            <p class="case-aside-label">Highlights</p>
+            <ul>
+              {highlights.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </>
+        )}
+        {tags.length > 0 && (
+          <div class="case-tags">
+            {tags.map((tag) => (
+              <span class="tag">{tag}</span>
+            ))}
+          </div>
+        )}
+        {ctaHref && (
+          <a class="btn btn-primary" href={ctaHref} target="_blank" rel="noopener noreferrer">
+            {ctaLabel}
+          </a>
+        )}
+      </aside>
+    )}
+  </div>
+
+  <nav class="case-footer-nav" aria-label="Case study navigation">
+    <a href={footerBackHref}>{footerBackLabel}</a>
+    <a href="/#cta-heading">Get in touch →</a>
+  </nav>
+</main>

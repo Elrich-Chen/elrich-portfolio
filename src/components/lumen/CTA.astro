@@ -1,111 +1,85 @@
 ---
+const formspreeId = import.meta.env.PUBLIC_FORMSPREE_FORM_ID ?? '';
 ---
 
-<section id="cta" class="section--cta relative py-36 px-8 lg:px-16 overflow-hidden">
-  <p class="section-index absolute top-16 left-8 lg:left-16 m-0 text-[11px] font-medium tracking-[0.16em] uppercase text-lumen-fg-muted pointer-events-none">— 04 / 04</p>
-  
-  <div class="section-inner max-w-[1100px] mx-auto w-full text-center">
-    <div class="cta-block flex flex-col items-center">
-      <h2 class="statement-line font-serif text-[clamp(52px,8vw,112px)] font-normal leading-[1.02] tracking-[-0.02em] text-lumen-fg m-0">
-        Build with someone in the <span class="text-lumen-accent italic">room.</span>
-      </h2>
-      <p class="cta-subtext text-[18px] text-lumen-fg-muted mt-6 mb-10 max-w-[46ch]">
-        Lumen is free while in beta. Takes 20 seconds to install.
-      </p>
-      
-      <form id="cta-form" class="flex flex-col sm:flex-row gap-3 w-full max-w-[480px]" novalidate>
-        <label for="cta-email" class="sr-only">Email</label>
-        <input 
+<section class="section section--cta" aria-labelledby="cta-heading">
+  <div class="section-inner">
+    <div class="cta-block" data-reveal>
+      <div class="section-head">
+        <p class="section-index" aria-hidden="true">— 05 / 05</p>
+        <h2 id="cta-heading" class="statement-line">
+          Say hello when you're <em class="accent">ready</em>.
+        </h2>
+      </div>
+      <p class="cta-subtext">For collaborations, roles, or a quiet note — drop a line.</p>
+      <form class="cta-form" id="cta-form" novalidate>
+        <label for="cta-email" class="sr-only">Work email</label>
+        <input
+          type="email"
           id="cta-email"
           name="email"
-          type="email" 
+          class="cta-input"
+          placeholder="you@email.com"
           autocomplete="email"
-          placeholder="you@company.com" 
-          class="flex-1 h-12 px-4 rounded-md bg-white bg-opacity-[0.05] border border-white border-opacity-[0.10] text-lumen-fg placeholder:text-lumen-fg-muted/40 focus:outline-none focus:border-lumen-accent/50 transition-all"
           required
         />
-        <!-- Formspree honeypot -->
-        <input type="text" name="_gotcha" class="hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
-        <button type="submit" class="h-12 px-6 rounded-md bg-lumen-accent text-lumen-bg font-semibold hover:brightness-110 transition-all disabled:opacity-70 disabled:cursor-not-allowed">
-          Get early access
-        </button>
+        <input type="text" name="_gotcha" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <button class="btn btn-primary" type="submit">Send message</button>
       </form>
-      <p id="cta-error" class="text-[13px] text-red-400 mt-3 m-0 hidden" role="alert"></p>
-
-      <div class="cta-meta mt-6 flex flex-col gap-4">
-        <p class="text-[13px] text-lumen-fg-muted/60">
-          Free during beta · No credit card · macOS & Linux
-        </p>
-        <a href="#demo" class="text-[14px] text-lumen-fg-muted hover:text-lumen-fg transition-colors flex items-center justify-center gap-1.5 no-underline">
-          See it think <span class="text-[18px]">→</span>
-        </a>
+      <p id="cta-error" class="cta-error" role="alert" hidden></p>
+      <div class="cta-meta">
+        <p class="cta-trust">Usually replies within a few days · No newsletter · Just a note</p>
+        <a class="cta-secondary-link" href="#product-heading">See recent work <span aria-hidden="true">→</span></a>
       </div>
-    </div>
-
-    <!-- Logo Wall -->
-    <div class="logo-wall mt-32 flex flex-wrap justify-center items-center gap-12 lg:gap-20 opacity-20 grayscale brightness-200 pointer-events-none">
-      <span class="font-sans font-bold tracking-tight text-[15px] uppercase">Northwind</span>
-      <span class="font-serif italic text-[22px]">bracket</span>
-      <span class="font-sans font-medium tracking-[0.1em] text-[12px] uppercase">Atlas Cloud</span>
-      <span class="font-serif italic text-[22px]">Helix.</span>
-      <span class="font-sans font-semibold tracking-[0.1em] text-[12px] uppercase">Caldera</span>
-      <span class="font-sans font-bold text-[15px] uppercase">Mercator</span>
     </div>
   </div>
 </section>
 
-<footer class="py-12 px-8 lg:px-16 border-t border-white border-opacity-[0.05]">
-  <div class="max-w-lumen-container mx-auto flex flex-col lg:flex-row justify-between items-start gap-12">
-    <div class="footer-brand flex flex-col gap-3">
-      <a href="#top" class="flex items-center gap-2 text-lumen-fg no-underline font-medium text-[15px]">
-        <span class="w-[22px] h-[22px] rounded-md bg-lumen-fg text-lumen-bg flex items-center justify-center font-semibold text-[13px]">◆</span>
-        <span>Lumen</span>
-      </a>
-      <p class="text-[13px] text-lumen-fg-muted">© Lumen 2026 · Made with restraint.</p>
-    </div>
-
-    <div class="footer-links flex gap-16 lg:gap-24">
-      <div class="flex flex-col gap-4">
-        <p class="text-[11px] font-medium uppercase tracking-wider text-lumen-fg-muted">Product</p>
-        <ul class="flex flex-col gap-2 list-none p-0 m-0">
-          <li><a href="#features" class="text-[13.5px] text-lumen-fg-muted hover:text-lumen-fg transition-colors no-underline">Features</a></li>
-          <li><a href="#changelog" class="text-[13.5px] text-lumen-fg-muted hover:text-lumen-fg transition-colors no-underline">Changelog</a></li>
-          <li><a href="#status" class="text-[13.5px] text-lumen-fg-muted hover:text-lumen-fg transition-colors no-underline">Status</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <p class="lg:self-end text-[13px] italic text-lumen-fg-muted font-serif">Built in 2026.</p>
+<footer class="footer">
+  <div class="footer-brand-col">
+    <a class="footer-brand-mark" href="#top">
+      <span class="logo-mark" aria-hidden="true">◆</span>
+      <span>Elrich</span>
+    </a>
+    <p class="footer-tagline">© Elrich 2026 · Made with restraint.</p>
   </div>
+
+  <nav class="footer-links-grouped" aria-label="Footer">
+    <div class="footer-link-group">
+      <p class="footer-link-heading">Product</p>
+      <ul>
+        <li><a href="#experience-heading">Work</a></li>
+        <li><a href="#projects-heading">Projects</a></li>
+        <li><a href="#product-heading">Hobbies</a></li>
+      </ul>
+    </div>
+    <div class="footer-link-group">
+      <p class="footer-link-heading">Company</p>
+      <ul>
+        <li><a href="https://twitter.com/lumen" rel="noopener noreferrer">Twitter</a></li>
+        <li><a href="https://github.com/lumen" rel="noopener noreferrer">GitHub</a></li>
+        <li><a href="mailto:hello@lumen.dev">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <p class="footer-signoff" aria-hidden="true">Built in 2026.</p>
 </footer>
 
-<script define:vars={{ formspreeId: import.meta.env.PUBLIC_FORMSPREE_FORM_ID ?? '' }}>
+<script define:vars={{ formspreeId }}>
   const form = document.getElementById('cta-form');
   const errorEl = document.getElementById('cta-error');
 
   function showError(message) {
     if (!errorEl) return;
+    errorEl.hidden = false;
     errorEl.textContent = message;
-    errorEl.classList.remove('hidden');
   }
 
   function clearError() {
     if (!errorEl) return;
+    errorEl.hidden = true;
     errorEl.textContent = '';
-    errorEl.classList.add('hidden');
-  }
-
-  function setSuccess(input, btn) {
-    if (btn) {
-      btn.textContent = 'On the list';
-      btn.disabled = true;
-    }
-    if (input) {
-      input.value = '';
-      input.placeholder = "We'll be in touch.";
-      input.blur();
-      input.disabled = true;
-    }
   }
 
   if (form) {
@@ -113,7 +87,7 @@
       e.preventDefault();
       clearError();
 
-      const input = form.querySelector('#cta-email');
+      const input = form.querySelector('.cta-input');
       const btn = form.querySelector('button[type="submit"]');
       const email = (input?.value || '').trim();
 
@@ -124,14 +98,26 @@
       }
 
       if (!formspreeId) {
-        showError('Waitlist is not configured yet. Set PUBLIC_FORMSPREE_FORM_ID in .env.');
+        console.warn('Set PUBLIC_FORMSPREE_FORM_ID to persist contact emails.');
+        if (btn) {
+          btn.textContent = 'Sent';
+          btn.disabled = true;
+          btn.style.opacity = '0.85';
+        }
+        if (input) {
+          input.value = '';
+          input.placeholder = "Thanks — I'll reply soon.";
+          input.blur();
+        }
+        window.posthog?.identify(email, { email });
+        window.posthog?.capture('contact_submit', { email, persisted: false });
         return;
       }
 
-      const prevLabel = btn?.textContent || 'Get early access';
+      const prevLabel = btn?.textContent || 'Send message';
       if (btn) {
         btn.disabled = true;
-        btn.textContent = 'Joining…';
+        btn.textContent = 'Sending…';
       }
 
       try {
@@ -143,14 +129,21 @@
           },
           body: JSON.stringify({ email }),
         });
-
-        if (!res.ok) {
-          throw new Error('request_failed');
-        }
+        if (!res.ok) throw new Error('request_failed');
 
         window.posthog?.identify(email, { email });
-        window.posthog?.capture('waitlist_signup', { email });
-        setSuccess(input, btn);
+        window.posthog?.capture('contact_submit', { email, persisted: true });
+
+        if (btn) {
+          btn.textContent = 'Sent';
+          btn.style.opacity = '0.85';
+        }
+        if (input) {
+          input.value = '';
+          input.placeholder = "Thanks — I'll reply soon.";
+          input.blur();
+          input.disabled = true;
+        }
       } catch {
         if (btn) {
           btn.disabled = false;

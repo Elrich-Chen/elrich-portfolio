@@ -13,11 +13,11 @@ AI desktop companion marketing site — Astro + Tailwind + GSAP.
 
 ## Structure
 
-- `src/pages/index.astro` — Lumen landing page
-- `src/components/lumen/` — page sections (Hero → Statement → Principles → Product → Changelog → Status → CTA)
-- `src/layouts/LumenLayout.astro` — site shell
-- `src/content/lumen-changelog/` · `src/content/lumen-status/` — product updates (wired)
-- `src/content/` — also retains unused portfolio collections
+- `src/pages/index.astro` — Lumen landing (Kombai inspiration port)
+- `src/components/lumen/` — Hero → Statement → Principles → Product → CTA
+- `src/layouts/LumenLayout.astro` — site shell + nav
+- `src/styles/lumen.css` — design CSS from Kombai source
+- `src/content/` — retained collections (not used on homepage)
 - `public/photos/` · `public/logos/` · `public/projects/` — retained assets
 - `.kombai/` — Kombai design source
 
@@ -26,4 +26,4 @@ AI desktop companion marketing site — Astro + Tailwind + GSAP.
 Copy `.env.example` to `.env`:
 
 - `PUBLIC_POSTHOG_*` — analytics (optional)
-- `PUBLIC_FORMSPREE_FORM_ID` — waitlist backend (required for CTA submissions)
+- `PUBLIC_FORMSPREE_FORM_ID` — waitlist backend (optional; CTA still shows success UI without it)
