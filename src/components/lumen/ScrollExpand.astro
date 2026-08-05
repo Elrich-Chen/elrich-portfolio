@@ -114,24 +114,31 @@ const rootClass = [
   import { mountScrollExpand } from '../../lib/scrollExpand';
 
   type Handle = { destroy: () => void };
-  const w = window as Window & { __lumenScrollExpand?: Handle[] };
+  type ScrollWin = Window & {
+    __lumenScrollExpand?: Handle[];
+    __lumenScrollExpandBound?: boolean;
+  };
+
+  const teardownScrollExpand = () => {
+    const w = window as ScrollWin;
+    if (!w.__lumenScrollExpand) return;
+    for (const h of w.__lumenScrollExpand) h.destroy();
+    w.__lumenScrollExpand = [];
+  };
 
   const mountAll = () => {
-    if (w.__lumenScrollExpand) {
-      for (const h of w.__lumenScrollExpand) h.destroy();
-    }
+    teardownScrollExpand();
     const handles: Handle[] = [];
     document.querySelectorAll<HTMLElement>('[data-scroll-expand]').forEach((el) => {
       handles.push(mountScrollExpand(el));
     });
-    w.__lumenScrollExpand = handles;
+    (window as ScrollWin).__lumenScrollExpand = handles;
   };
 
   mountAll();
-  document.addEventListener('astro:after-swap', mountAll);
-  document.addEventListener('astro:before-swap', () => {
-    if (!w.__lumenScrollExpand) return;
-    for (const h of w.__lumenScrollExpand) h.destroy();
-    w.__lumenScrollExpand = [];
-  });
+  if (!(window as ScrollWin).__lumenScrollExpandBound) {
+    (window as ScrollWin).__lumenScrollExpandBound = true;
+    document.addEventListener('astro:page-load', mountAll);
+    document.addEventListener('astro:before-swap', teardownScrollExpand);
+  }
 </script>

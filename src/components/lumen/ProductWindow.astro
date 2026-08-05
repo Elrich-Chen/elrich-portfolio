@@ -654,15 +654,35 @@ const hobbies = [
 <script>
   import { mountBorderGlow } from '../../lib/borderGlow';
 
-  const el = document.querySelector('[data-hobby-border-glow]');
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  type GlowHandle = { destroy: () => void };
+  type GlowWin = Window & {
+    __lumenHobbyBorderGlow?: GlowHandle;
+    __lumenHobbyBorderGlowBound?: boolean;
+  };
 
-  type GlowWin = Window & { __lumenHobbyBorderGlow?: { destroy: () => void } };
-  const prev = (window as GlowWin).__lumenHobbyBorderGlow;
-  if (prev) prev.destroy();
+  function teardownHobbyGlow() {
+    const w = window as GlowWin;
+    w.__lumenHobbyBorderGlow?.destroy();
+    w.__lumenHobbyBorderGlow = undefined;
+  }
 
-  if (el instanceof HTMLElement && !reduceMotion && canHover) {
+  function initHobbyGlow() {
+    const el = document.querySelector('[data-hobby-border-glow]');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+    if (!(el instanceof HTMLElement) || reduceMotion || !canHover) {
+      teardownHobbyGlow();
+      return;
+    }
+
+    // Already live on this node after a soft-nav remount race.
+    if (el.querySelector('canvas') && (window as GlowWin).__lumenHobbyBorderGlow) {
+      return;
+    }
+
+    teardownHobbyGlow();
+
     const trackRoot = document.querySelector('[data-hobby-body]');
     const handle = mountBorderGlow(el, {
       className: 'hobby-border-glow',
@@ -680,6 +700,12 @@ const hobbies = [
       trackRoot: trackRoot instanceof HTMLElement ? trackRoot : null,
     });
     (window as GlowWin).__lumenHobbyBorderGlow = handle;
-    document.addEventListener('astro:before-swap', () => handle.destroy(), { once: true });
+  }
+
+  initHobbyGlow();
+  if (!(window as GlowWin).__lumenHobbyBorderGlowBound) {
+    (window as GlowWin).__lumenHobbyBorderGlowBound = true;
+    document.addEventListener('astro:page-load', initHobbyGlow);
+    document.addEventListener('astro:before-swap', teardownHobbyGlow);
   }
 </script>

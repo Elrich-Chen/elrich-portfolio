@@ -267,17 +267,46 @@ const toProps = (item: (typeof experiences)[number]) => {
 <script>
   import { mountColorBends } from '../../lib/colorBends';
 
-  const container = document.querySelector('[data-color-bends]');
-  const section = document.querySelector('.section--experience');
-  if (
-    !(container instanceof HTMLElement) ||
-    !(section instanceof HTMLElement) ||
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  ) {
-    if (container instanceof HTMLElement) container.remove();
-  } else {
-    const prev = (window as Window & { __lumenColorBends?: { destroy: () => void } }).__lumenColorBends;
-    if (prev) prev.destroy();
+  type ColorBendsCtl = {
+    destroy: () => void;
+    setPaused: (paused: boolean) => void;
+  };
+
+  type LumenWindow = Window & {
+    __lumenColorBends?: ColorBendsCtl;
+    __lumenColorBendsIo?: IntersectionObserver;
+  };
+
+  function teardownColorBends() {
+    const w = window as LumenWindow;
+    w.__lumenColorBendsIo?.disconnect();
+    w.__lumenColorBendsIo = undefined;
+    w.__lumenColorBends?.destroy();
+    w.__lumenColorBends = undefined;
+  }
+
+  function initColorBends() {
+    const container = document.querySelector('[data-color-bends]');
+    const section = document.querySelector('.section--experience');
+
+    // Leaving the homepage — drop any live WebGL instance.
+    if (!(container instanceof HTMLElement) || !(section instanceof HTMLElement)) {
+      teardownColorBends();
+      return;
+    }
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      teardownColorBends();
+      container.remove();
+      return;
+    }
+
+    // Already mounted on this same DOM node (e.g. duplicate page-load).
+    if (container.querySelector('canvas') && (window as LumenWindow).__lumenColorBends) {
+      return;
+    }
+
+    teardownColorBends();
 
     const handle = mountColorBends(container, {
       colors: ['#ff5c7a', '#8a5cff', '#00ffd1'],
@@ -294,7 +323,7 @@ const toProps = (item: (typeof experiences)[number]) => {
       bandWidth: 6,
       transparent: true,
     });
-    (window as Window & { __lumenColorBends?: { destroy: () => void } }).__lumenColorBends = handle;
+    (window as LumenWindow).__lumenColorBends = handle;
 
     if ('IntersectionObserver' in window) {
       const io = new IntersectionObserver(
@@ -304,8 +333,14 @@ const toProps = (item: (typeof experiences)[number]) => {
         { rootMargin: '80px' }
       );
       io.observe(section);
+      (window as LumenWindow).__lumenColorBendsIo = io;
     }
+  }
 
-    document.addEventListener('astro:before-swap', () => handle.destroy(), { once: true });
+  initColorBends();
+  if (!(window as LumenWindow & { __lumenColorBendsBound?: boolean }).__lumenColorBendsBound) {
+    (window as LumenWindow & { __lumenColorBendsBound?: boolean }).__lumenColorBendsBound = true;
+    document.addEventListener('astro:page-load', initColorBends);
+    document.addEventListener('astro:before-swap', teardownColorBends);
   }
 </script>

@@ -82,27 +82,52 @@ const sheet = {
 
     <script is:inline>
       // Soft navigations (case study ↔ home) swap the DOM without a full
-      // reload. [data-reveal] starts at opacity:0 — without re-revealing
-      // here, the homepage looks like a black screen after "Back".
-      document.addEventListener('astro:after-swap', function () {
-        document.querySelectorAll('[data-reveal]').forEach(function (el) {
-          el.style.transition = 'none';
-          el.classList.add('in-view');
-        });
-      });
+      // reload. Keep reveals + sheet direction + hash scroll consistent.
+      (function () {
+        if (window.__lumenRouterBound) return;
+        window.__lumenRouterBound = true;
 
-      // Link clicks are "forward" by default, so ← Back was sliding the
-      // next page up from the bottom. Leaving a case page should always
-      // dismiss top→down; entering one should always rise from the bottom.
-      document.addEventListener('astro:before-preparation', function (event) {
-        var isCasePath = function (pathname) {
-          return pathname.indexOf('/projects/') === 0 || pathname.indexOf('/experience/') === 0;
-        };
-        var fromCase = !!document.querySelector('.case-study');
-        var toCase = isCasePath(event.to.pathname);
-        if (fromCase && !toCase) event.direction = 'back';
-        if (!fromCase && toCase) event.direction = 'forward';
-      });
+        function revealVisible() {
+          document.querySelectorAll('[data-reveal]').forEach(function (el) {
+            el.style.transition = 'none';
+            el.classList.add('in-view');
+          });
+        }
+
+        function scrollToHash() {
+          var hash = window.location.hash;
+          if (!hash || hash.length < 2) return;
+          var id = decodeURIComponent(hash.slice(1));
+          var target = document.getElementById(id);
+          if (!target) return;
+          // Defer one frame so swapped layout/CSS can settle.
+          requestAnimationFrame(function () {
+            target.scrollIntoView({ behavior: 'instant', block: 'start' });
+          });
+        }
+
+        document.addEventListener('astro:after-swap', function () {
+          revealVisible();
+        });
+
+        document.addEventListener('astro:page-load', function () {
+          revealVisible();
+          scrollToHash();
+        });
+
+        // Link clicks are "forward" by default, so ← Back was sliding the
+        // next page up from the bottom. Leaving a case page should always
+        // dismiss top→down; entering one should always rise from the bottom.
+        document.addEventListener('astro:before-preparation', function (event) {
+          var isCasePath = function (pathname) {
+            return pathname.indexOf('/projects/') === 0 || pathname.indexOf('/experience/') === 0;
+          };
+          var fromCase = !!document.querySelector('.case-study');
+          var toCase = isCasePath(event.to.pathname);
+          if (fromCase && !toCase) event.direction = 'back';
+          if (!fromCase && toCase) event.direction = 'forward';
+        });
+      })();
     </script>
   </body>
 </html>
