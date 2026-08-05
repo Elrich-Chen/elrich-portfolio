@@ -9,12 +9,19 @@ interface Props {
   open?: boolean;
   previewSrc?: string;
   logo?: string;
+  index?: number;
 }
 
-const { id, href, org, title, dates, body, open = false, previewSrc = '', logo = '' } = Astro.props;
+const { id, href, org, title, dates, body, open = false, previewSrc = '', logo = '', index = 0 } = Astro.props;
 ---
 
-<li class="exp-item" data-accordion-item {...(open ? { 'data-open': true } : {})}>
+<li
+  class="exp-item"
+  data-accordion-item
+  data-exp-row
+  style={`--exp-i: ${index}`}
+  {...(open ? { 'data-open': true } : {})}
+>
   <h3 class="exp-heading">
     <div class="exp-row">
       <button

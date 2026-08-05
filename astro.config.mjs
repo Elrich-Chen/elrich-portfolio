@@ -13,7 +13,7 @@ export default defineConfig({
   },
   vite: {
     optimizeDeps: {
-      include: ['gsap', 'gsap/ScrollTrigger'],
+      include: ['gsap', 'gsap/ScrollTrigger', 'three'],
     },
     build: {
       cssCodeSplit: true,

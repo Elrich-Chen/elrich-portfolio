@@ -38,6 +38,8 @@ const project = defineCollection({
     image: z.string().optional(), // Project screenshot/hero image
     tagline: z.string().optional(), // Short 1-line description
     href: z.string().url().optional(),
+    devpost: z.string().url().optional(), // Devpost write-up for hackathon projects
+    linkedin: z.string().url().optional(), // LinkedIn post / write-up
     logo: z.string().optional(), // path in /public/
     year: z.string().optional(),
     tags: z.array(z.string()).default([]),
@@ -45,9 +47,12 @@ const project = defineCollection({
     duration: z.string().optional(), // e.g., "3 months", "Ongoing"
     role: z.string().optional(), // e.g., "Lead Developer", "Full Stack Engineer"
     featured: z.boolean().optional(), // Highlight important projects
+    award: z.string().optional(), // e.g. "Best Use of Gemini"
+    hackathon: z.string().optional(), // e.g. "QHacks", "Hack the Valley"
     deployed: z.boolean().optional(), // Show "Deployed to Production" badge
     order: z.number().optional(), // Custom sort order
     wide: z.boolean().optional(), // Span two columns on projects grid
+    imageFit: z.enum(['cover', 'contain']).optional(), // contain = smaller photo-style hero
   }),
 });
 

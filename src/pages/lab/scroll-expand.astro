@@ -1,0 +1,142 @@
+---
+import LumenLayout from '../../layouts/LumenLayout.astro';
+import ScrollExpand from '../../components/lumen/ScrollExpand.astro';
+import brunoMars from '../../assets/hobbies/music/bruno-mars-1.jpg';
+import brunoMarsPoster from '../../assets/hobbies/music/bruno-mars-video-1-poster.jpg';
+---
+
+<LumenLayout title="Lab — ScrollExpand" robots="noindex, nofollow">
+  <div class="lab-banner">
+    <a class="lab-banner-back" href="/">← Portfolio</a>
+    <p class="lab-banner-meta">Lab · unlisted · React Bits → vanilla</p>
+  </div>
+
+  <ScrollExpand
+    src={brunoMars.src}
+    alt="Bruno Mars concert"
+    title="Built to scale"
+    scrollHint="Scroll"
+    useWindowScroll
+    startWidth={38}
+    startHeight={52}
+    mediaZoom={1.4}
+    scrollDistance={1.35}
+    holdDistance={0.4}
+  >
+    <h2>Every pixel, everywhere</h2>
+    <p>
+      The frame opens up as you scroll and hands the whole stage to your media.
+      Vanilla port — no React required.
+    </p>
+  </ScrollExpand>
+
+  <section class="lab-between">
+    <p class="lab-between-kicker">Same component, self-scroller</p>
+    <p class="lab-between-copy">
+      Nested mode — scroll inside the box instead of the page. Useful when the
+      effect lives mid-page without owning the whole viewport.
+    </p>
+  </section>
+
+  <div class="lab-scroller-frame">
+    <ScrollExpand
+      src="/video/hobbies/bruno-mars-1.mp4"
+      mediaType="video"
+      poster={brunoMarsPoster.src}
+      title="Volume up"
+      scrollHint="Scroll inside"
+      mediaZoom={1.3}
+      startWidth={44}
+      startHeight={56}
+      scrollDistance={1.1}
+      holdDistance={0.25}
+    >
+      <h2>Concert energy, contained</h2>
+      <p>Muted looping video — same expand choreography, own scroll track.</p>
+    </ScrollExpand>
+  </div>
+
+  <section class="lab-footer">
+    <a href="/">Back to portfolio</a>
+  </section>
+</LumenLayout>
+
+<style>
+  .lab-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem clamp(1rem, 4vw, 2.5rem);
+    background: #080808;
+    color: rgba(250, 250, 250, 0.65);
+    font-size: 0.8125rem;
+  }
+
+  .lab-banner-back {
+    color: #fafafa;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+
+  .lab-banner-back:hover {
+    opacity: 0.75;
+  }
+
+  .lab-banner-meta {
+    margin: 0;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 0.6875rem;
+    color: rgba(250, 250, 250, 0.35);
+  }
+
+  .lab-between {
+    padding: clamp(3rem, 8vw, 5.5rem) clamp(1.25rem, 5vw, 3rem);
+    max-width: 36rem;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .lab-between-kicker {
+    margin: 0 0 0.75rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(250, 250, 250, 0.4);
+  }
+
+  .lab-between-copy {
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.55;
+    color: rgba(250, 250, 250, 0.7);
+  }
+
+  .lab-scroller-frame {
+    height: min(78vh, 720px);
+    margin: 0 clamp(1rem, 4vw, 2.5rem) clamp(3rem, 8vw, 5rem);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(250, 250, 250, 0.08);
+  }
+
+  .lab-footer {
+    padding: 2rem 2rem 4rem;
+    text-align: center;
+  }
+
+  .lab-footer a {
+    color: rgba(250, 250, 250, 0.5);
+    font-size: 0.875rem;
+  }
+
+  .lab-footer a:hover {
+    color: #fafafa;
+  }
+
+  :global(body:has(.lab-banner) .site-nav),
+  :global(body:has(.lab-banner) .page-thread) {
+    display: none;
+  }
+</style>

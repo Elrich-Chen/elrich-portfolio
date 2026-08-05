@@ -14,7 +14,7 @@ role: Full-Stack Developer
 duration: "Ongoing"
 featured: true
 deployed: true
-order: 2
+order: 3
 wide: true
 ---
 

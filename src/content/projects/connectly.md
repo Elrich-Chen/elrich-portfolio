@@ -12,6 +12,7 @@ highlights:
   - Integrated Playwright automation to scrape feeds, parse 100+ profiles, and execute agent decisions
 role: Backend Engineer & AI Integration Specialist
 duration: Go On Hacks 2025
+order: 7
 ---
 
 Built an AI-powered content orchestration system integrating LangChain, Redis, and FastAPI for semantic task routing. Developed human-in-the-loop review workflows allowing users to approve, reject, or modify AI-generated content via a React dashboard, with Playwright automation for real-time LinkedIn interaction.

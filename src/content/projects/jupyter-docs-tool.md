@@ -2,6 +2,7 @@
 name: Jupyter Notebook Documentation Tool
 category: "Open Source"
 href: https://github.com/Elrich-Chen/jupyterlab_docs_helper
+linkedin: https://www.linkedin.com/posts/elrich-chen_document-your-code-or-lose-credibility-activity-7377847789801590784-gjdT
 year: "2025"
 tags: [typescript, jupyter, ai]
 tagline: AI-assisted documentation directly in Jupyter notebooks - no context switching required
@@ -15,5 +16,3 @@ duration: 3 months
 ---
 
 Built in-place documentation generator for data scientists using TypeScript and Jupyter AI to eliminate context switching. Enables seamless doc creation without leaving the notebook environment.
-
-

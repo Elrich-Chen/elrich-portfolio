@@ -17,8 +17,6 @@ const archived = experiences.filter((item) => item.data.archived);
 // Same pattern as Projects.astro: `image` is a plain public/ path string in
 // the content frontmatter, matched against an optimized src/assets copy by
 // filename so the hover-preview tooltip never hotlinks a full-res original.
-// No experience entries have `image:` set yet — add one (and drop a
-// matching file in src/assets/experiences/) to light up its tooltip.
 const previewSources = import.meta.glob('/src/assets/experiences/*', { eager: true });
 
 const previewSrcByFilename = new Map<string, string>();
@@ -41,7 +39,7 @@ const toProps = (item: (typeof experiences)[number]) => {
     org: item.data.company,
     title: item.data.role,
     dates: formatExperienceDates(item.data.start, item.data.end, item.data.dates),
-    body: (item.body?.trim() || item.data.tagline || '').replace(/\n+/g, ' '),
+    body: (item.data.tagline || item.body?.trim() || '').replace(/\n+/g, ' '),
     previewSrc: filename ? previewSrcByFilename.get(filename) ?? '' : '',
     logo: item.data.logo ?? '',
   };
@@ -49,19 +47,21 @@ const toProps = (item: (typeof experiences)[number]) => {
 ---
 
 <section class="section section--experience" id="experience" aria-labelledby="experience-heading">
-  <div class="section-inner experience-inner" data-reveal>
+  <div class="experience-colorbends" data-color-bends aria-hidden="true"></div>
+
+  <div class="section-inner experience-inner" data-reveal data-exp-stage>
     <div class="section-head">
-      <p class="section-index" aria-hidden="true">— 02 / 05</p>
       <p class="eyebrow">— Experience</p>
       <h2 id="experience-heading" class="experience-h2">
         Work that <em class="accent">stuck</em>.
       </h2>
+      <span class="experience-rule" aria-hidden="true"></span>
     </div>
     <p class="experience-caption">Expand a role, or open the full case.</p>
 
     <ul class="exp-list" role="list" data-accordion>
       {roles.map((role, i) => (
-        <ExpRole {...toProps(role)} open={i === 0} />
+        <ExpRole {...toProps(role)} open={i === 0} index={i} />
       ))}
     </ul>
 
@@ -85,8 +85,8 @@ const toProps = (item: (typeof experiences)[number]) => {
           aria-labelledby="exp-archive-toggle"
         >
           <ul class="exp-list exp-list--archive" role="list" data-accordion>
-            {archived.map((role) => (
-              <ExpRole {...toProps(role)} open={false} />
+            {archived.map((role, i) => (
+              <ExpRole {...toProps(role)} open={false} index={roles.length + i} />
             ))}
           </ul>
         </div>
@@ -262,4 +262,50 @@ const toProps = (item: (typeof experiences)[number]) => {
       });
     }
   })();
+</script>
+
+<script>
+  import { mountColorBends } from '../../lib/colorBends';
+
+  const container = document.querySelector('[data-color-bends]');
+  const section = document.querySelector('.section--experience');
+  if (
+    !(container instanceof HTMLElement) ||
+    !(section instanceof HTMLElement) ||
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  ) {
+    if (container instanceof HTMLElement) container.remove();
+  } else {
+    const prev = (window as Window & { __lumenColorBends?: { destroy: () => void } }).__lumenColorBends;
+    if (prev) prev.destroy();
+
+    const handle = mountColorBends(container, {
+      colors: ['#ff5c7a', '#8a5cff', '#00ffd1'],
+      rotation: 90,
+      speed: 0.18,
+      scale: 1,
+      frequency: 1,
+      warpStrength: 1,
+      mouseInfluence: 0,
+      parallax: 0,
+      noise: 0.1,
+      iterations: 1,
+      intensity: 1.15,
+      bandWidth: 6,
+      transparent: true,
+    });
+    (window as Window & { __lumenColorBends?: { destroy: () => void } }).__lumenColorBends = handle;
+
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          handle.setPaused(!entries[0]?.isIntersecting);
+        },
+        { rootMargin: '80px' }
+      );
+      io.observe(section);
+    }
+
+    document.addEventListener('astro:before-swap', () => handle.destroy(), { once: true });
+  }
 </script>

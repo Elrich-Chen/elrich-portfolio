@@ -1,0 +1,116 @@
+---
+---
+
+<aside class="case-line-nav" data-case-line-nav hidden>
+  <p class="case-line-nav-label">On this page</p>
+  <ul class="case-line-nav-list" data-case-line-list></ul>
+</aside>
+
+<script is:inline data-astro-rerun>
+  (function () {
+    if (window.__caseLineNavAbort) window.__caseLineNavAbort.abort();
+    const ac = new AbortController();
+    window.__caseLineNavAbort = ac;
+    const { signal } = ac;
+
+    const nav = document.querySelector('[data-case-line-nav]');
+    const list = document.querySelector('[data-case-line-list]');
+    const prose = document.querySelector('.case-prose');
+    if (!nav || !list || !prose) return;
+
+    const headings = Array.from(prose.querySelectorAll('h2'));
+    if (headings.length < 2) return;
+
+    const slugify = (text) =>
+      text
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
+    list.innerHTML = '';
+    const links = headings.map((heading, index) => {
+      const label = heading.textContent?.trim() || `Section ${index + 1}`;
+      if (!heading.id) heading.id = slugify(label) || `section-${index + 1}`;
+
+      const li = document.createElement('li');
+      li.className = 'case-line-nav-item';
+      li.style.setProperty('--effect', '0');
+
+      const marker = document.createElement('span');
+      marker.className = 'case-line-nav-marker';
+      marker.setAttribute('aria-hidden', 'true');
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'case-line-nav-btn';
+      btn.innerHTML =
+        '<span class="case-line-nav-index">' +
+        String(index + 1).padStart(2, '0') +
+        '</span><span class="case-line-nav-text">' +
+        label +
+        '</span>';
+
+      btn.addEventListener(
+        'click',
+        () => {
+          heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setActive(index);
+        },
+        { signal }
+      );
+
+      li.append(marker, btn);
+      list.appendChild(li);
+      return { heading, li };
+    });
+
+    nav.hidden = false;
+    nav.classList.add('is-ready');
+
+    let active = 0;
+    const setActive = (index) => {
+      active = index;
+      links.forEach((item, i) => {
+        item.li.classList.toggle('is-active', i === index);
+        const effect = i === index ? 1 : Number(item.li.style.getPropertyValue('--effect') || 0);
+        if (i === index) item.li.style.setProperty('--effect', '1');
+        else if (effect > 0.9) item.li.style.setProperty('--effect', '0');
+      });
+    };
+
+    const onScroll = () => {
+      const marker = window.scrollY + window.innerHeight * 0.28;
+      let next = 0;
+      links.forEach((item, i) => {
+        if (item.heading.getBoundingClientRect().top + window.scrollY <= marker) next = i;
+      });
+      if (next !== active) setActive(next);
+    };
+
+    const onPointerMove = (event) => {
+      const rect = list.getBoundingClientRect();
+      const y = event.clientY - rect.top;
+      links.forEach((item) => {
+        const center = item.li.offsetTop + item.li.offsetHeight / 2;
+        const dist = Math.abs(y - center);
+        const t = Math.max(0, 1 - dist / 90);
+        const smooth = t * t * (3 - 2 * t);
+        const value = item.li.classList.contains('is-active') ? Math.max(smooth, 1) : smooth;
+        item.li.style.setProperty('--effect', value.toFixed(3));
+      });
+    };
+
+    const onPointerLeave = () => {
+      links.forEach((item, i) => {
+        item.li.style.setProperty('--effect', i === active ? '1' : '0');
+      });
+    };
+
+    setActive(0);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true, signal });
+    list.addEventListener('pointermove', onPointerMove, { passive: true, signal });
+    list.addEventListener('pointerleave', onPointerLeave, { signal });
+  })();
+</script>

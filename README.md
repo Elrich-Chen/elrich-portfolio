@@ -26,4 +26,4 @@ AI desktop companion marketing site — Astro + Tailwind + GSAP.
 Copy `.env.example` to `.env`:
 
 - `PUBLIC_POSTHOG_*` — analytics (optional)
-- `PUBLIC_FORMSPREE_FORM_ID` — waitlist backend (optional; CTA still shows success UI without it)
+- Contact form — Formspree (`CTA.astro`)

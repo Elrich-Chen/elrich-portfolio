@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
+import '../../styles/border-glow.css';
 import ramenPhoto from '../../assets/hobbies/ramen.jpeg';
-import gymPhoto from '../../assets/hobbies/gym.jpeg';
 import ravingPhoto from '../../assets/hobbies/raving.jpeg';
 
 import cooking1 from '../../assets/hobbies/cooking/cooking-1.jpg';
@@ -10,6 +10,7 @@ import cooking2 from '../../assets/hobbies/cooking/cooking-2.jpg';
 import sports1 from '../../assets/hobbies/sports/sports-1.jpg';
 import sports2 from '../../assets/hobbies/sports/sports-2.jpg';
 import sports3 from '../../assets/hobbies/sports/sports-3.jpg';
+import sports4 from '../../assets/hobbies/sports/sports-4-liondance.png';
 
 import gardening1 from '../../assets/hobbies/gardening/gardening-1.jpg';
 import gardening2 from '../../assets/hobbies/gardening/gardening-2.jpg';
@@ -32,36 +33,36 @@ const hobbies = [
   {
     id: 'eating',
     label: 'Cooking',
-    title: 'Kitchen over takeout.',
-    note: 'Weeknight meals, plating included. The real fuel protocol.',
+    title: 'On my <a class="hobby-inline-link" href="https://www.outsideonline.com/health/wellness/bryan-johnson-diagnosis-longevity/" target="_blank" rel="noopener noreferrer">Brian Johnson</a> arc to eat good every day.',
+    note: 'Still figuring it out. At least I’m trying.',
     media: [
-      { type: 'image', src: cooking1, alt: 'Cooking' },
-      { type: 'image', src: cooking2, alt: 'Cooking' },
-      { type: 'image', src: ramenPhoto, alt: 'A bowl of ramen' },
+      { type: 'image', src: cooking1, alt: 'Shakshuka', caption: 'Shakshuka' },
+      { type: 'image', src: cooking2, alt: 'Steak', caption: 'Steak' },
+      { type: 'image', src: ramenPhoto, alt: 'Mala ramen', caption: 'Mala ramen' },
     ],
   },
   {
     id: 'sports',
     label: 'Sports',
-    title: 'Move so I can eat.',
-    note: 'Runs around the city, pickup basketball, calisthenics, boxing — whatever keeps the week honest.',
+    title: 'Move so I can eat. Also <a class="hobby-inline-link" href="https://www.chinahighlights.com/travelguide/special-report/chinese-new-year/new-year-lion-dance.htm" target="_blank" rel="noopener noreferrer">Chinese lion dance</a> when the season hits.',
+    note: 'Mostly places I run regularly.',
     media: [
-      { type: 'image', src: sports1, alt: 'Sports' },
-      { type: 'image', src: sports2, alt: 'On a run' },
-      { type: 'image', src: sports3, alt: 'On a run' },
-      { type: 'image', src: gymPhoto, alt: 'At the gym' },
+      { type: 'image', src: sports1, alt: 'Downtown Markham run', caption: 'Downtown Markham' },
+      { type: 'image', src: sports2, alt: 'The Arborfront run', caption: 'The Arborfront' },
+      { type: 'image', src: sports3, alt: 'Toronto run', caption: 'Toronto' },
+      { type: 'image', src: sports4, alt: 'Chinese lion dance', caption: 'Chinese lion dance' },
     ],
   },
   {
     id: 'gardening',
     label: 'Gardening',
-    title: 'Dirt under the nails.',
-    note: 'Slow growth. Water, wait, repeat.',
+    title: 'Fun fact: <a class="hobby-inline-link" href="https://www.almanac.com/plant/blueberries" target="_blank" rel="noopener noreferrer">blueberry bushes</a> need acidic soil (pH 4.5–5.5) to take up nutrients. Get that wrong and nothing else matters.',
+    note: 'The others are plants I’m making space for. Slow growth. Water, wait, repeat.',
     media: [
-      { type: 'image', src: gardening1, alt: 'Gardening' },
-      { type: 'image', src: gardening2, alt: 'Gardening' },
-      { type: 'image', src: gardening3, alt: 'Gardening' },
-      { type: 'image', src: gardening4, alt: 'Gardening' },
+      { type: 'image', src: gardening4, alt: 'Blueberry plant', caption: 'My blueberry plant' },
+      { type: 'image', src: gardening1, alt: 'Chili plant', caption: 'Chili plant' },
+      { type: 'image', src: gardening2, alt: 'Dandelions', caption: 'Dandelions' },
+      { type: 'image', src: gardening3, alt: 'Strawflowers', caption: 'Strawflowers' },
     ],
   },
   {
@@ -70,23 +71,25 @@ const hobbies = [
     title: 'Volume up, brain off.',
     note: 'Bruno Mars, Martin Garrix, and everything loud in between.',
     media: [
-      { type: 'image', src: ravingPhoto, alt: 'At a show' },
+      { type: 'image', src: ravingPhoto, alt: 'Broken hand', caption: 'Broken hand' },
       {
         type: 'video',
         src: '/video/hobbies/bruno-mars-1.mp4',
         poster: brunoMarsVideo1Poster,
         alt: 'Bruno Mars concert clip',
+        caption: 'More Bruno Mars',
       },
-      { type: 'image', src: brunoMars1, alt: 'Bruno Mars concert' },
+      { type: 'image', src: brunoMars1, alt: 'Bruno Mars concert', caption: 'Bruno Mars' },
       {
         type: 'video',
         src: '/video/hobbies/bruno-mars-2.mp4',
         poster: brunoMarsVideo2Poster,
         alt: 'Bruno Mars concert clip',
+        caption: 'More Bruno Mars',
       },
-      { type: 'image', src: brunoMars2, alt: 'Bruno Mars concert' },
-      { type: 'image', src: martinGarrix1, alt: 'Martin Garrix concert' },
-      { type: 'image', src: martinGarrix2, alt: 'Martin Garrix concert' },
+      { type: 'image', src: brunoMars2, alt: 'Bruno Mars concert', caption: 'Bruno Mars' },
+      { type: 'image', src: martinGarrix1, alt: 'Martin Garrix concert', caption: 'Martin Garrix' },
+      { type: 'image', src: martinGarrix2, alt: 'Martin Garrix concert', caption: 'Martin Garrix' },
     ],
   },
 ] as const;
@@ -97,9 +100,8 @@ const hobbies = [
     <div class="section-inner">
       <div class="product-header" data-reveal>
         <div class="section-head">
-          <p class="section-index" aria-hidden="true">— 04 / 05</p>
           <p class="eyebrow">— Off the clock</p>
-          <h2 id="product-heading" class="product-h2">Life, mid-scroll.</h2>
+          <h2 id="product-heading" class="product-h2">Hobbies.</h2>
         </div>
         <p class="product-caption">Hover a tab. The photo flips to that hobby.</p>
       </div>
@@ -133,9 +135,13 @@ const hobbies = [
             needed since it all sits directly on the page background.
           -->
           <div class="hobby-media-col">
-            <div class="hobby-card-stage" data-hobby-media>
-              <div class="hobby-card-mat" aria-hidden="true"></div>
-              {hobbies.map((hobby, i) => (
+            <!-- BorderGlow wraps the photo stage only (not tabs/connector). -->
+            <div class="hobby-border-glow" data-hobby-border-glow>
+              <div class="edge-light" aria-hidden="true"></div>
+              <div class="border-glow-inner">
+                <div class="hobby-card-stage" data-hobby-media>
+                  <div class="hobby-card-mat" aria-hidden="true"></div>
+                  {hobbies.map((hobby, i) => (
                 <article
                   class:list={['hobby-card', { 'hobby-card--active': i === 0 }]}
                   data-hobby-pane={hobby.id}
@@ -143,75 +149,114 @@ const hobbies = [
                 >
                   <div class="hobby-card-media">
                     {hobby.media.length > 0 ? (
-                      hobby.media.map((item, mi) => (
-                        <div
-                          class:list={['hobby-media-item', { 'hobby-media-item--active': mi === 0 }]}
-                          data-media-item
-                          data-media-index={mi}
-                        >
-                          {item.type === 'image' ? (
-                            <>
-                              {/* Blurred backdrop: blur(32px) destroys detail anyway,
-                                  so a small source is enough and far cheaper to decode. */}
-                              <Image
-                                src={item.src}
-                                alt=""
-                                aria-hidden="true"
-                                class="hobby-card-img hobby-card-img--bg"
-                                loading={i === 0 && mi === 0 ? 'eager' : 'lazy'}
-                                decoding="async"
-                                width={480}
-                                format="webp"
-                                quality={55}
-                              />
-                              <Image
-                                src={item.src}
-                                alt={item.alt}
-                                class="hobby-card-img hobby-card-img--fg"
-                                loading={i === 0 && mi === 0 ? 'eager' : 'lazy'}
-                                fetchpriority={i === 0 && mi === 0 ? 'high' : 'auto'}
-                                decoding="async"
-                                width={1400}
-                                widths={[480, 900, 1400]}
-                                sizes="(max-width: 768px) 92vw, 55vw"
-                                format="webp"
-                                quality={78}
-                              />
-                            </>
-                          ) : (
-                            <>
-                              <Image
-                                src={item.poster}
-                                alt=""
-                                aria-hidden="true"
-                                class="hobby-card-img hobby-card-img--bg"
-                                loading="lazy"
-                                decoding="async"
-                                width={480}
-                                format="webp"
-                                quality={55}
-                              />
-                              <video
-                                class="hobby-card-video"
-                                data-hobby-video
-                                src={item.src}
-                                poster={item.poster.src}
-                                muted
-                                loop
-                                playsinline
-                                preload="metadata"
-                                controls
-                                aria-label={item.alt}
-                              />
-                            </>
-                          )}
-                        </div>
-                      ))
+                      <div
+                        class="hobby-media-scroller"
+                        data-media-scroller
+                        tabindex="0"
+                        aria-label={`${hobby.label} photos`}
+                      >
+                        {hobby.media.map((item, mi) => (
+                          <div
+                            class:list={['hobby-media-item', { 'hobby-media-item--active': mi === 0 }]}
+                            data-media-item
+                            data-media-index={mi}
+                          >
+                            {item.type === 'image' ? (
+                              <>
+                                {/* Blurred backdrop: blur(32px) destroys detail anyway,
+                                    so a small source is enough and far cheaper to decode. */}
+                                <Image
+                                  src={item.src}
+                                  alt=""
+                                  aria-hidden="true"
+                                  class="hobby-card-img hobby-card-img--bg"
+                                  loading={i === 0 && mi === 0 ? 'eager' : 'lazy'}
+                                  decoding="async"
+                                  width={480}
+                                  format="webp"
+                                  quality={55}
+                                  draggable="false"
+                                />
+                                <Image
+                                  src={item.src}
+                                  alt={item.alt}
+                                  class="hobby-card-img hobby-card-img--fg"
+                                  loading={i === 0 && mi === 0 ? 'eager' : 'lazy'}
+                                  fetchpriority={i === 0 && mi === 0 ? 'high' : 'auto'}
+                                  decoding="async"
+                                  width={1400}
+                                  widths={[480, 900, 1400]}
+                                  sizes="(max-width: 768px) 92vw, 55vw"
+                                  format="webp"
+                                  quality={78}
+                                  draggable="false"
+                                />
+                              </>
+                            ) : (
+                              <>
+                                <Image
+                                  src={item.poster}
+                                  alt=""
+                                  aria-hidden="true"
+                                  class="hobby-card-img hobby-card-img--bg"
+                                  loading="lazy"
+                                  decoding="async"
+                                  width={480}
+                                  format="webp"
+                                  quality={55}
+                                  draggable="false"
+                                />
+                                <video
+                                  class="hobby-card-video"
+                                  data-hobby-video
+                                  src={item.src}
+                                  poster={item.poster.src}
+                                  muted
+                                  loop
+                                  playsinline
+                                  preload="metadata"
+                                  controls
+                                  draggable="false"
+                                  aria-label={item.alt}
+                                />
+                              </>
+                            )}
+                            {'caption' in item && item.caption && (
+                              <span class="hobby-media-caption">{item.caption}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     ) : (
                       <div class="hobby-card-empty" aria-hidden="true">
                         <span class="hobby-card-empty-mark">◆</span>
                         <span>Drop a photo here</span>
                       </div>
+                    )}
+
+                    {hobby.media.length > 1 && (
+                      <>
+                        <button
+                          type="button"
+                          class="hobby-media-nav hobby-media-nav--prev"
+                          data-media-prev
+                          aria-label="Previous photo"
+                        >
+                          <svg class="hobby-media-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          class="hobby-media-nav hobby-media-nav--next"
+                          data-media-next
+                          aria-label="Next photo"
+                        >
+                          <svg class="hobby-media-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M9.5 5.5 16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                        </button>
+                      </>
                     )}
                   </div>
 
@@ -245,6 +290,8 @@ const hobbies = [
                   )}
                 </article>
               ))}
+                </div>
+              </div>
             </div>
 
             <div class="hobby-media-meta">
@@ -254,7 +301,7 @@ const hobbies = [
                     class:list={['hobby-caption', { 'hobby-caption--active': i === 0 }]}
                     data-hobby-caption={hobby.id}
                   >
-                    {hobby.title}
+                    <Fragment set:html={hobby.title} />
                   </p>
                 ))}
               </div>
@@ -305,34 +352,142 @@ const hobbies = [
       pane.querySelectorAll('[data-hobby-video]').forEach((v) => v.pause());
     };
 
-    // Per-pane thumbnail strip: swap which media item is "active" without
-    // touching the outer hobby-tab selection at all.
+    // Per-pane media index: thumbs, arrows, and native horizontal scroll
+    // all share selectMedia so the active photo / video / thumb stay in sync.
     panes.forEach((pane) => {
       const items = Array.from(pane.querySelectorAll('[data-media-item]'));
       const thumbs = Array.from(pane.querySelectorAll('[data-hobby-thumbs] .hobby-thumb'));
-      if (!thumbs.length) return;
+      const scroller = pane.querySelector('[data-media-scroller]');
+      const prevBtn = pane.querySelector('[data-media-prev]');
+      const nextBtn = pane.querySelector('[data-media-next]');
+      if (items.length <= 1 || !scroller) return;
+
+      let activeIndex = 0;
+      const count = items.length;
+      let syncingFromSelect = false;
+
+      const applyActive = (next) => {
+        activeIndex = next;
+        thumbs.forEach((t) => {
+          const on = Number(t.getAttribute('data-thumb-index')) === next;
+          t.classList.toggle('hobby-thumb--active', on);
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        items.forEach((item) => {
+          const on = Number(item.getAttribute('data-media-index')) === next;
+          item.classList.toggle('hobby-media-item--active', on);
+          const video = item.querySelector('[data-hobby-video]');
+          if (video) {
+            if (on) video.play().catch(() => {});
+            else video.pause();
+          }
+        });
+      };
+
+      const selectMedia = (idx, { smooth = true } = {}) => {
+        const next = ((idx % count) + count) % count;
+        applyActive(next);
+        syncingFromSelect = true;
+        const left = next * scroller.clientWidth;
+        scroller.scrollTo({ left, behavior: smooth && !reduceMotion ? 'smooth' : 'auto' });
+        const clear = () => { syncingFromSelect = false; };
+        if ('onscrollend' in scroller) {
+          scroller.addEventListener('scrollend', clear, { once: true, signal });
+        } else {
+          window.setTimeout(clear, smooth && !reduceMotion ? 420 : 0);
+        }
+      };
+
+      const indexFromScroll = () => {
+        const w = scroller.clientWidth || 1;
+        return Math.max(0, Math.min(count - 1, Math.round(scroller.scrollLeft / w)));
+      };
+
+      scroller.addEventListener('scroll', () => {
+        if (syncingFromSelect) return;
+        const next = indexFromScroll();
+        if (next !== activeIndex) applyActive(next);
+      }, { signal, passive: true });
 
       thumbs.forEach((thumb) => {
         thumb.addEventListener('click', () => {
-          const idx = thumb.getAttribute('data-thumb-index');
-
-          thumbs.forEach((t) => {
-            const on = t === thumb;
-            t.classList.toggle('hobby-thumb--active', on);
-            t.setAttribute('aria-selected', on ? 'true' : 'false');
-          });
-
-          items.forEach((item) => {
-            const on = item.getAttribute('data-media-index') === idx;
-            item.classList.toggle('hobby-media-item--active', on);
-            const video = item.querySelector('[data-hobby-video]');
-            if (video) {
-              if (on) video.play().catch(() => {});
-              else video.pause();
-            }
-          });
+          selectMedia(Number(thumb.getAttribute('data-thumb-index')));
         }, { signal });
       });
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectMedia(activeIndex - 1);
+        }, { signal });
+      }
+      if (nextBtn) {
+        nextBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectMedia(activeIndex + 1);
+        }, { signal });
+      }
+
+      // Keyboard when scroller is focused.
+      scroller.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          selectMedia(activeIndex - 1);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          selectMedia(activeIndex + 1);
+        }
+      }, { signal });
+
+      // Mouse click-drag pans the strip (trackpad two-finger uses native overflow).
+      let dragPointer = null;
+      let dragStartX = 0;
+      let dragStartScroll = 0;
+      let dragMoved = false;
+
+      scroller.addEventListener('pointerdown', (e) => {
+        if (e.pointerType !== 'mouse' || (e.button != null && e.button !== 0)) return;
+        if (e.target.closest('[data-media-prev], [data-media-next], .hobby-thumbs, video')) return;
+        dragPointer = e.pointerId;
+        dragStartX = e.clientX;
+        dragStartScroll = scroller.scrollLeft;
+        dragMoved = false;
+        syncingFromSelect = true;
+        try { scroller.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
+      }, { signal });
+
+      scroller.addEventListener('pointermove', (e) => {
+        if (dragPointer == null || e.pointerId !== dragPointer) return;
+        const dx = e.clientX - dragStartX;
+        if (Math.abs(dx) > 4) dragMoved = true;
+        scroller.scrollLeft = dragStartScroll - dx;
+      }, { signal });
+
+      const endDrag = (e) => {
+        if (dragPointer == null || (e.pointerId != null && e.pointerId !== dragPointer)) return;
+        dragPointer = null;
+        syncingFromSelect = false;
+        const next = indexFromScroll();
+        applyActive(next);
+        // Snap to nearest slide after a drag.
+        selectMedia(next, { smooth: true });
+      };
+
+      scroller.addEventListener('pointerup', endDrag, { signal });
+      scroller.addEventListener('pointercancel', () => {
+        dragPointer = null;
+        syncingFromSelect = false;
+      }, { signal });
+
+      scroller.addEventListener('dragstart', (e) => e.preventDefault(), { signal });
+      scroller.addEventListener('click', (e) => {
+        // Suppress click-through after a drag.
+        if (dragMoved) {
+          e.preventDefault();
+          e.stopPropagation();
+          dragMoved = false;
+        }
+      }, { signal, capture: true });
     });
 
     // Stretch the connector from the active tab's own box all the way to
@@ -349,15 +504,19 @@ const hobbies = [
       const left = btnRect.left - bodyRect.left;
       // Overlap the mat by 2px so same-color seams don't show a hairline gap
       // at the T-junction (the concave fillets sit in that overlapped region).
+      // Stretch to the mat edge without overshooting into the photo frame.
       const width = stacked
         ? btnRect.width
-        : Math.max(0, mediaRect.left - btnRect.left + 2);
+        : Math.max(0, mediaRect.left - btnRect.left);
+      // Inset 1px top/bottom so the bar doesn't peek past the tab corners.
+      const top = btnRect.top - bodyRect.top + 1;
+      const height = Math.max(0, btnRect.height - 2);
 
       connector.classList.toggle('hobby-connector--no-transition', !animate);
       connector.style.left = left + 'px';
-      connector.style.top = (btnRect.top - bodyRect.top) + 'px';
+      connector.style.top = top + 'px';
       connector.style.width = width + 'px';
-      connector.style.height = btnRect.height + 'px';
+      connector.style.height = height + 'px';
       if (!animate) {
         void connector.offsetHeight; // flush before re-enabling transition
         connector.classList.remove('hobby-connector--no-transition');
@@ -490,4 +649,37 @@ const hobbies = [
     fromHash();
     window.addEventListener('hashchange', fromHash, { signal });
   })();
+</script>
+
+<script>
+  import { mountBorderGlow } from '../../lib/borderGlow';
+
+  const el = document.querySelector('[data-hobby-border-glow]');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  type GlowWin = Window & { __lumenHobbyBorderGlow?: { destroy: () => void } };
+  const prev = (window as GlowWin).__lumenHobbyBorderGlow;
+  if (prev) prev.destroy();
+
+  if (el instanceof HTMLElement && !reduceMotion && canHover) {
+    const trackRoot = document.querySelector('[data-hobby-body]');
+    const handle = mountBorderGlow(el, {
+      className: 'hobby-border-glow',
+      edgeSensitivity: 8,
+      // Base bloom is orange; blue is layered in CSS so both stay visible.
+      glowColor: '24 95 55',
+      backgroundColor: '#0a0a0a',
+      borderRadius: 26,
+      glowRadius: 120,
+      glowIntensity: 1.7,
+      coneSpread: 42,
+      animated: false,
+      colors: ['#f97316', '#38bdf8', '#fb923c', '#7dd3fc'],
+      fillOpacity: 0.75,
+      trackRoot: trackRoot instanceof HTMLElement ? trackRoot : null,
+    });
+    (window as GlowWin).__lumenHobbyBorderGlow = handle;
+    document.addEventListener('astro:before-swap', () => handle.destroy(), { once: true });
+  }
 </script>

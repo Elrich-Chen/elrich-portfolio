@@ -3,7 +3,7 @@ import { ClientRouter } from 'astro:transitions';
 import PostHog from '../components/posthog.astro';
 import '../styles/lumen.css';
 
-const { title = 'Elrich — Portfolio' } = Astro.props;
+const { title = 'Elrich — Portfolio', robots } = Astro.props;
 
 /* Case pages: open from the bottom, close top→down (sheet drops away). */
 const sheet = {
@@ -44,6 +44,7 @@ const sheet = {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
+    {robots ? <meta name="robots" content={robots} /> : null}
     <meta name="description" content="Designer & builder. Interfaces, experiments, and the quiet spaces between." />
     <link rel="icon" type="image/svg+xml" href="/e.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />

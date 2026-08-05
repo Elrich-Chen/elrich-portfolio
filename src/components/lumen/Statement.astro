@@ -1,32 +1,32 @@
 ---
+import ScrollExpand from './ScrollExpand.astro';
+// Placeholder — swap when you pick final media.
+import ideaMedia from '../../assets/hobbies/music/bruno-mars-1.jpg';
 ---
 
-<div class="statement-pin">
-    <section class="section section--statement" aria-labelledby="statement-heading">
-      <p class="section-aside" aria-hidden="true">Manifesto · 2026</p>
-      <div class="section-inner" data-reveal>
-        <div class="section-head">
-          <p class="section-index" aria-hidden="true">— 01 / 05</p>
-          <p class="eyebrow">— The idea</p>
-          <h2 id="statement-heading" class="statement-line">
-            <span class="h2-line">
-              <span class="word" style="--i:1">I</span>
-              <span class="word" style="--i:2">like to</span>
-            </span>
-            <span class="h2-line">
-              <span class="word" style="--i:3">build</span>
-            </span>
-            <span class="h2-line">
-              <span class="word" style="--i:4">various</span>
-              <em class="word accent" style="--i:5">things</em>
-            </span>
-            <span class="h2-line">
-              <span class="word" style="--i:6">take a look :)</span>
-            </span>
-          </h2>
-        </div>
-        <span class="statement-rule" aria-hidden="true"></span>
-        <p class="statement-caption">Shown below are some of the things I've worked on.</p>
-      </div>
-    </section>
+<section class="section section--statement" aria-label="Take a look">
+  <div class="statement-expand">
+    <ScrollExpand
+      class="scroll-expand--idea"
+      src={ideaMedia.src}
+      alt="Placeholder — replace with your idea media"
+      title="take a look"
+      scrollHint="Scroll"
+      useWindowScroll
+      startWidth={36}
+      startHeight={52}
+      startRadius={22}
+      endRadius={0}
+      mediaZoom={1.35}
+      scrollDistance={1.25}
+      holdDistance={0.4}
+      overlayScrim={0.5}
+    >
+      <p class="statement-expand-kicker">— Take a look</p>
+      <h2>Shown below are some of the things I've worked on.</h2>
+      <p>
+        <a class="statement-expand-link" href="#projects">Selected work ↓</a>
+      </p>
+    </ScrollExpand>
   </div>
+</section>

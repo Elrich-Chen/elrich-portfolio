@@ -36,7 +36,7 @@ public/
 
 ## Content
 ### Lumen page
-Ported from Kombai inspiration (`tmp-lumen-ref` / `.kombai/canvas/Lumen.canvas`). Sections: Hero → Statement → Principles → ProductWindow → CTA. Motion is vanilla scroll choreography (not GSAP). Optional waitlist: `PUBLIC_FORMSPREE_FORM_ID`.
+Ported from Kombai inspiration (`tmp-lumen-ref` / `.kombai/canvas/Lumen.canvas`). Sections: Hero → Statement → Principles → ProductWindow → CTA. Motion is vanilla scroll choreography (not GSAP). Contact form posts to Formspree.
 
 ### Retained (unused on Lumen page)
 - Portfolio collections under `src/content/` (including unused `lumen-changelog` / `lumen-status`)
@@ -44,4 +44,4 @@ Ported from Kombai inspiration (`tmp-lumen-ref` / `.kombai/canvas/Lumen.canvas`)
 
 ## Env (see `.env.example`)
 - `PUBLIC_POSTHOG_PROJECT_TOKEN` / `PUBLIC_POSTHOG_HOST` — analytics
-- `PUBLIC_FORMSPREE_FORM_ID` — waitlist form endpoint
+- Contact form — Formspree endpoint hardcoded in `CTA.astro`

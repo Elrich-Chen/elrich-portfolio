@@ -18,16 +18,44 @@ const {
   tagline,
   category,
   image,
+  imageFit,
   year,
   role,
   duration,
   tags,
   highlights,
   href,
+  devpost,
+  linkedin,
   deployed,
+  award,
 } = project.data;
 
 const meta = [role, year, duration].filter(Boolean) as string[];
+const ctaHref = href ?? devpost ?? linkedin;
+const ctaLabel =
+  href && href !== devpost && href !== linkedin
+    ? 'Visit project'
+    : devpost
+      ? 'View on Devpost'
+      : 'Read on LinkedIn';
+
+let secondaryHref: string | undefined;
+let secondaryLabel = 'View on Devpost';
+if (href && devpost && href !== devpost) {
+  secondaryHref = devpost;
+  secondaryLabel = 'View on Devpost';
+} else if (href && linkedin && href !== linkedin) {
+  secondaryHref = linkedin;
+  secondaryLabel = 'Read on LinkedIn';
+}
+
+const figureHref = linkedin ?? devpost ?? href;
+const figureLabel = linkedin
+  ? 'LinkedIn →'
+  : devpost
+    ? 'Devpost →'
+    : 'Open project →';
 ---
 
 <LumenLayout title={`${name} — Elrich`}>
@@ -39,14 +67,18 @@ const meta = [role, year, duration].filter(Boolean) as string[];
     backLabel="← Projects"
     meta={meta}
     live={Boolean(deployed)}
+    award={award}
     image={image}
     imageAlt={`${name} preview`}
-    externalHref={href}
-    externalLabel="Open project →"
+    imageFit={imageFit}
+    externalHref={figureHref}
+    externalLabel={figureLabel}
     highlights={highlights ?? []}
     tags={tags ?? []}
-    ctaHref={href}
-    ctaLabel="Visit project"
+    ctaHref={ctaHref}
+    ctaLabel={ctaLabel}
+    secondaryHref={secondaryHref}
+    secondaryLabel={secondaryLabel}
     footerBackHref="/#projects"
     footerBackLabel="← Back to projects"
   >

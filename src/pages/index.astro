@@ -60,7 +60,6 @@ import CTA from '../components/lumen/CTA.astro';
       const heroCopyEl = document.querySelector('.hero .copy');
       const heroSubtextEl = document.querySelector('.hero .subtext');
       const heroCtasEl = document.querySelector('.hero .ctas');
-      const heroTypeHintEl = document.querySelector('.hero .type-hint');
       const heroSplineEl = document.querySelector('.hero .spline-col');
       const reduceMotion = false;
       const desktopMQ = window.matchMedia('(min-width: 1024px)');
@@ -70,10 +69,7 @@ import CTA from '../components/lumen/CTA.astro';
         return t * t * (3 - 2 * t);
       };
 
-      // Move 2 / 3 / 4 elements
-      const statementPin = document.querySelector('.statement-pin');
-      const statementWords = document.querySelectorAll('.statement-line .word');
-      const statementCaption = document.querySelector('.section--statement .statement-caption');
+      // Move 3 / 4 elements
       const principlesPin = document.querySelector('.principles-pin');
       const principlesTrack = document.querySelector('.principles-pin .principles-grid');
 
@@ -86,8 +82,6 @@ import CTA from '../components/lumen/CTA.astro';
       const computePositions = () => {
         positions.heroTop = hero ? hero.offsetTop : 0;
         positions.heroHeight = hero ? hero.offsetHeight : 0;
-        positions.stmtTop = statementPin ? statementPin.offsetTop : 0;
-        positions.stmtHeight = statementPin ? statementPin.offsetHeight : 0;
         positions.prinTop = principlesPin ? principlesPin.offsetTop : 0;
         positions.prinHeight = principlesPin ? principlesPin.offsetHeight : 0;
         positions.vpH = window.innerHeight;
@@ -111,7 +105,6 @@ import CTA from '../components/lumen/CTA.astro';
         const exitC = smoothstep(0.30, 0.90, p);
         if (heroSubtextEl) heroSubtextEl.style.transform = 'translateY(' + (exitA * 18) + 'px)';
         if (heroCtasEl) heroCtasEl.style.transform = 'translateY(' + (exitA * 24) + 'px)';
-        if (heroTypeHintEl) heroTypeHintEl.style.transform = 'translateY(' + (exitA * 24) + 'px)';
         if (heroCopyEl) {
           heroCopyEl.style.opacity = 1 - exitB;
           heroCopyEl.style.transform = 'translateY(' + (-exitB * 22) + 'px)';
@@ -119,24 +112,6 @@ import CTA from '../components/lumen/CTA.astro';
         if (heroSplineEl) {
           heroSplineEl.style.opacity = 1 - exitC;
           heroSplineEl.style.transform = 'scale(' + (1 - 0.06 * exitC) + ')';
-        }
-      };
-
-      const updateStatementPin = () => {
-        if (!statementPin || reduceMotion || !desktopMQ.matches) return;
-        const range = positions.stmtHeight - positions.vpH;
-        if (range <= 0) return;
-        const p = clamp01((window.scrollY - positions.stmtTop) / range);
-        const startGap = 0.10;
-        const span = 0.18;
-        statementWords.forEach((w, i) => {
-          const wp = smoothstep(i * startGap, i * startGap + span, p);
-          w.style.opacity = (0.32 + 0.68 * wp).toFixed(3);
-        });
-        if (statementCaption) {
-          const cp = smoothstep(0.72, 0.95, p);
-          statementCaption.style.opacity = cp.toFixed(3);
-          statementCaption.style.transform = 'translateY(' + ((1 - cp) * 16).toFixed(1) + 'px)';
         }
       };
 
@@ -154,7 +129,6 @@ import CTA from '../components/lumen/CTA.astro';
         ticking = true;
         requestAnimationFrame(() => {
           updateHeroPin();
-          updateStatementPin();
           updatePrinciplesPin();
           if (thread && positions.docH > 0) {
             const pct = window.scrollY / positions.docH;

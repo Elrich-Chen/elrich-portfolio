@@ -27,20 +27,20 @@
             <a class="btn btn-primary" href="#projects">View work</a>
             <a class="btn btn-ghost" href="#cta-heading">Get in touch</a>
           </div>
-          <p class="type-hint">
-            <span class="type-hint-keys" aria-hidden="true">
-              <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
-            </span>
-            <span>or any key to hear the keyboard</span>
-          </p>
         </section>
 
         <div class="spline-col">
-          <div class="spline-wrap" aria-hidden="true">
-            <div id="spline-poster">
+          <div class="spline-wrap">
+            <div id="spline-poster" aria-hidden="true">
               <div class="poster-hint" aria-hidden="true"></div>
             </div>
-            <canvas id="spline-canvas"></canvas>
+            <canvas id="spline-canvas" aria-hidden="true"></canvas>
+            <div class="pc-chat" data-pc-chat role="status" aria-live="polite">
+              <p class="pc-chat-bubble">
+                <em class="pc-chat-hi">I’m Pixel.</em>
+                <span class="pc-chat-rest">Try any key <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span>
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -50,128 +50,148 @@
 
 <script type="module" is:inline data-astro-rerun>
     const isTouch = window.matchMedia('(hover: none)').matches;
-    if (!isTouch) {
-      if (window.__lumenHeroAbort) window.__lumenHeroAbort.abort();
-      const heroAc = new AbortController();
-      window.__lumenHeroAbort = heroAc;
-      const { signal } = heroAc;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      const canvas = document.getElementById('spline-canvas');
-      const poster = document.getElementById('spline-poster');
+    // Typing tip is desktop-only; still reveal on touch so layout stays consistent
+    // if CSS later shows it, but default CSS hides it on coarse pointers.
+    const chat = document.querySelector('[data-pc-chat]');
+    if (chat && !isTouch) {
+      const revealChat = () => chat.classList.add('pc-chat--in');
+      if (reduceMotion) revealChat();
+      else window.setTimeout(revealChat, 520);
+    }
 
-      // How much to zoom out the Spline camera. <1 widens the view,
-      // showing more of the desk (books, full lamp, table edges).
-      const CAMERA_ZOOM = 0.52;
+    if (window.__lumenHeroAbort) window.__lumenHeroAbort.abort();
+    const heroAc = new AbortController();
+    window.__lumenHeroAbort = heroAc;
+    const { signal } = heroAc;
 
-      let app;
-      import('https://unpkg.com/@splinetool/runtime/build/runtime.js')
-        .then(({ Application }) => {
-          app = new Application(canvas);
-          return app.load('https://prod.spline.design/jQxUG3hwx263Jw5Z/scene.splinecode');
-        })
-        .then(() => {
-          // Walk the Three.js scene graph (private API) to find the
-          // active camera and zoom it out. If anything is shaped
-          // differently in a future runtime version, this just no-ops.
-          try {
-            const candidates = [
-              app?._scene, app?.scene, app?._renderer?.scene,
-            ].filter(Boolean);
-            const findCamera = (root) => {
-              let found = null;
-              root.traverse?.((obj) => {
-                if (found) return;
-                if (obj.isCamera || obj.type?.endsWith('Camera')) found = obj;
-              });
-              return found;
-            };
-            let cam = app?._camera || app?.camera || null;
-            for (const root of candidates) {
-              if (cam) break;
-              cam = findCamera(root);
-            }
-            if (cam) {
-              if (cam.isOrthographicCamera || cam.type === 'OrthographicCamera') {
-                cam.zoom = (cam.zoom || 1) * CAMERA_ZOOM;
-                cam.updateProjectionMatrix?.();
-              } else if (cam.position) {
-                const f = 1 / CAMERA_ZOOM;
-                cam.position.x *= f;
-                cam.position.y *= f;
-                cam.position.z *= f;
-                cam.updateProjectionMatrix?.();
-              }
-            }
-          } catch (e) {
-            console.warn('Spline camera zoom adjustment skipped:', e);
+    const canvas = document.getElementById('spline-canvas');
+    const poster = document.getElementById('spline-poster');
+
+    // How much to zoom out the Spline camera. <1 widens the view,
+    // showing more of the desk (books, full lamp, table edges).
+    const CAMERA_ZOOM = 0.52;
+
+    let app;
+    import('https://unpkg.com/@splinetool/runtime/build/runtime.js')
+      .then(({ Application }) => {
+        app = new Application(canvas);
+        return app.load('https://prod.spline.design/jQxUG3hwx263Jw5Z/scene.splinecode');
+      })
+      .then(() => {
+        // Walk the Three.js scene graph (private API) to find the
+        // active camera and zoom it out. If anything is shaped
+        // differently in a future runtime version, this just no-ops.
+        try {
+          const candidates = [
+            app?._scene, app?.scene, app?._renderer?.scene,
+          ].filter(Boolean);
+          const findCamera = (root) => {
+            let found = null;
+            root.traverse?.((obj) => {
+              if (found) return;
+              if (obj.isCamera || obj.type?.endsWith('Camera')) found = obj;
+            });
+            return found;
+          };
+          let cam = app?._camera || app?.camera || null;
+          for (const root of candidates) {
+            if (cam) break;
+            cam = findCamera(root);
           }
+          if (cam) {
+            if (cam.isOrthographicCamera || cam.type === 'OrthographicCamera') {
+              cam.zoom = (cam.zoom || 1) * CAMERA_ZOOM;
+              cam.updateProjectionMatrix?.();
+            } else if (cam.position) {
+              const f = 1 / CAMERA_ZOOM;
+              cam.position.x *= f;
+              cam.position.y *= f;
+              cam.position.z *= f;
+              cam.updateProjectionMatrix?.();
+            }
+          }
+        } catch (e) {
+          console.warn('Spline camera zoom adjustment skipped:', e);
+        }
 
-          // Soft match to site bg via official API only (no Three.js surgery).
-          try { app.setBackgroundColor?.('#080808'); } catch (e) { /* ignore */ }
+        // Try a transparent canvas clear so ColorBends / page bg can show
+        // through. If the Spline file itself includes a black plane, that
+        // geometry stays — only the renderer clear color can be cleared here.
+        try {
+          app.setBackgroundColor?.(null);
+          const scene = app?._scene || app?.scene;
+          if (scene) scene.background = null;
+          const renderer = app?._renderer || app?.renderer;
+          renderer?.setClearColor?.(0x000000, 0);
+          if (canvas) canvas.style.background = 'transparent';
+        } catch (e) { /* ignore */ }
 
+        if (poster) {
           poster.style.opacity = '0';
           setTimeout(() => poster.remove(), 400);
+        }
 
-          // Keep hero effects local to the hero. Global pointer/key forwarding
-          // adds overhead across the whole page and hurts below-the-fold UX.
-          let splineActive = true;
+        // Keep hero effects local to the hero. Global pointer/key forwarding
+        // adds overhead across the whole page and hurts below-the-fold UX.
+        let splineActive = true;
 
-          // Pause Spline WebGL rendering when hero is out of viewport.
-          const heroEl = document.querySelector('.hero');
-          if (heroEl) {
-            const forwardPointer = (e) => {
-              if (!splineActive) return;
-              canvas.dispatchEvent(new PointerEvent('pointermove', {
-                clientX: e.clientX,
-                clientY: e.clientY,
-                pointerType: e.pointerType || 'mouse',
-                bubbles: true,
-                cancelable: true,
-              }));
-            };
-            heroEl.addEventListener('pointermove', forwardPointer, { passive: true, signal });
-          }
+        // Pause Spline WebGL rendering when hero is out of viewport.
+        const heroEl = document.querySelector('.hero');
+        if (heroEl) {
+          const forwardPointer = (e) => {
+            if (!splineActive) return;
+            canvas.dispatchEvent(new PointerEvent('pointermove', {
+              clientX: e.clientX,
+              clientY: e.clientY,
+              pointerType: e.pointerType || 'mouse',
+              bubbles: true,
+              cancelable: true,
+            }));
+          };
+          heroEl.addEventListener('pointermove', forwardPointer, { passive: true, signal });
+        }
 
-          if (heroEl && 'IntersectionObserver' in window) {
-            let active = true;
-            const tryPause = () => {
-              try {
-                if (typeof app.stop === 'function') { app.stop(); return true; }
-                if (typeof app.pause === 'function') { app.pause(); return true; }
-                if (app._renderer && typeof app._renderer.setAnimationLoop === 'function') {
-                  app._renderer.setAnimationLoop(null); return true;
-                }
-              } catch (e) { }
-              return false;
-            };
-            const tryResume = () => {
-              try {
-                if (typeof app.play === 'function') { app.play(); return true; }
-                if (typeof app.start === 'function') { app.start(); return true; }
-                if (typeof app.resume === 'function') { app.resume(); return true; }
-              } catch (e) { }
-              return false;
-            };
-            const splineIO = new IntersectionObserver((entries) => {
-              const inView = entries[0].isIntersecting;
-              if (inView === active) return;
-              active = inView;
-              splineActive = inView;
-              canvas.style.visibility = inView ? '' : 'hidden';
-              if (inView) tryResume(); else tryPause();
-            // Hero exits through the TOP of the viewport as the user scrolls
-            // down, so shrink the root's top edge (negative top margin) to
-            // pause the WebGL scene a bit before it's fully scrolled past —
-            // a positive margin here does the opposite: it keeps the scene
-            // "in view" (and rendering) even after it's offscreen, letting it
-            // compete for main-thread/GPU budget with the section below.
-            }, { rootMargin: '-15% 0px 0px 0px' });
-            splineIO.observe(heroEl);
-            signal.addEventListener('abort', () => splineIO.disconnect());
-          }
-        })
-        .catch((err) => {
-          console.error('Spline failed to load:', err);
-        });
-    }
+        if (heroEl && 'IntersectionObserver' in window) {
+          let active = true;
+          const tryPause = () => {
+            try {
+              if (typeof app.stop === 'function') { app.stop(); return true; }
+              if (typeof app.pause === 'function') { app.pause(); return true; }
+              if (app._renderer && typeof app._renderer.setAnimationLoop === 'function') {
+                app._renderer.setAnimationLoop(null); return true;
+              }
+            } catch (e) { }
+            return false;
+          };
+          const tryResume = () => {
+            try {
+              if (typeof app.play === 'function') { app.play(); return true; }
+              if (typeof app.start === 'function') { app.start(); return true; }
+              if (typeof app.resume === 'function') { app.resume(); return true; }
+            } catch (e) { }
+            return false;
+          };
+          const splineIO = new IntersectionObserver((entries) => {
+            const inView = entries[0].isIntersecting;
+            if (inView === active) return;
+            active = inView;
+            splineActive = inView;
+            canvas.style.visibility = inView ? '' : 'hidden';
+            if (inView) tryResume(); else tryPause();
+          // Hero exits through the TOP of the viewport as the user scrolls
+          // down, so shrink the root's top edge (negative top margin) to
+          // pause the WebGL scene a bit before it's fully scrolled past —
+          // a positive margin here does the opposite: it keeps the scene
+          // "in view" (and rendering) even after it's offscreen, letting it
+          // compete for main-thread/GPU budget with the section below.
+          }, { rootMargin: '-15% 0px 0px 0px' });
+          splineIO.observe(heroEl);
+          signal.addEventListener('abort', () => splineIO.disconnect());
+        }
+      })
+      .catch((err) => {
+        console.error('Spline failed to load:', err);
+      });
   </script>

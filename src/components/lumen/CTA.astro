@@ -1,35 +1,128 @@
 ---
-const formspreeId = import.meta.env.PUBLIC_FORMSPREE_FORM_ID ?? '';
+const formspreeId = 'xaewyjlk';
+
+const templates = [
+  {
+    id: 'recruiter',
+    label: 'Recruiter',
+    subject: 'Recruiter intro',
+    body: `Hi Elrich —
+
+I'm reaching out from [company] with potential interest and would love to connect. I really liked your work on [project / piece].
+
+Would be great to chat if you're open to it.
+
+Best,
+[name]`,
+  },
+  {
+    id: 'connect',
+    label: 'Just connecting',
+    subject: 'Wanted to connect',
+    body: `Hi Elrich —
+
+Hey, I'm from [school / company] and wanted to reach out. I came across your work through [how] and figured I'd say hi.
+
+Would love to connect if you're open to it.
+
+Best,
+[name]`,
+  },
+] as const;
+
+const defaultTemplate = templates[0];
 ---
 
 <section class="section section--cta" aria-labelledby="cta-heading">
   <div class="section-inner">
-    <div class="cta-block" data-reveal>
-      <div class="section-head">
-        <p class="section-index" aria-hidden="true">— 05 / 05</p>
-        <h2 id="cta-heading" class="statement-line">
-          Say hello when you're <em class="accent">ready</em>.
-        </h2>
+    <div class="cta-layout" data-reveal>
+      <div class="cta-intro">
+        <div class="section-head">
+          <h2 id="cta-heading" class="statement-line">
+            Say hello when you're <em class="accent">ready</em>.
+          </h2>
+        </div>
+        <p class="cta-subtext">For collaborations, roles, or a quiet note — pick a starter, then send.</p>
       </div>
-      <p class="cta-subtext">For collaborations, roles, or a quiet note — drop a line.</p>
-      <form class="cta-form" id="cta-form" novalidate>
-        <label for="cta-email" class="sr-only">Work email</label>
-        <input
-          type="email"
-          id="cta-email"
-          name="email"
-          class="cta-input"
-          placeholder="you@email.com"
-          autocomplete="email"
-          required
-        />
-        <input type="text" name="_gotcha" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true" />
-        <button class="btn btn-primary" type="submit">Send message</button>
-      </form>
-      <p id="cta-error" class="cta-error" role="alert" hidden></p>
-      <div class="cta-meta">
-        <p class="cta-trust">Usually replies within a few days · No newsletter · Just a note</p>
-        <a class="cta-secondary-link" href="#product-heading">See recent work <span aria-hidden="true">→</span></a>
+
+      <div class="cta-main">
+        <div class="cta-block">
+          <form
+            class="cta-form"
+            id="cta-form"
+            method="post"
+            action={`https://formspree.io/f/${formspreeId}`}
+            data-astro-reload
+            novalidate
+          >
+            <div class="cta-templates" role="group" aria-label="Message starters">
+              {templates.map((t, i) => (
+                <button
+                  type="button"
+                  class="cta-template"
+                  data-cta-template
+                  data-template-id={t.id}
+                  aria-pressed={i === 0 ? 'true' : 'false'}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            <label for="cta-message" class="sr-only">Message</label>
+            <textarea
+              id="cta-message"
+              name="message"
+              class="cta-message"
+              rows="3"
+              required
+              data-cta-message
+            >{defaultTemplate.body}</textarea>
+
+            <input type="hidden" name="_subject" value={defaultTemplate.subject} data-cta-subject />
+            <input type="hidden" name="intent" value={defaultTemplate.id} data-cta-intent />
+
+            <div class="cta-row">
+              <label for="cta-email" class="sr-only">Work email</label>
+              <input
+                type="email"
+                id="cta-email"
+                name="email"
+                class="cta-input"
+                placeholder="you@email.com"
+                autocomplete="email"
+                required
+              />
+              <input type="text" name="_gotcha" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true" />
+              <button class="btn btn-primary" type="submit">Send message</button>
+            </div>
+          </form>
+          <p id="cta-error" class="cta-error" role="alert" hidden></p>
+          <div class="cta-meta">
+            <p class="cta-trust">Usually replies within a few days · No newsletter · Just a note</p>
+          </div>
+        </div>
+
+        <aside class="cta-aside" aria-label="Other ways to reach me">
+          <p class="cta-aside-label">Elsewhere</p>
+          <ul class="cta-aside-links">
+            <li>
+              <a href="https://www.linkedin.com/in/elrich-chen" target="_blank" rel="noopener noreferrer">
+                LinkedIn
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com/Elrich-Chen" target="_blank" rel="noopener noreferrer">
+                GitHub
+              </a>
+            </li>
+            <li>
+              <a href="https://devpost.com/Elrich-Chen" target="_blank" rel="noopener noreferrer">
+                Devpost
+              </a>
+            </li>
+          </ul>
+        </aside>
       </div>
     </div>
   </div>
@@ -46,19 +139,25 @@ const formspreeId = import.meta.env.PUBLIC_FORMSPREE_FORM_ID ?? '';
 
   <nav class="footer-links-grouped" aria-label="Footer">
     <div class="footer-link-group">
-      <p class="footer-link-heading">Product</p>
+      <p class="footer-link-heading">On this page</p>
       <ul>
-        <li><a href="#experience-heading">Work</a></li>
-        <li><a href="#projects-heading">Projects</a></li>
-        <li><a href="#product-heading">Hobbies</a></li>
+        <li><a href="#experience">Work</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#hobbies">Life</a></li>
       </ul>
     </div>
     <div class="footer-link-group">
-      <p class="footer-link-heading">Company</p>
+      <p class="footer-link-heading">Elsewhere</p>
       <ul>
-        <li><a href="https://twitter.com/lumen" rel="noopener noreferrer">Twitter</a></li>
-        <li><a href="https://github.com/lumen" rel="noopener noreferrer">GitHub</a></li>
-        <li><a href="mailto:hello@lumen.dev">Contact</a></li>
+        <li>
+          <a href="https://www.linkedin.com/in/elrich-chen" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        </li>
+        <li>
+          <a href="https://github.com/Elrich-Chen" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </li>
+        <li>
+          <a href="https://devpost.com/Elrich-Chen" target="_blank" rel="noopener noreferrer">Devpost</a>
+        </li>
       </ul>
     </div>
   </nav>
@@ -66,91 +165,155 @@ const formspreeId = import.meta.env.PUBLIC_FORMSPREE_FORM_ID ?? '';
   <p class="footer-signoff" aria-hidden="true">Built in 2026.</p>
 </footer>
 
-<script define:vars={{ formspreeId }}>
-  const form = document.getElementById('cta-form');
-  const errorEl = document.getElementById('cta-error');
+<script is:inline define:vars={{ formspreeId, templates }} data-astro-rerun>
+  (function () {
+    if (window.__lumenCtaAbort) window.__lumenCtaAbort.abort();
+    const ac = new AbortController();
+    window.__lumenCtaAbort = ac;
+    const { signal } = ac;
 
-  function showError(message) {
-    if (!errorEl) return;
-    errorEl.hidden = false;
-    errorEl.textContent = message;
-  }
+    const form = document.getElementById('cta-form');
+    const errorEl = document.getElementById('cta-error');
+    if (!form) return;
 
-  function clearError() {
-    if (!errorEl) return;
-    errorEl.hidden = true;
-    errorEl.textContent = '';
-  }
+    const messageEl = form.querySelector('[data-cta-message]');
+    const subjectEl = form.querySelector('[data-cta-subject]');
+    const intentEl = form.querySelector('[data-cta-intent]');
+    const templateBtns = form.querySelectorAll('[data-cta-template]');
+    const byId = Object.fromEntries((templates || []).map((t) => [t.id, t]));
 
-  if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      clearError();
+    function showError(message) {
+      if (!errorEl) return;
+      errorEl.hidden = false;
+      errorEl.textContent = message;
+    }
 
-      const input = form.querySelector('.cta-input');
-      const btn = form.querySelector('button[type="submit"]');
-      const email = (input?.value || '').trim();
+    function clearError() {
+      if (!errorEl) return;
+      errorEl.hidden = true;
+      errorEl.textContent = '';
+    }
 
-      if (!email || !input?.checkValidity()) {
-        showError('Enter a valid email address.');
-        input?.focus();
-        return;
-      }
+    function fitMessage() {
+      if (!messageEl) return;
+      messageEl.style.height = 'auto';
+      const next = Math.min(Math.max(messageEl.scrollHeight, 72), 280);
+      messageEl.style.height = next + 'px';
+    }
 
-      if (!formspreeId) {
-        console.warn('Set PUBLIC_FORMSPREE_FORM_ID to persist contact emails.');
-        if (btn) {
-          btn.textContent = 'Sent';
-          btn.disabled = true;
-          btn.style.opacity = '0.85';
-        }
-        if (input) {
-          input.value = '';
-          input.placeholder = "Thanks — I'll reply soon.";
-          input.blur();
-        }
-        window.posthog?.identify(email, { email });
-        window.posthog?.capture('contact_submit', { email, persisted: false });
-        return;
-      }
+    function applyTemplate(btn) {
+      if (!messageEl || !btn) return;
+      const id = btn.getAttribute('data-template-id') || 'general';
+      const t = byId[id];
+      if (!t) return;
 
-      const prevLabel = btn?.textContent || 'Send message';
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'Sending…';
-      }
+      messageEl.value = t.body;
+      if (subjectEl) subjectEl.value = t.subject;
+      if (intentEl) intentEl.value = t.id;
 
-      try {
-        const res = await fetch(`https://formspree.io/f/${formspreeId}`, {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email }),
-        });
-        if (!res.ok) throw new Error('request_failed');
+      templateBtns.forEach((el) => el.setAttribute('aria-pressed', el === btn ? 'true' : 'false'));
+      fitMessage();
+      messageEl.focus();
+      const len = messageEl.value.length;
+      messageEl.setSelectionRange(len, len);
+    }
 
-        window.posthog?.identify(email, { email });
-        window.posthog?.capture('contact_submit', { email, persisted: true });
-
-        if (btn) {
-          btn.textContent = 'Sent';
-          btn.style.opacity = '0.85';
-        }
-        if (input) {
-          input.value = '';
-          input.placeholder = "Thanks — I'll reply soon.";
-          input.blur();
-          input.disabled = true;
-        }
-      } catch {
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = prevLabel;
-        }
-        showError('Something went wrong. Please try again.');
-      }
+    templateBtns.forEach((btn) => {
+      btn.addEventListener('click', () => applyTemplate(btn), { signal });
     });
-  }
+
+    messageEl?.addEventListener('input', fitMessage, { signal });
+    fitMessage();
+
+    form.addEventListener(
+      'submit',
+      async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        clearError();
+
+        const input = form.querySelector('.cta-input');
+        const btn = form.querySelector('button[type="submit"]');
+        const email = (input?.value || '').trim();
+        const message = (messageEl?.value || '').trim();
+        const subject = (subjectEl?.value || 'Hello').trim();
+        const intent = (intentEl?.value || 'general').trim();
+
+        if (!email || !input?.checkValidity()) {
+          showError('Enter a valid email address.');
+          input?.focus();
+          return;
+        }
+
+        if (!message) {
+          showError('Add a short message, or pick a starter above.');
+          messageEl?.focus();
+          return;
+        }
+
+        const prevLabel = btn?.textContent || 'Send message';
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = 'Sending…';
+        }
+
+        try {
+          const honeypot = form.querySelector('[name="_gotcha"]');
+          const res = await fetch(`https://formspree.io/f/${formspreeId}`, {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email,
+              message,
+              intent,
+              _subject: subject,
+              _gotcha: honeypot?.value || '',
+            }),
+          });
+          if (!res.ok) {
+            let detail = '';
+            try {
+              const data = await res.json();
+              detail = data?.error || '';
+            } catch {}
+            throw new Error(detail || 'request_failed');
+          }
+
+          window.posthog?.identify(email, { email });
+          window.posthog?.capture('contact_submit', { email, intent, persisted: true });
+
+          if (btn) {
+            btn.textContent = 'Sent';
+            btn.style.opacity = '0.85';
+          }
+          if (input) {
+            input.value = '';
+            input.placeholder = "Thanks — I'll reply soon.";
+            input.blur();
+            input.disabled = true;
+          }
+          if (messageEl) {
+            messageEl.value = '';
+            messageEl.placeholder = 'Message sent.';
+            messageEl.disabled = true;
+            fitMessage();
+          }
+          templateBtns.forEach((t) => {
+            t.disabled = true;
+          });
+        } catch (err) {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = prevLabel;
+          }
+          const detail = err?.message && err.message !== 'request_failed' ? err.message : '';
+          showError(detail || 'Something went wrong. Please try again.');
+        }
+      },
+      { signal },
+    );
+  })();
 </script>

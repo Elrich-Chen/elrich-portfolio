@@ -1,4 +1,6 @@
 ---
+import CaseLineNav from './CaseLineNav.astro';
+
 interface Props {
   title: string;
   tagline?: string;
@@ -7,8 +9,10 @@ interface Props {
   backLabel: string;
   meta?: string[];
   live?: boolean;
+  award?: string;
   image?: string;
   imageAlt?: string;
+  imageFit?: 'cover' | 'contain';
   gallery?: string[];
   externalHref?: string;
   externalLabel?: string;
@@ -16,6 +20,8 @@ interface Props {
   tags?: string[];
   ctaHref?: string;
   ctaLabel?: string;
+  secondaryHref?: string;
+  secondaryLabel?: string;
   footerBackHref: string;
   footerBackLabel: string;
 }
@@ -28,8 +34,10 @@ const {
   backLabel,
   meta = [],
   live = false,
+  award,
   image,
   imageAlt,
+  imageFit = 'cover',
   gallery = [],
   externalHref,
   externalLabel = 'Open →',
@@ -37,11 +45,16 @@ const {
   tags = [],
   ctaHref,
   ctaLabel = 'Visit',
+  secondaryHref,
+  secondaryLabel = 'Devpost →',
   footerBackHref,
   footerBackLabel,
 } = Astro.props;
 
-const hasAside = highlights.length > 0 || tags.length > 0 || Boolean(ctaHref);
+const hasHighlights = highlights.length > 0;
+const hasCtas = Boolean(ctaHref) || Boolean(secondaryHref);
+const hasMetaAside = tags.length > 0 || hasCtas;
+const mediaCompact = imageFit === 'contain';
 ---
 
 <main class="case-study" id="top">
@@ -58,6 +71,8 @@ const hasAside = highlights.length > 0 || tags.length > 0 || Boolean(ctaHref);
     <h1 class="case-title">{title}</h1>
     {tagline && <p class="case-tagline">{tagline}</p>}
 
+    {award && <p class="case-award">{award}</p>}
+
     {(meta.length > 0 || live) && (
       <div class="case-meta">
         {meta.map((item) => (
@@ -69,8 +84,8 @@ const hasAside = highlights.length > 0 || tags.length > 0 || Boolean(ctaHref);
   </div>
 
   {image && (
-    <div class="case-media">
-      <figure class="case-figure">
+    <div class:list={['case-media', { 'case-media--compact': mediaCompact, 'case-media--solo': !externalHref }]}>
+      <figure class:list={['case-figure', { 'case-figure--contain': mediaCompact }]}>
         <img src={image} alt={imageAlt ?? `${title} preview`} loading="eager" />
       </figure>
       {externalHref && (
@@ -94,37 +109,50 @@ const hasAside = highlights.length > 0 || tags.length > 0 || Boolean(ctaHref);
     </div>
   )}
 
-  <div class="case-body">
-    <div class="case-prose">
-      <slot />
-    </div>
+  {hasHighlights && (
+    <section class="case-highlights" aria-labelledby="case-highlights-label">
+      <p class="case-highlights-label" id="case-highlights-label">Highlights</p>
+      <ul>
+        {highlights.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+    </section>
+  )}
 
-    {hasAside && (
-      <aside class="case-aside">
-        {highlights.length > 0 && (
-          <>
-            <p class="case-aside-label">Highlights</p>
-            <ul>
-              {highlights.map((item) => (
-                <li>{item}</li>
+  <div class:list={['case-body', { 'case-body--after-highlights': hasHighlights }]}>
+    <CaseLineNav />
+    <div class="case-side">
+      <div class="case-prose">
+        <slot />
+      </div>
+
+      {hasMetaAside && (
+        <aside class="case-aside">
+          {tags.length > 0 && (
+            <div class="case-tags">
+              {tags.map((tag) => (
+                <span class="tag">{tag}</span>
               ))}
-            </ul>
-          </>
-        )}
-        {tags.length > 0 && (
-          <div class="case-tags">
-            {tags.map((tag) => (
-              <span class="tag">{tag}</span>
-            ))}
-          </div>
-        )}
-        {ctaHref && (
-          <a class="btn btn-primary" href={ctaHref} target="_blank" rel="noopener noreferrer">
-            {ctaLabel}
-          </a>
-        )}
-      </aside>
-    )}
+            </div>
+          )}
+          {hasCtas && (
+            <div class="case-ctas">
+              {ctaHref && (
+                <a class="btn btn-primary" href={ctaHref} target="_blank" rel="noopener noreferrer">
+                  {ctaLabel}
+                </a>
+              )}
+              {secondaryHref && secondaryHref !== ctaHref && (
+                <a class="btn btn-ghost" href={secondaryHref} target="_blank" rel="noopener noreferrer">
+                  {secondaryLabel}
+                </a>
+              )}
+            </div>
+          )}
+        </aside>
+      )}
+    </div>
   </div>
 
   <nav class="case-footer-nav" aria-label="Case study navigation">

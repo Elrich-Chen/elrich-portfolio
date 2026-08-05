@@ -1,0 +1,137 @@
+---
+import '../../styles/scroll-expand.css';
+
+interface Props {
+  src?: string;
+  mediaType?: 'image' | 'video';
+  poster?: string;
+  alt?: string;
+  title?: string;
+  scrollHint?: string;
+  startWidth?: number;
+  startHeight?: number;
+  startRadius?: number;
+  endRadius?: number;
+  mediaZoom?: number;
+  scrollDistance?: number;
+  holdDistance?: number;
+  smoothing?: number;
+  overlayScrim?: number;
+  useWindowScroll?: boolean;
+  enabled?: boolean;
+  class?: string;
+  style?: string;
+}
+
+const {
+  src = '',
+  mediaType = 'image',
+  poster = '',
+  alt = '',
+  title = '',
+  scrollHint = '',
+  startWidth = 42,
+  startHeight = 58,
+  startRadius = 24,
+  endRadius = 0,
+  mediaZoom = 1.35,
+  scrollDistance = 1.2,
+  holdDistance = 0.35,
+  smoothing = 0.1,
+  overlayScrim = 0.45,
+  useWindowScroll = false,
+  enabled = true,
+  class: className = '',
+  style,
+} = Astro.props;
+
+const rootClass = [
+  'scroll-expand',
+  useWindowScroll ? '' : 'scroll-expand--scroller',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<div
+  class={rootClass}
+  style={style}
+  data-scroll-expand
+  data-start-width={startWidth}
+  data-start-height={startHeight}
+  data-start-radius={startRadius}
+  data-end-radius={endRadius}
+  data-media-zoom={mediaZoom}
+  data-scroll-distance={scrollDistance}
+  data-hold-distance={holdDistance}
+  data-smoothing={smoothing}
+  data-overlay-scrim={overlayScrim}
+  data-use-window-scroll={useWindowScroll ? 'true' : 'false'}
+  data-enabled={enabled ? 'true' : 'false'}
+>
+  <div class="scroll-expand__track" data-se-track>
+    <div class="scroll-expand__stage" data-se-stage>
+      <div class="scroll-expand__frame" data-se-frame>
+        {
+          mediaType === 'video' ? (
+            <video
+              class="scroll-expand__media"
+              data-se-media
+              src={src}
+              poster={poster || undefined}
+              autoplay
+              muted
+              loop
+              playsinline
+            />
+          ) : (
+            <img
+              class="scroll-expand__media"
+              data-se-media
+              src={src}
+              alt={alt}
+              draggable="false"
+            />
+          )
+        }
+        <div class="scroll-expand__scrim" data-se-scrim aria-hidden="true"></div>
+        {
+          Astro.slots.has('default') ? (
+            <div class="scroll-expand__overlay" data-se-overlay>
+              <slot />
+            </div>
+          ) : null
+        }
+      </div>
+      {title ? <div class="scroll-expand__title" data-se-title>{title}</div> : null}
+      {scrollHint ? <div class="scroll-expand__hint" data-se-hint>{scrollHint}</div> : null}
+    </div>
+  </div>
+</div>
+
+<script>
+  import { mountScrollExpand } from '../../lib/scrollExpand';
+
+  type Handle = { destroy: () => void };
+  const w = window as Window & { __lumenScrollExpand?: Handle[] };
+
+  const mountAll = () => {
+    if (w.__lumenScrollExpand) {
+      for (const h of w.__lumenScrollExpand) h.destroy();
+    }
+    const handles: Handle[] = [];
+    document.querySelectorAll<HTMLElement>('[data-scroll-expand]').forEach((el) => {
+      handles.push(mountScrollExpand(el));
+    });
+    w.__lumenScrollExpand = handles;
+  };
+
+  mountAll();
+  document.addEventListener('astro:after-swap', mountAll);
+  document.addEventListener('astro:before-swap', () => {
+    if (!w.__lumenScrollExpand) return;
+    for (const h of w.__lumenScrollExpand) h.destroy();
+    w.__lumenScrollExpand = [];
+  });
+</script>
