@@ -65,21 +65,40 @@
     const heroAc = new AbortController();
     window.__lumenHeroAbort = heroAc;
     const { signal } = heroAc;
+    let disposed = false;
+    signal.addEventListener('abort', () => {
+      disposed = true;
+    });
 
     const canvas = document.getElementById('spline-canvas');
     const poster = document.getElementById('spline-poster');
+    if (!(canvas instanceof HTMLCanvasElement)) return;
 
     // How much to zoom out the Spline camera. <1 widens the view,
     // showing more of the desk (books, full lamp, table edges).
     const CAMERA_ZOOM = 0.52;
 
     let app;
+    const disposeApp = () => {
+      try {
+        app?.dispose?.();
+      } catch (e) { /* ignore */ }
+      app = null;
+    };
+    signal.addEventListener('abort', disposeApp);
+
     import('https://unpkg.com/@splinetool/runtime/build/runtime.js')
       .then(({ Application }) => {
+        if (disposed || !document.contains(canvas)) return null;
         app = new Application(canvas);
         return app.load('https://prod.spline.design/jQxUG3hwx263Jw5Z/scene.splinecode');
       })
       .then(() => {
+        if (disposed || !app || !document.contains(canvas)) {
+          disposeApp();
+          return;
+        }
+
         // Walk the Three.js scene graph (private API) to find the
         // active camera and zoom it out. If anything is shaped
         // differently in a future runtime version, this just no-ops.
@@ -125,12 +144,14 @@
           if (scene) scene.background = null;
           const renderer = app?._renderer || app?.renderer;
           renderer?.setClearColor?.(0x000000, 0);
-          if (canvas) canvas.style.background = 'transparent';
+          canvas.style.background = 'transparent';
         } catch (e) { /* ignore */ }
 
-        if (poster) {
+        if (poster && document.contains(poster)) {
           poster.style.opacity = '0';
-          setTimeout(() => poster.remove(), 400);
+          setTimeout(() => {
+            if (!disposed && poster.isConnected) poster.remove();
+          }, 400);
         }
 
         // Keep hero effects local to the hero. Global pointer/key forwarding
@@ -141,7 +162,7 @@
         const heroEl = document.querySelector('.hero');
         if (heroEl) {
           const forwardPointer = (e) => {
-            if (!splineActive) return;
+            if (!splineActive || disposed) return;
             canvas.dispatchEvent(new PointerEvent('pointermove', {
               clientX: e.clientX,
               clientY: e.clientY,
@@ -174,6 +195,7 @@
             return false;
           };
           const splineIO = new IntersectionObserver((entries) => {
+            if (disposed) return;
             const inView = entries[0].isIntersecting;
             if (inView === active) return;
             active = inView;
@@ -188,21 +210,10 @@
           // compete for main-thread/GPU budget with the section below.
           }, { rootMargin: '-15% 0px 0px 0px' });
           splineIO.observe(heroEl);
-          signal.addEventListener('abort', () => {
-            splineIO.disconnect();
-            try {
-              app?.dispose?.();
-            } catch (e) { /* ignore */ }
-          });
+          signal.addEventListener('abort', () => splineIO.disconnect());
         }
       })
       .catch((err) => {
-        console.error('Spline failed to load:', err);
+        if (!disposed) console.error('Spline failed to load:', err);
       });
-
-    signal.addEventListener('abort', () => {
-      try {
-        app?.dispose?.();
-      } catch (e) { /* ignore */ }
-    });
   </script>

@@ -2593,6 +2593,23 @@
       }
     }
 
+    /* Soft-nav lock — blocks double-clicks mid sheet animation. */
+    html[data-navigating] {
+      cursor: progress;
+    }
+
+    html[data-navigating] body {
+      pointer-events: none;
+    }
+
+    html[data-navigating] .site-nav {
+      pointer-events: none;
+    }
+
+    html[data-reduced-motion] {
+      scroll-behavior: auto;
+    }
+
     /* ---------- Case study pages ---------- */
     .case-study {
       position: relative;

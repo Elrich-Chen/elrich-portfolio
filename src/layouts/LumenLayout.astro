@@ -55,7 +55,8 @@ const sheet = {
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap"
       rel="stylesheet"
     />
-    <ClientRouter />
+    <!-- Prefetch on by ClientRouter; animate fallback for non-VT browsers. -->
+    <ClientRouter fallback="animate" />
   </head>
   <body>
     <div class="page-noise" aria-hidden="true"></div>
@@ -81,52 +82,153 @@ const sheet = {
     <PostHog />
 
     <script is:inline>
-      // Soft navigations (case study ↔ home) swap the DOM without a full
-      // reload. Keep reveals + sheet direction + hash scroll consistent.
+      /**
+       * Lumen soft-nav spine.
+       * Runs once, survives ClientRouter swaps, and keeps case ↔ home
+       * transitions, hash landing, and reveal state consistent.
+       */
       (function () {
         if (window.__lumenRouterBound) return;
         window.__lumenRouterBound = true;
 
-        function revealVisible() {
+        var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduceMotion) document.documentElement.dataset.reducedMotion = '';
+
+        var pendingSwap = false;
+        var navTimer = 0;
+
+        function isCasePath(pathname) {
+          return (
+            pathname.indexOf('/projects/') === 0 ||
+            pathname.indexOf('/experience/') === 0
+          );
+        }
+
+        function setNavigating(on) {
+          if (on) document.documentElement.dataset.navigating = '';
+          else delete document.documentElement.dataset.navigating;
+        }
+
+        function revealAfterSoftNav() {
           document.querySelectorAll('[data-reveal]').forEach(function (el) {
             el.style.transition = 'none';
             el.classList.add('in-view');
           });
         }
 
-        function scrollToHash() {
+        function navOffset() {
+          var nav = document.querySelector('[data-nav]');
+          if (!nav) return 12;
+          var h = nav.getBoundingClientRect().height || 0;
+          return Math.round(h) + 12;
+        }
+
+        function scrollToHashOnce() {
           var hash = window.location.hash;
-          if (!hash || hash.length < 2) return;
-          var id = decodeURIComponent(hash.slice(1));
+          if (!hash || hash.length < 2) return false;
+          var id;
+          try {
+            id = decodeURIComponent(hash.slice(1));
+          } catch (e) {
+            id = hash.slice(1);
+          }
+          if (!id) return false;
           var target = document.getElementById(id);
-          if (!target) return;
-          // Defer one frame so swapped layout/CSS can settle.
-          requestAnimationFrame(function () {
-            target.scrollIntoView({ behavior: 'instant', block: 'start' });
+          if (!target) return false;
+          var top = target.getBoundingClientRect().top + window.scrollY - navOffset();
+          window.scrollTo({ top: Math.max(0, top), left: 0, behavior: 'auto' });
+          return true;
+        }
+
+        function scrollToHashReliable() {
+          if (scrollToHashOnce()) return;
+          var tries = 0;
+          function tick() {
+            tries += 1;
+            if (scrollToHashOnce() || tries > 16) return;
+            requestAnimationFrame(tick);
+          }
+          requestAnimationFrame(tick);
+        }
+
+        function clearTransientUi() {
+          // Hover previews / open menus can linger visually across swaps.
+          document.querySelectorAll('.project-preview.is-active').forEach(function (el) {
+            el.classList.remove('is-active');
           });
         }
 
+        document.addEventListener('astro:before-preparation', function (event) {
+          var fromCase = !!document.querySelector('.case-study');
+          var toCase = isCasePath(event.to.pathname);
+          // Sheet direction: cases rise in, dismiss top→down on leave.
+          if (fromCase && !toCase) event.direction = 'back';
+          if (!fromCase && toCase) event.direction = 'forward';
+
+          setNavigating(true);
+          if (navTimer) window.clearTimeout(navTimer);
+          // Safety unlock if a navigation aborts mid-flight.
+          navTimer = window.setTimeout(function () {
+            setNavigating(false);
+          }, reduceMotion ? 80 : 1200);
+        });
+
+        document.addEventListener('astro:before-swap', function () {
+          pendingSwap = true;
+          clearTransientUi();
+          // Drop page-scoped listeners before the DOM is replaced so they
+          // don't keep firing against detached nodes after soft-nav.
+          [
+            '__lumenHomeAbort',
+            '__lumenExpAbort',
+            '__lumenHobbiesAbort',
+            '__lumenCtaAbort',
+            '__lumenHeroAbort',
+            '__caseLineNavAbort',
+          ].forEach(function (key) {
+            try {
+              if (window[key]) window[key].abort();
+              window[key] = undefined;
+            } catch (e) { /* ignore */ }
+          });
+        });
+
         document.addEventListener('astro:after-swap', function () {
-          revealVisible();
+          // Soft-nav only — don't kill first-visit scroll reveals.
+          if (pendingSwap) revealAfterSoftNav();
+          // New case pages should open at the top (hash handled on page-load).
+          if (document.querySelector('.case-study') && !window.location.hash) {
+            window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+          }
         });
 
         document.addEventListener('astro:page-load', function () {
-          revealVisible();
-          scrollToHash();
+          if (pendingSwap) {
+            revealAfterSoftNav();
+            pendingSwap = false;
+          }
+          scrollToHashReliable();
+          setNavigating(false);
+          if (navTimer) {
+            window.clearTimeout(navTimer);
+            navTimer = 0;
+          }
         });
 
-        // Link clicks are "forward" by default, so ← Back was sliding the
-        // next page up from the bottom. Leaving a case page should always
-        // dismiss top→down; entering one should always rise from the bottom.
-        document.addEventListener('astro:before-preparation', function (event) {
-          var isCasePath = function (pathname) {
-            return pathname.indexOf('/projects/') === 0 || pathname.indexOf('/experience/') === 0;
-          };
-          var fromCase = !!document.querySelector('.case-study');
-          var toCase = isCasePath(event.to.pathname);
-          if (fromCase && !toCase) event.direction = 'back';
-          if (!fromCase && toCase) event.direction = 'forward';
-        });
+        // Same-document hash clicks (already on home) — ClientRouter may no-op.
+        document.addEventListener(
+          'click',
+          function (event) {
+            var a = event.target && event.target.closest ? event.target.closest('a[href]') : null;
+            if (!a) return;
+            var href = a.getAttribute('href') || '';
+            if (!href || href.charAt(0) !== '#') return;
+            if (a.hasAttribute('download') || a.getAttribute('target') === '_blank') return;
+            // Let the browser update the hash, then correct for fixed nav.
+            window.setTimeout(scrollToHashOnce, 0);
+          },
+          true
+        );
       })();
     </script>
   </body>
