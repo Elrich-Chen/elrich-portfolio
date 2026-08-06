@@ -516,13 +516,28 @@
       }
 
       .hero-grid {
-        grid-template-rows: 60svh auto;
+        grid-template-rows: min(58svh, 420px) auto;
         grid-auto-flow: row;
+        align-items: stretch;
       }
 
       .spline-col {
         order: -1;
-        min-height: 60svh;
+        min-height: 0;
+        height: min(58svh, 420px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .spline-wrap {
+        width: 100%;
+        height: 100%;
+        /* Landscape scene into a tall phone frame: scale up and pin the
+           desk/character toward the visual center instead of top-left crop. */
+        transform: scale(1.28);
+        transform-origin: 50% 42%;
       }
 
       .copy {
@@ -2413,6 +2428,55 @@
       }
     }
 
+    /* Touch / coarse pointers — no hover, so mirror the treatment on press
+       and keep a quiet always-on arrow affordance. */
+    @media (hover: none), (pointer: coarse) {
+      .project-row .project-row-arrow {
+        opacity: 0.45;
+        transform: none;
+      }
+
+      .project-row.is-hot,
+      .project-row:active {
+        background: var(--fg);
+        color: var(--bg);
+      }
+
+      .project-row.is-hot .project-row-name,
+      .project-row.is-hot .project-row-tagline,
+      .project-row:active .project-row-name,
+      .project-row:active .project-row-tagline {
+        color: var(--bg);
+      }
+
+      .project-row.is-hot .project-row-arrow,
+      .project-row:active .project-row-arrow {
+        opacity: 1;
+        color: var(--bg);
+      }
+
+      .project-row--hackathon.is-hot,
+      .project-row--hackathon:active {
+        background: transparent;
+      }
+
+      .project-row--hackathon.is-hot .project-hack-flow,
+      .project-row--hackathon:active .project-hack-flow {
+        display: flex;
+        transform: translate3d(0, 0, 0);
+      }
+
+      .project-row--hackathon.is-hot .project-hack-flow-track,
+      .project-row--hackathon:active .project-hack-flow-track {
+        animation-play-state: running;
+      }
+
+      .project-row--award.is-hot .project-award-chip,
+      .project-row--award:active .project-award-chip {
+        opacity: 0;
+      }
+    }
+
     .project-row:focus-visible {
       outline: 2px solid var(--accent);
       outline-offset: 3px;
@@ -2450,11 +2514,6 @@
       .project-row-name-wrap { grid-area: name; }
       .project-row-tagline { grid-area: tagline; }
       .project-row-arrow { grid-area: arrow; align-self: center; }
-
-      /* No marquee on touch — keep the award chip readable. */
-      .project-hack-flow {
-        display: none;
-      }
 
       .project-award-chip {
         font-size: 9px;
@@ -2511,7 +2570,8 @@
 
     @media (hover: none), (pointer: coarse) {
       .project-preview {
-        display: none;
+        width: min(220px, 58vw);
+        border-radius: 14px;
       }
     }
 

@@ -75,3 +75,56 @@ const hackParts = Array.from({ length: 6 }, (_, i) => i);
     </ul>
   </div>
 </section>
+
+<script is:inline data-astro-rerun>
+  (function () {
+    if (window.__lumenProjectsAbort) window.__lumenProjectsAbort.abort();
+    const ac = new AbortController();
+    window.__lumenProjectsAbort = ac;
+    const { signal } = ac;
+
+    const list = document.querySelector('[data-project-list]');
+    if (!list) return;
+
+    // iOS/Android have no hover — paint the desktop hover treatment on press.
+    const coarse = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+    if (!coarse) return;
+
+    let hot = null;
+    const clearHot = () => {
+      if (!hot) return;
+      hot.classList.remove('is-hot');
+      hot = null;
+    };
+
+    list.addEventListener(
+      'pointerdown',
+      (event) => {
+        const row = event.target instanceof Element ? event.target.closest('.project-row') : null;
+        if (!row || !list.contains(row)) return;
+        clearHot();
+        hot = row;
+        row.classList.add('is-hot');
+      },
+      { signal },
+    );
+
+    list.addEventListener(
+      'pointerup',
+      () => {
+        // Keep the flash through the tap so the marquee/invert is visible.
+        window.setTimeout(clearHot, 180);
+      },
+      { signal },
+    );
+
+    list.addEventListener('pointercancel', clearHot, { signal });
+    list.addEventListener(
+      'pointerleave',
+      (event) => {
+        if (event.target === list) clearHot();
+      },
+      { signal },
+    );
+  })();
+</script>

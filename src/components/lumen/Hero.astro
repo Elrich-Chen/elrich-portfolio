@@ -51,7 +51,9 @@
   import { Application } from '@splinetool/runtime';
 
   const SCENE_URL = 'https://prod.spline.design/jQxUG3hwx263Jw5Z/scene.splinecode';
-  const CAMERA_ZOOM = 0.52;
+  // Desktop pulls the camera back for the wide hero; phone keeps it tighter
+  // so Pixel/desk stay centered in the portrait crop.
+  const CAMERA_ZOOM = window.matchMedia('(max-width: 1023px)').matches ? 0.82 : 0.52;
   const MAX_ATTEMPTS = 3;
 
   type HeroWin = Window & {

@@ -204,7 +204,8 @@ const toProps = (item: (typeof experiences)[number]) => {
     const previewTriggers = Array.from(document.querySelectorAll('[data-exp-trigger-preview]'))
       .filter((el) => el.getAttribute('data-preview-src'));
 
-    if (preview && previewImg && previewTriggers.length && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    if (preview && previewImg && previewTriggers.length) {
+      const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
       let activeTrigger = null;
       let targetX = 0;
       let targetY = 0;
@@ -231,34 +232,55 @@ const toProps = (item: (typeof experiences)[number]) => {
         rafId = requestAnimationFrame(applyPosition);
       };
 
-      previewTriggers.forEach((trigger) => {
+      const showPreview = (trigger, clientX, clientY) => {
         const src = trigger.getAttribute('data-preview-src');
+        if (!src) return;
+        activeTrigger = trigger;
+        previewImg.src = src;
+        targetX = clientX;
+        targetY = clientY;
+        applyPosition();
+        preview.classList.add('is-active');
+      };
 
-        trigger.addEventListener('pointerenter', (event) => {
-          activeTrigger = trigger;
-          previewImg.src = src;
-          targetX = event.clientX;
-          targetY = event.clientY;
-          applyPosition();
-          preview.classList.add('is-active');
-        }, { signal });
+      const hidePreview = (trigger) => {
+        if (trigger && activeTrigger !== trigger) return;
+        activeTrigger = null;
+        preview.classList.remove('is-active');
+      };
 
-        trigger.addEventListener('pointermove', (event) => {
-          if (activeTrigger !== trigger) return;
-          targetX = event.clientX;
-          targetY = event.clientY;
-          queuePosition();
-        }, { signal, passive: true });
+      previewTriggers.forEach((trigger) => {
+        if (canHover) {
+          trigger.addEventListener('pointerenter', (event) => {
+            showPreview(trigger, event.clientX, event.clientY);
+          }, { signal });
 
-        trigger.addEventListener('pointerleave', () => {
-          if (activeTrigger !== trigger) return;
-          activeTrigger = null;
-          preview.classList.remove('is-active');
-        }, { signal });
+          trigger.addEventListener('pointermove', (event) => {
+            if (activeTrigger !== trigger) return;
+            targetX = event.clientX;
+            targetY = event.clientY;
+            queuePosition();
+          }, { signal, passive: true });
+
+          trigger.addEventListener('pointerleave', () => hidePreview(trigger), { signal });
+        } else {
+          // Touch: flash the preview on press without blocking the accordion tap.
+          trigger.addEventListener('pointerdown', (event) => {
+            if (event.pointerType === 'mouse') return;
+            showPreview(trigger, event.clientX, event.clientY);
+          }, { signal });
+
+          trigger.addEventListener('pointerup', () => {
+            window.setTimeout(() => hidePreview(trigger), 220);
+          }, { signal });
+
+          trigger.addEventListener('pointercancel', () => hidePreview(trigger), { signal });
+        }
       });
 
       signal.addEventListener('abort', () => {
         if (rafId !== null) cancelAnimationFrame(rafId);
+        hidePreview();
       });
     }
   })();
