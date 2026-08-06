@@ -3808,16 +3808,35 @@
       }
     }
 
-    /* Touch iPads: same layout as MacBook, slightly tighter scene box. */
+    /* Touch iPads: same absolute layout as MacBook, but keep copy and
+       desk from colliding on Pro 11" portrait (~834px). */
     @media (min-width: 834px) and (hover: none) {
-      .spline-col {
-        width: 54vw;
-        max-width: 760px;
+      .copy {
+        max-width: min(380px, 44vw);
         will-change: auto;
       }
 
-      .copy {
+      .hero .eyebrow {
+        font-size: 14px;
+      }
+
+      .subtext {
+        white-space: normal;
+        font-size: 17px;
+      }
+
+      .spline-col {
+        width: 56vw;
+        max-width: 680px;
         will-change: auto;
+      }
+
+      .hero::before {
+        background: linear-gradient(90deg,
+            var(--bg) 0%,
+            rgba(8, 8, 8, 0.92) 28%,
+            rgba(8, 8, 8, 0.55) 48%,
+            transparent 68%);
       }
     }
 
