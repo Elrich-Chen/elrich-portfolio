@@ -56,7 +56,8 @@
   const isPhone = window.matchMedia('(max-width: 720px)').matches;
   const isTouchUI = window.matchMedia('(hover: none)').matches;
   const isMidWidth = window.matchMedia('(min-width: 768px) and (max-width: 1199px)').matches;
-  const isIPadProWidth = window.matchMedia('(min-width: 1024px) and (max-width: 1024px)').matches;
+  const isTabletTuneRange = window.matchMedia('(min-width: 767px) and (max-width: 1192px)').matches;
+  const isCompactDesktopWidth = window.matchMedia('(min-width: 1200px) and (max-width: 1295px)').matches;
   const isWideDesktop = window.matchMedia('(min-width: 1800px)').matches;
   const isIOS =
     /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -77,10 +78,12 @@
   );
   const CAMERA_ZOOM = isPhone
     ? 0.62
-    : isIPadProWidth
-      ? 0.39
+    : isTabletTuneRange
+      ? 0.34
       : isMidWidth
         ? midWidthZoom
+        : isCompactDesktopWidth
+          ? 0.44
         : isWideDesktop
           ? wideDesktopZoom
           : 0.52;

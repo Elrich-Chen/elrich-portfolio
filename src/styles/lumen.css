@@ -749,11 +749,16 @@
       }
     }
 
-    /* iPad Pro portrait only: nudge the desk slightly right without changing
-       neighboring tablet widths. */
-    @media (min-width: 1024px) and (max-width: 1024px) {
+    /* Keep the tablet family on one consistent framing and alignment. */
+    @media (min-width: 767px) and (max-width: 1192px) {
       .spline-col {
-        transform: translate(3.75rem, -3.5rem);
+        flex: 0 1 24rem;
+        width: 24rem;
+        max-width: min(24rem, 46vw);
+        height: clamp(260px, 34svh, 320px);
+        min-height: clamp(260px, 34svh, 320px);
+        max-height: clamp(260px, 34svh, 320px);
+        transform: translate(6.25rem, -3.5rem);
       }
     }
 
@@ -3996,6 +4001,17 @@
 
       h1 {
         font-size: clamp(64px, 7vw, 96px);
+      }
+    }
+
+    /* Bridge the tablet-to-desktop jump so ~1205px windows do not get the
+       full-size MacBook canvas before there is room for it. */
+    @media (min-width: 1200px) and (max-width: 1295px) {
+      .spline-col {
+        top: -8rem;
+        bottom: auto;
+        width: 44vw;
+        max-width: 560px;
       }
     }
 
