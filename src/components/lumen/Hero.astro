@@ -61,6 +61,13 @@
   const CAMERA_ZOOM = isPhone ? 0.62 : 0.52;
   const MAX_ATTEMPTS = 4;
 
+  // Laptop/desktop only gets keyboard click audio. Phones/iPads stay muted
+  // (autoplay + Howler spam, and no real keyboard anyway).
+  const allowSplineAudio =
+    window.matchMedia('(min-width: 1200px)').matches &&
+    window.matchMedia('(hover: hover)').matches &&
+    !isIOS;
+
   type HeroWin = Window & {
     __lumenHeroAbort?: AbortController;
     __lumenHeroBound?: boolean;
@@ -70,10 +77,12 @@
       volume?: (v: number) => void;
       stop?: () => void;
       ctx?: { state?: string; resume?: () => Promise<void> };
+      _audioUnlocked?: boolean;
     };
   };
 
   function silenceSplineAudio() {
+    if (allowSplineAudio) return;
     try {
       const Howler = (window as HeroWin).Howler;
       if (!Howler) return;
@@ -83,6 +92,31 @@
     } catch {
       /* ignore */
     }
+  }
+
+  function enableSplineAudio() {
+    if (!allowSplineAudio) return;
+    try {
+      const Howler = (window as HeroWin).Howler;
+      if (!Howler) return;
+      Howler.mute?.(false);
+      Howler.volume?.(1);
+      const ctx = Howler.ctx;
+      if (ctx?.state === 'suspended') ctx.resume?.().catch(() => {});
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function unlockSplineAudioOnGesture(signal: AbortSignal) {
+    if (!allowSplineAudio) return;
+    const unlock = () => {
+      enableSplineAudio();
+      window.removeEventListener('keydown', unlock);
+      window.removeEventListener('pointerdown', unlock);
+    };
+    window.addEventListener('keydown', unlock, { passive: true, signal });
+    window.addEventListener('pointerdown', unlock, { passive: true, signal });
   }
 
   const wait = (ms: number, signal: AbortSignal) =>
@@ -198,6 +232,7 @@
         silenceSplineAudio();
         await app.load(SCENE_URL);
         silenceSplineAudio();
+        enableSplineAudio();
         if (signal.aborted || !document.contains(canvas)) {
           disposeHeroApp();
           throw new DOMException('Aborted', 'AbortError');
@@ -206,6 +241,7 @@
         tuneCamera(app);
         clearBackground(app, canvas);
         silenceSplineAudio();
+        enableSplineAudio();
         // Force a resize after layout settles — iPhone 14 often mounts
         // before the absolute crop wrap has its final box.
         (app as any).resize?.();
@@ -385,6 +421,7 @@
     signal.addEventListener('abort', disposeHeroApp);
 
     initHeroChat();
+    unlockSplineAudioOnGesture(signal);
 
     mountSpline(canvas, poster instanceof HTMLElement ? poster : null, signal)
       .then((app) => {
@@ -392,6 +429,7 @@
           disposeHeroApp();
           return;
         }
+        enableSplineAudio();
         wireVisibility(app, canvas, signal);
       })
       .catch((err) => {
