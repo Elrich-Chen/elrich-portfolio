@@ -224,7 +224,7 @@ export function mountColorBends(
   }
   material.uniforms.uColorCount.value = colorVecs.length;
 
-  const clock = new THREE.Clock();
+  const clockStart = performance.now();
   const pointerTarget = new THREE.Vector2(0, 0);
   const pointerCurrent = new THREE.Vector2(0, 0);
   const pointerSmooth = 8;
@@ -232,6 +232,7 @@ export function mountColorBends(
   let rafId: number | null = null;
   let paused = false;
   let destroyed = false;
+  let lastTs = clockStart;
 
   const handleResize = () => {
     const w = Math.max(1, container.clientWidth || 1);
@@ -262,8 +263,10 @@ export function mountColorBends(
   const loop = () => {
     if (destroyed) return;
     if (!paused) {
-      const dt = clock.getDelta();
-      const elapsed = clock.elapsedTime;
+      const now = performance.now();
+      const dt = Math.min(0.05, (now - lastTs) / 1000);
+      lastTs = now;
+      const elapsed = (now - clockStart) / 1000;
       material.uniforms.uTime.value = elapsed;
 
       const deg = (rotation % 360) + autoRotate * elapsed;
@@ -283,7 +286,7 @@ export function mountColorBends(
     setPaused(next) {
       if (paused === next) return;
       paused = next;
-      if (!paused) clock.getDelta();
+      if (!paused) lastTs = performance.now();
       // Keep the last frame visible while off-screen; only stop the RAF work
       // via the paused flag — don't hide the element (that looked like a bug).
     },

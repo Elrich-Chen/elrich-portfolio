@@ -317,7 +317,13 @@ const toProps = (item: (typeof experiences)[number]) => {
       return;
     }
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    // Skip on phones: Spline already ships its own Three.js, and a second
+    // copy (this effect) triggers "Multiple instances of Three.js" + burns
+    // mobile GPU for a soft background wash.
+    if (
+      window.matchMedia('(max-width: 720px)').matches ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
       teardownColorBends();
       container.remove();
       return;

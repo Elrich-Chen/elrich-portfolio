@@ -510,6 +510,8 @@
       mix-blend-mode: normal;
     }
 
+    /* Tablet / small laptop (< desktop hero): keep natural 100% wrap.
+       Do NOT apply the phone crop — that blew Spline up on iPad. */
     @media (max-width: 1023px) {
       .hero {
         padding-top: 1rem;
@@ -524,20 +526,15 @@
       .spline-col {
         order: -1;
         min-height: 0;
-        height: min(52svh, 380px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        height: min(52svh, 400px);
+        position: relative;
         overflow: hidden;
       }
 
       .spline-wrap {
         width: 100%;
         height: 100%;
-        /* Scene is framed for desktop (desk sits left in the canvas).
-           Scale up and shift right so Pixel lands in the phone center. */
-        transform: scale(1.65) translate(22%, 6%);
-        transform-origin: center center;
+        transform: none;
       }
 
       .copy {
@@ -546,6 +543,38 @@
 
       .hero::after {
         display: none;
+      }
+    }
+
+    /* Phone only: landscape scene into a short portrait frame.
+       Widen the canvas and center-crop — no CSS scale (breaks iOS WebGL). */
+    @media (max-width: 720px) {
+      .hero-grid {
+        grid-template-rows: min(48svh, 340px) auto;
+      }
+
+      .spline-col {
+        height: min(46svh, 320px);
+      }
+
+      .spline-wrap {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 145%;
+        height: 100%;
+        /* -50% centers the wider canvas; slight left bias so Pixel/desk
+           (authored toward scene-left) land mid-frame. */
+        transform: translateX(-46%);
+      }
+
+      #spline-canvas,
+      #spline-poster {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
       }
     }
 

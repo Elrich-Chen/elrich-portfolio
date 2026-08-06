@@ -51,16 +51,36 @@
   import { Application } from '@splinetool/runtime';
 
   const SCENE_URL = 'https://prod.spline.design/jQxUG3hwx263Jw5Z/scene.splinecode';
-  // Desktop pulls the camera back for the wide hero; phone keeps it tighter
-  // so Pixel/desk stay centered in the portrait crop.
-  const CAMERA_ZOOM = window.matchMedia('(max-width: 1023px)').matches ? 0.82 : 0.52;
+  // Same pull-back for laptop + iPad. Phones only nudge slightly tighter —
+  // framing on ≤720px is done by the CSS crop, not a bigger camera zoom
+  // (that made tablet/desktop look blown up).
+  const isPhone = window.matchMedia('(max-width: 720px)').matches;
+  const CAMERA_ZOOM = isPhone ? 0.62 : 0.52;
   const MAX_ATTEMPTS = 3;
 
   type HeroWin = Window & {
     __lumenHeroAbort?: AbortController;
     __lumenHeroBound?: boolean;
     __lumenHeroApp?: { dispose?: () => void } | null;
+    Howler?: {
+      mute?: (muted: boolean) => void;
+      volume?: (v: number) => void;
+      stop?: () => void;
+      ctx?: { state?: string; resume?: () => Promise<void> };
+    };
   };
+
+  function silenceSplineAudio() {
+    try {
+      const Howler = (window as HeroWin).Howler;
+      if (!Howler) return;
+      Howler.mute?.(true);
+      Howler.volume?.(0);
+      Howler.stop?.();
+    } catch {
+      /* ignore */
+    }
+  }
 
   const wait = (ms: number, signal: AbortSignal) =>
     new Promise<void>((resolve, reject) => {
@@ -171,7 +191,9 @@
       try {
         const app = new Application(canvas);
         (window as HeroWin).__lumenHeroApp = app;
+        silenceSplineAudio();
         await app.load(SCENE_URL);
+        silenceSplineAudio();
         if (signal.aborted || !document.contains(canvas)) {
           disposeHeroApp();
           throw new DOMException('Aborted', 'AbortError');
@@ -179,6 +201,7 @@
 
         tuneCamera(app);
         clearBackground(app, canvas);
+        silenceSplineAudio();
 
         if (poster && document.contains(poster)) {
           poster.style.opacity = '0';
@@ -284,7 +307,12 @@
     const isTouch = window.matchMedia('(hover: none)').matches;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const chat = document.querySelector('[data-pc-chat]');
-    if (!(chat instanceof HTMLElement) || isTouch) return;
+    if (!(chat instanceof HTMLElement)) return;
+    const rest = chat.querySelector('.pc-chat-rest');
+    if (rest instanceof HTMLElement && isTouch) {
+      rest.textContent = 'Drag to look around';
+    }
+    if (isTouch) return;
     const revealChat = () => chat.classList.add('pc-chat--in');
     if (reduceMotion) revealChat();
     else window.setTimeout(revealChat, 520);
