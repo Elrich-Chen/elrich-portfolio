@@ -603,19 +603,29 @@
       .hero-grid {
         display: grid;
         grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-        grid-template-rows: none;
+        grid-template-rows: auto;
         align-items: center;
+        align-content: center;
+        justify-content: stretch;
         gap: clamp(1rem, 2.5vw, 2rem);
         width: 100%;
+        height: 100%;
         pointer-events: auto;
       }
 
       .copy {
+        --ipad-hero-side: clamp(300px, 42svh, 400px);
         max-width: none;
         position: relative;
         z-index: 3;
         gap: 1.1rem;
         will-change: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: var(--ipad-hero-side);
+        min-height: var(--ipad-hero-side);
+        max-height: var(--ipad-hero-side);
       }
 
       .hero .eyebrow {
@@ -641,6 +651,7 @@
       }
 
       .spline-col {
+        --ipad-hero-side: clamp(300px, 42svh, 400px);
         position: relative;
         top: auto;
         right: auto;
@@ -649,9 +660,9 @@
         order: 0;
         width: 100%;
         max-width: none;
-        height: clamp(300px, 46svh, 460px);
-        max-height: 460px;
-        min-height: 0;
+        height: var(--ipad-hero-side);
+        min-height: var(--ipad-hero-side);
+        max-height: var(--ipad-hero-side);
         margin: 0;
         overflow: hidden;
         will-change: auto;
