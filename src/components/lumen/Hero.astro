@@ -59,9 +59,9 @@
   const isIOS =
     /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  // Mid widths (iPad / narrow laptop windows) need a stronger pull-back so
-  // the desk isn't clipped by the smaller column.
-  const CAMERA_ZOOM = isPhone ? 0.62 : isMidWidth ? 0.4 : 0.52;
+  // Mid widths need a stronger pull-back so the full desk fits the
+  // smaller column (esp. iPad Pro 1024) without clipping the platform.
+  const CAMERA_ZOOM = isPhone ? 0.62 : isMidWidth ? 0.32 : 0.52;
   const MAX_ATTEMPTS = 4;
 
   // Laptop/desktop only gets keyboard click audio. Phones/iPads stay muted

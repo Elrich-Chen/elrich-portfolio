@@ -594,7 +594,8 @@
         position: relative;
         height: 100svh;
         min-height: 0;
-        padding: 1.25rem 2.25rem 1.5rem;
+        /* Even side padding — do not use --pad-x (8rem at 1024). */
+        padding: 1.25rem 3rem 1.5rem;
         overflow: hidden;
         display: grid;
         grid-template-rows: auto 1fr;
@@ -604,8 +605,9 @@
         display: flex;
         flex-direction: row;
         align-items: center;
-        justify-content: space-between;
-        gap: clamp(1rem, 2.5vw, 2rem);
+        /* Center the pair — space-between made a huge middle void. */
+        justify-content: center;
+        gap: 1.5rem;
         width: 100%;
         height: 100%;
         min-width: 0;
@@ -613,8 +615,8 @@
       }
 
       .copy {
-        flex: 1 1 42%;
-        max-width: 22rem;
+        flex: 0 1 20rem;
+        max-width: 20rem;
         position: relative;
         z-index: 3;
         gap: 1rem;
@@ -626,9 +628,7 @@
         min-height: 0;
         max-height: none;
         min-width: 0;
-        /* Desk mass sits low in the Spline canvas — drop the text block
-           so both share one visual midline. */
-        transform: translateY(1.5rem);
+        transform: translateY(0.35rem);
       }
 
       .hero .eyebrow {
@@ -654,20 +654,20 @@
       }
 
       .spline-col {
-        flex: 1 1 54%;
+        flex: 0 1 22rem;
         position: relative;
         top: auto;
         right: auto;
         bottom: auto;
         left: auto;
         order: 0;
-        width: auto;
-        max-width: 28rem;
-        height: clamp(280px, 38svh, 360px);
-        min-height: clamp(280px, 38svh, 360px);
-        max-height: clamp(280px, 38svh, 360px);
+        width: 22rem;
+        max-width: min(22rem, 42vw);
+        height: clamp(260px, 34svh, 320px);
+        min-height: clamp(260px, 34svh, 320px);
+        max-height: clamp(260px, 34svh, 320px);
         margin: 0;
-        overflow: visible;
+        overflow: hidden;
         will-change: auto;
         transform: none;
         z-index: 1;
@@ -679,7 +679,7 @@
         width: 100%;
         height: 100%;
         transform: none;
-        overflow: visible;
+        overflow: hidden;
       }
 
       #spline-canvas,
@@ -697,31 +697,34 @@
       }
     }
 
-    /* Tighter under ~1100 so the desk doesn't clip. */
+    /* 1024 and neighbors: balanced side air, tight pair, desk fully in frame. */
     @media (min-width: 768px) and (max-width: 1100px) {
       .hero {
-        padding: 1rem 1.75rem 1.25rem;
+        padding: 1.15rem 2.75rem 1.35rem;
       }
 
       .hero-grid {
-        gap: 0.85rem;
+        gap: 1.25rem;
       }
 
       .copy {
-        max-width: 18.5rem;
+        flex: 0 1 18rem;
+        max-width: 18rem;
         gap: 0.85rem;
-        transform: translateY(1.25rem);
+        transform: translateY(0.25rem);
       }
 
       .spline-col {
-        max-width: 24rem;
-        height: clamp(240px, 32svh, 300px);
-        min-height: clamp(240px, 32svh, 300px);
-        max-height: clamp(240px, 32svh, 300px);
+        flex: 0 1 20rem;
+        width: 20rem;
+        max-width: min(20rem, 40vw);
+        height: clamp(230px, 30svh, 280px);
+        min-height: clamp(230px, 30svh, 280px);
+        max-height: clamp(230px, 30svh, 280px);
       }
 
       h1 {
-        font-size: clamp(40px, 5vw, 54px);
+        font-size: clamp(40px, 4.8vw, 52px);
       }
 
       .hero .eyebrow {
@@ -740,6 +743,7 @@
 
       .ctas {
         gap: 8px;
+        flex-wrap: wrap;
       }
     }
 
