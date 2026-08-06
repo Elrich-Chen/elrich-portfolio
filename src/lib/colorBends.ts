@@ -210,7 +210,8 @@ export function mountColorBends(
     preserveDrawingBuffer: true,
   });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  const pixelRatioCap = window.matchMedia('(hover: none)').matches ? 1 : 2;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, pixelRatioCap));
   renderer.setClearColor(0x000000, 0);
   renderer.domElement.style.width = '100%';
   renderer.domElement.style.height = '100%';
