@@ -9,6 +9,7 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@splinetool/runtime": "^1.12.98",
     "astro": "^5.15.2",
     "gsap": "^3.15.0",
     "posthog-js": "^1.372.8",
