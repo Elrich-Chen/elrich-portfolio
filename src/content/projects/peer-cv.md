@@ -18,4 +18,30 @@ order: 1
 wide: true
 ---
 
-Built a community resume review platform with secure file uploads, threaded feedback, and fast, SEO-friendly rendering.
+## Why PeerCV
+
+Resume advice is usually scattered across direct messages, shared documents, and one-off calls. PeerCV turns that feedback into a shared review flow where a resume, its discussion, and the useful replies can stay together.
+
+The product is built around a simple loop: upload a resume, open a review thread, and let the community respond in context.
+
+## The backend
+
+I built the API with FastAPI and modeled the data in PostgreSQL through SQLAlchemy. The schema supports review threads, nested comments, and voting, so feedback can become a conversation instead of a flat list of reactions.
+
+JWT-based authentication protects API routes and keeps identity handling stateless across the frontend and backend.
+
+## Uploads and delivery
+
+Resume files are stored through ImageKit. Using CDN-backed storage keeps file delivery separate from the application server and gives the upload flow a clearer responsibility boundary.
+
+The frontend uses Next.js and TailwindCSS. Server-side rendering gives public-facing pages fast initial output and a structure that search engines can understand.
+
+## What was difficult
+
+The hard part was not rendering comments. It was preserving the relationship between a review, a reply, a vote, and the person allowed to perform each action.
+
+Threaded feedback also creates product questions beyond the schema. Privacy, moderation, deletion, and useful ranking all matter when the content being reviewed is personal.
+
+## Where it stands
+
+PeerCV is deployed and remains an active project. The current build establishes the secure upload and discussion foundation. The next iterations are about making feedback quality and user control as strong as the underlying architecture.

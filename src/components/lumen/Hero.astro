@@ -92,11 +92,11 @@
           : 0.52;
   const MAX_ATTEMPTS = 4;
 
-  // Laptop/desktop only gets keyboard click audio. Phones/iPads stay muted
-  // (autoplay + Howler spam, and no real keyboard anyway).
+  // Any real laptop pointer setup gets keyboard click audio, including compact
+  // laptop widths. Phones and touch-only tablets stay muted.
   const allowSplineAudio =
-    window.matchMedia('(min-width: 1200px)').matches &&
-    window.matchMedia('(hover: hover)').matches &&
+    window.matchMedia('(min-width: 768px)').matches &&
+    window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
     !isIOS;
 
   type HeroWin = Window & {
