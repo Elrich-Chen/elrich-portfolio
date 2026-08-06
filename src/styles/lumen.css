@@ -586,10 +586,11 @@
       }
     }
 
-    /* iPhone 14 Pro Max portrait (430px): the Spline scene's internal camera
-       target sits low-left, so position its crop in the intended hero frame.
-       Use top/left only; transforms on a WebGL ancestor can blank iOS Safari. */
-    @media (min-width: 430px) and (max-width: 430px) {
+    /* Larger iPhone portrait range (390–430px): the Spline scene's
+       internal camera target sits low-left, so position its crop in the
+       intended hero frame. Use top/left only; transforms on a WebGL ancestor
+       can blank iOS Safari. */
+    @media (min-width: 390px) and (max-width: 430px) {
       .spline-col {
         height: 360px;
         overflow: visible;
