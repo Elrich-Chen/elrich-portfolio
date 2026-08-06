@@ -549,6 +549,12 @@
        Widen + offset with LEFT only — no transform/scale on an ancestor
        of the WebGL canvas (that blanks Spline on some iPhone 14 Safari builds). */
     @media (max-width: 720px) {
+      .hero {
+        /* Extra top air on iPhone 12/14 so logo + Spline clear the notch /
+           Dynamic Island — iPad/MacBook keep their own padding. */
+        padding-top: calc(2.75rem + env(safe-area-inset-top, 0px));
+      }
+
       .hero-grid {
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: min(48svh, 340px) auto;
