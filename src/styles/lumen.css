@@ -108,7 +108,7 @@
       flex: 1;
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 1200px) {
       .hero-grid {
         /* Give Spline more horizontal room so the scene's natural
            ~2:1 composition isn't cover-cropped on the sides. */
@@ -126,7 +126,7 @@
       gap: 1.5rem;
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 1200px) {
       .copy {
         max-width: 700px;
       }
@@ -142,7 +142,7 @@
       margin: 0;
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 1200px) {
       .eyebrow {
         white-space: nowrap;
         line-height: 1;
@@ -175,7 +175,7 @@
       max-width: none;
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 1200px) {
       .subtext {
         white-space: nowrap;
       }
@@ -586,28 +586,26 @@
       }
     }
 
-    /* iPad Pro (and similar): real left/right columns, both sides smaller
-       so they fit on one row. Absolute full-bleed is MacBook-only — on a
-       tall iPad canvas the desk shrinks into a tiny island in black space. */
+    /* iPad / mid widths: side-by-side, optically centered on one line.
+       Do NOT use --pad-x here — at 1024px it jumps to 8rem and crushes
+       the row so text + desk look staggered. */
     @media (min-width: 768px) and (max-width: 1199px) {
       .hero {
         position: relative;
         height: 100svh;
         min-height: 0;
-        padding: 1.25rem var(--pad-x) 1.5rem;
+        padding: 1.25rem 2.25rem 1.5rem;
         overflow: hidden;
         display: grid;
         grid-template-rows: auto 1fr;
       }
 
       .hero-grid {
-        display: grid;
-        grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
-        grid-template-rows: auto;
+        display: flex;
+        flex-direction: row;
         align-items: center;
-        align-content: center;
-        justify-content: stretch;
-        gap: clamp(0.75rem, 2vw, 1.75rem);
+        justify-content: space-between;
+        gap: clamp(1rem, 2.5vw, 2rem);
         width: 100%;
         height: 100%;
         min-width: 0;
@@ -615,19 +613,22 @@
       }
 
       .copy {
-        --ipad-hero-side: clamp(280px, 40svh, 380px);
-        max-width: none;
+        flex: 1 1 42%;
+        max-width: 22rem;
         position: relative;
         z-index: 3;
-        gap: 1.1rem;
+        gap: 1rem;
         will-change: auto;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        height: var(--ipad-hero-side);
-        min-height: var(--ipad-hero-side);
-        max-height: var(--ipad-hero-side);
+        height: auto;
+        min-height: 0;
+        max-height: none;
         min-width: 0;
+        /* Desk mass sits low in the Spline canvas — drop the text block
+           so both share one visual midline. */
+        transform: translateY(1.5rem);
       }
 
       .hero .eyebrow {
@@ -637,7 +638,7 @@
       }
 
       h1 {
-        font-size: clamp(44px, 5.8vw, 68px);
+        font-size: clamp(44px, 5.6vw, 64px);
       }
 
       .subtext {
@@ -653,20 +654,19 @@
       }
 
       .spline-col {
-        --ipad-hero-side: clamp(280px, 40svh, 380px);
+        flex: 1 1 54%;
         position: relative;
         top: auto;
         right: auto;
         bottom: auto;
         left: auto;
         order: 0;
-        width: 100%;
-        max-width: none;
-        height: var(--ipad-hero-side);
-        min-height: var(--ipad-hero-side);
-        max-height: var(--ipad-hero-side);
+        width: auto;
+        max-width: 28rem;
+        height: clamp(280px, 38svh, 360px);
+        min-height: clamp(280px, 38svh, 360px);
+        max-height: clamp(280px, 38svh, 360px);
         margin: 0;
-        /* visible so the circular base isn't chopped by the column box */
         overflow: visible;
         will-change: auto;
         transform: none;
@@ -697,26 +697,31 @@
       }
     }
 
-    /* Narrower mid widths (~iPad portrait / small laptop windows):
-       desk was getting clipped under ~1087px — shrink both sides further
-       and give Spline a bit more of the row. */
+    /* Tighter under ~1100 so the desk doesn't clip. */
     @media (min-width: 768px) and (max-width: 1100px) {
       .hero {
-        padding: 1rem var(--pad-x) 1.25rem;
+        padding: 1rem 1.75rem 1.25rem;
       }
 
       .hero-grid {
-        grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-        gap: 0.75rem;
+        gap: 0.85rem;
       }
 
-      .copy,
+      .copy {
+        max-width: 18.5rem;
+        gap: 0.85rem;
+        transform: translateY(1.25rem);
+      }
+
       .spline-col {
-        --ipad-hero-side: clamp(240px, 34svh, 320px);
+        max-width: 24rem;
+        height: clamp(240px, 32svh, 300px);
+        min-height: clamp(240px, 32svh, 300px);
+        max-height: clamp(240px, 32svh, 300px);
       }
 
       h1 {
-        font-size: clamp(40px, 5.2vw, 56px);
+        font-size: clamp(40px, 5vw, 54px);
       }
 
       .hero .eyebrow {
