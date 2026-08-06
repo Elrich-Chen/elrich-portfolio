@@ -669,7 +669,9 @@
         margin: 0;
         overflow: hidden;
         will-change: auto;
-        transform: none;
+        /* The scene's camera target sits low inside its canvas. Lift the
+           tablet column so the visible desk aligns with the copy. */
+        transform: translateY(-3.5rem);
         z-index: 1;
         min-width: 0;
       }
@@ -744,6 +746,14 @@
       .ctas {
         gap: 8px;
         flex-wrap: wrap;
+      }
+    }
+
+    /* iPad Pro portrait only: nudge the desk slightly right without changing
+       neighboring tablet widths. */
+    @media (min-width: 1024px) and (max-width: 1024px) {
+      .spline-col {
+        transform: translate(3.75rem, -3.5rem);
       }
     }
 
@@ -3986,6 +3996,42 @@
 
       h1 {
         font-size: clamp(64px, 7vw, 96px);
+      }
+    }
+
+    /* External-width displays (1800px+): keep copy + desk as one
+       composition. The canvas remains landscape at every width; allowing its
+       height to follow the viewport made the scene huge on laptops and tiny
+       inside a near-square canvas on 2K displays. */
+    @media (min-width: 1800px) {
+      .hero {
+        --hero-inset: max(3rem, calc((100vw - 72rem) / 2));
+        padding-left: var(--hero-inset);
+        padding-right: max(3rem, calc(var(--hero-inset) * 0.35));
+      }
+
+      .spline-col {
+        /* Keep the visible scene next to the copy. The Spline artwork has
+           substantial transparent space on its left. Near 1800px it needs
+           more separation from the copy; that extra offset tapers to 1rem
+           at 2320px, where the existing position is already correct. */
+        left: calc(var(--hero-inset) + clamp(1rem, calc(16rem + 831px - 46.15vw), 16rem));
+        right: auto;
+        bottom: 15svh;
+        width: clamp(700px, 46vw, 1100px);
+        max-width: 1100px;
+        height: auto;
+        aspect-ratio: 1.5 / 1;
+        max-height: min(82svh, 760px);
+        margin-block: auto;
+      }
+
+      .hero::before {
+        background: linear-gradient(90deg,
+            var(--bg) 0%,
+            rgba(8, 8, 8, 0.88) 24%,
+            rgba(8, 8, 8, 0.45) 42%,
+            transparent 58%);
       }
     }
 

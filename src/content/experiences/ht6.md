@@ -9,10 +9,10 @@ dates: "June 2026"
 location: Toronto, ON
 tagline: Sponsorships, workshops, and floor work for Toronto’s biggest student hackathon
 bullets:
-  - Ran sponsorship outreach months before the June weekend with cold emails, decks, and follow-ups that did not wait for warm intros
-  - Closed Base44 as title sponsor after rounds on booth presence, branding, and what a title package should feel like on site
-  - Worked directly with FDM, Next Canada, and other partners on packages that matched different budgets and goals
-  - Lined up sponsor workshops and handled the on-site grind: check-in, booth setup, room swaps, and walking the floor when something broke
+  - "Ran sponsorship outreach months before the June weekend with cold emails, decks, and follow-ups that did not wait for warm intros"
+  - "Closed Base44 as title sponsor after rounds on booth presence, branding, and what a title package should feel like on site"
+  - "Worked directly with FDM, Next Canada, and other partners on packages that matched different budgets and goals"
+  - "Lined up sponsor workshops and handled the on-site grind: check-in, booth setup, room swaps, and walking the floor when something broke"
 tags:
   - sponsorships
   - partnerships

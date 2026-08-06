@@ -56,12 +56,34 @@
   const isPhone = window.matchMedia('(max-width: 720px)').matches;
   const isTouchUI = window.matchMedia('(hover: none)').matches;
   const isMidWidth = window.matchMedia('(min-width: 768px) and (max-width: 1199px)').matches;
+  const isIPadProWidth = window.matchMedia('(min-width: 1024px) and (max-width: 1024px)').matches;
+  const isWideDesktop = window.matchMedia('(min-width: 1800px)').matches;
   const isIOS =
     /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   // Mid widths need a stronger pull-back so the full desk fits the
   // smaller column (esp. iPad Pro 1024) without clipping the platform.
-  const CAMERA_ZOOM = isPhone ? 0.62 : isMidWidth ? 0.32 : 0.52;
+  // Scale gently across tablets; iPad Pro needs the scene to use the full
+  // canvas instead of sitting as a small island in its lower-left corner.
+  const midWidthZoom = Math.min(
+    0.48,
+    Math.max(0.4, 0.4 + ((window.innerWidth - 768) / (1024 - 768)) * 0.08),
+  );
+  // Preserve the original MacBook camera through 1799px. Only external-width
+  // displays interpolate toward a closer framing.
+  const wideDesktopZoom = Math.min(
+    1.1,
+    Math.max(0.65, 0.65 + ((window.innerWidth - 1800) / (2320 - 1800)) * 0.45),
+  );
+  const CAMERA_ZOOM = isPhone
+    ? 0.62
+    : isIPadProWidth
+      ? 0.39
+      : isMidWidth
+        ? midWidthZoom
+        : isWideDesktop
+          ? wideDesktopZoom
+          : 0.52;
   const MAX_ATTEMPTS = 4;
 
   // Laptop/desktop only gets keyboard click audio. Phones/iPads stay muted
