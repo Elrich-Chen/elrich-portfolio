@@ -13,6 +13,7 @@
     window.__caseLineNavAbort = ac;
     const { signal } = ac;
 
+    const initCaseLineNav = () => {
     const nav = document.querySelector('[data-case-line-nav]');
     const list = document.querySelector('[data-case-line-list]');
     const prose = document.querySelector('.case-prose');
@@ -85,6 +86,8 @@
       links.forEach((item, i) => {
         if (item.heading.getBoundingClientRect().top + window.scrollY <= marker) next = i;
       });
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      if (window.scrollY >= maxScroll - 2) next = links.length - 1;
       if (next !== active) setActive(next);
     };
 
@@ -112,5 +115,12 @@
     window.addEventListener('scroll', onScroll, { passive: true, signal });
     list.addEventListener('pointermove', onPointerMove, { passive: true, signal });
     list.addEventListener('pointerleave', onPointerLeave, { signal });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initCaseLineNav, { once: true, signal });
+    } else {
+      initCaseLineNav();
+    }
   })();
 </script>

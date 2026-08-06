@@ -23,16 +23,7 @@ const { id, href, org, title, dates, body, open = false, previewSrc = '', logo =
   {...(open ? { 'data-open': true } : {})}
 >
   <h3 class="exp-heading">
-    <div class="exp-row" data-exp-swipe-row>
-      <a
-        class="exp-swipe-action"
-        href={href}
-        aria-label={`Open ${org} case study`}
-        data-exp-swipe-action
-      >
-        <span>Open case</span>
-        <span aria-hidden="true">→</span>
-      </a>
+    <div class="exp-row">
       <button
         type="button"
         class="exp-trigger"
