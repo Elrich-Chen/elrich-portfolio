@@ -51,15 +51,14 @@
   import { Application } from '@splinetool/runtime';
 
   const SCENE_URL = 'https://prod.spline.design/jQxUG3hwx263Jw5Z/scene.splinecode';
-  // MacBook / fine-pointer desktop stays at 0.52. Phones crop via CSS.
-  // iPad (incl. Pro at ≥1024) needs a stronger pull-back — it was picking
-  // up the desktop layout and looking huge.
+  // MacBook stays at 0.52. Touch tablets share the side-by-side hero with a
+  // mild pull-back so the desk isn't oversized; phones crop via CSS.
   const isPhone = window.matchMedia('(max-width: 720px)').matches;
   const isTouchUI = window.matchMedia('(hover: none)').matches;
   const isIOS =
     /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const CAMERA_ZOOM = isPhone ? 0.62 : isTouchUI ? 0.4 : 0.52;
+  const CAMERA_ZOOM = isPhone ? 0.62 : isTouchUI ? 0.48 : 0.52;
   const MAX_ATTEMPTS = 4;
 
   type HeroWin = Window & {

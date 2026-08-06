@@ -510,8 +510,7 @@
       mix-blend-mode: normal;
     }
 
-    /* Tablet / small laptop (< desktop hero): keep natural 100% wrap.
-       Do NOT apply the phone crop — that blew Spline up on iPad. */
+    /* Tablet / small widths: stacked by default (phones + narrow iPads). */
     @media (max-width: 1023px) {
       .hero {
         padding-top: 1rem;
@@ -546,16 +545,47 @@
       }
     }
 
+    /* iPad Pro 11" portrait (834px) and similar: side-by-side like laptop,
+       not the phone stack. */
+    @media (min-width: 834px) and (max-width: 1023px) {
+      .hero {
+        min-height: 72svh;
+        padding-top: 1.25rem;
+      }
+
+      .hero-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+        grid-template-rows: none;
+        grid-auto-flow: row;
+        align-items: center;
+        gap: 1rem 1.25rem;
+      }
+
+      .spline-col {
+        order: 0;
+        height: min(58svh, 560px);
+        min-height: 420px;
+        overflow: hidden;
+      }
+
+      .copy {
+        max-width: 100%;
+      }
+    }
+
     /* Phone only: landscape scene into a short portrait frame.
        Widen + offset with LEFT only — no transform/scale on an ancestor
        of the WebGL canvas (that blanks Spline on some iPhone 14 Safari builds). */
     @media (max-width: 720px) {
       .hero-grid {
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: min(48svh, 340px) auto;
       }
 
       .spline-col {
+        order: -1;
         height: min(46svh, 320px);
+        min-height: 0;
       }
 
       .spline-wrap {
@@ -3731,13 +3761,11 @@
       }
     }
 
-    /* Desktop: full-bleed Spline, larger H1.
+    /* Desktop (+ iPad Pro landscape / 12.9" portrait): full-bleed Spline.
        Note: hero is NOT pinned (sticky) — it's a normal 100svh section.
        Choreography is driven by the hero element's rect, so the next
-       section appears immediately as the hero scrolls up.
-       Scoped to hover-capable pointers so MacBook keeps this layout while
-       iPad Pro (often ≥1024 CSS px) does NOT inherit the huge absolute scene. */
-    @media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+       section appears immediately as the hero scrolls up. */
+    @media (min-width: 1024px) {
       .hero {
         position: relative;
         height: 100svh;
@@ -3801,56 +3829,17 @@
       }
     }
 
-    /* iPad Pro / large tablets: stacked hero, smaller scene — never the
-       MacBook absolute full-bleed. hover:none catches touch iPadOS. */
+    /* iPad Pro at desktop widths: same side-by-side layout as MacBook,
+       just a touch tighter so the desk doesn't dominate. */
     @media (min-width: 1024px) and (hover: none) {
-      .hero {
-        height: auto;
-        min-height: 0;
-        padding-top: 1.25rem;
-        overflow: hidden;
-      }
-
-      .hero-grid {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: min(40svh, 360px) auto;
-        gap: 1.25rem;
-        align-items: stretch;
-        pointer-events: auto;
-      }
-
       .spline-col {
-        order: -1;
-        position: relative;
-        top: auto;
-        right: auto;
-        bottom: auto;
-        left: auto;
-        width: 100%;
-        max-width: none;
-        height: min(40svh, 360px);
-        max-height: 360px;
-        min-height: 0;
-        overflow: hidden;
+        width: 52vw;
+        max-width: 720px;
         will-change: auto;
-        transform: none;
-      }
-
-      .spline-wrap {
-        width: 100%;
-        height: 100%;
-        transform: none;
       }
 
       .copy {
-        max-width: 40rem;
         will-change: auto;
-      }
-
-      .hero::before,
-      .hero::after {
-        display: none;
       }
     }
 
