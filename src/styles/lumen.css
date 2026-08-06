@@ -418,7 +418,7 @@
       min-height: 360px;
     }
 
-    @media (min-width: 834px) {
+    @media (min-width: 1200px) {
       .spline-col {
         /* Shorter + wider gives the canvas a landscape aspect that
            matches the Spline scene's natural composition. */
@@ -477,7 +477,7 @@
       background: transparent;
     }
 
-    @media (min-width: 834px) {
+    @media (min-width: 1200px) {
       .spline-wrap {
         /* Let the scene render at the col's natural aspect so the full
            desk is in frame; the bleed comes from the col's negative
@@ -510,9 +510,8 @@
       mix-blend-mode: normal;
     }
 
-    /* Narrow only (phones + small tablets): stack Spline above copy.
-       iPad Pro (834px+) uses the real desktop absolute hero below. */
-    @media (max-width: 833px) {
+    /* Narrow only: stack Spline above copy. */
+    @media (max-width: 767px) {
       .hero {
         padding-top: 1rem;
       }
@@ -565,8 +564,6 @@
         position: absolute;
         top: 0;
         bottom: 0;
-        /* Equivalent of prior left:50% + translateX(-46%) on a 145% wrap,
-           without creating a transformed containing block for WebGL. */
         left: -17%;
         width: 145%;
         height: 100%;
@@ -580,6 +577,101 @@
         width: 100%;
         height: 100%;
         transform: none;
+      }
+    }
+
+    /* iPad Pro (and similar): real left/right columns, both sides smaller
+       so they fit on one row. Absolute full-bleed is MacBook-only — on a
+       tall iPad canvas the desk shrinks into a tiny island in black space. */
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .hero {
+        position: relative;
+        height: 100svh;
+        min-height: 0;
+        padding: 1.25rem var(--pad-x) 1.5rem;
+        overflow: hidden;
+        display: grid;
+        grid-template-rows: auto 1fr;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+        grid-template-rows: none;
+        align-items: center;
+        gap: clamp(1rem, 2.5vw, 2rem);
+        width: 100%;
+        pointer-events: auto;
+      }
+
+      .copy {
+        max-width: none;
+        position: relative;
+        z-index: 3;
+        gap: 1.1rem;
+        will-change: auto;
+      }
+
+      .hero .eyebrow {
+        font-size: 13px;
+        letter-spacing: 0.14em;
+        white-space: normal;
+      }
+
+      h1 {
+        font-size: clamp(48px, 6.2vw, 72px);
+      }
+
+      .subtext {
+        font-size: 16px;
+        line-height: 1.45;
+        white-space: normal;
+      }
+
+      .hero .btn {
+        height: 44px;
+        padding: 0 22px;
+        font-size: 15px;
+      }
+
+      .spline-col {
+        position: relative;
+        top: auto;
+        right: auto;
+        bottom: auto;
+        left: auto;
+        order: 0;
+        width: 100%;
+        max-width: none;
+        height: clamp(300px, 46svh, 460px);
+        max-height: 460px;
+        min-height: 0;
+        margin: 0;
+        overflow: hidden;
+        will-change: auto;
+        transform: none;
+        z-index: 1;
+      }
+
+      .spline-wrap {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform: none;
+      }
+
+      #spline-canvas,
+      #spline-poster {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        transform: none;
+      }
+
+      .hero::before,
+      .hero::after {
+        display: none;
       }
     }
 
@@ -3734,9 +3826,9 @@
       }
     }
 
-    /* Desktop + iPad Pro (834px+): full-bleed absolute Spline beside copy.
-       834 catches iPad Pro 11" portrait — do NOT use a separate grid hack. */
-    @media (min-width: 834px) {
+    /* MacBook / large desktop only: full-bleed absolute Spline.
+       iPad widths (≤1199) use the compact 2-col grid above instead. */
+    @media (min-width: 1200px) {
       .hero {
         position: relative;
         height: 100svh;
@@ -3745,7 +3837,7 @@
       }
 
       h1 {
-        font-size: clamp(72px, 7.5vw, 130px);
+        font-size: clamp(80px, 8vw, 130px);
       }
 
       .hero-grid {
@@ -3805,38 +3897,6 @@
             rgba(8, 8, 8, 0.85) 32%,
             rgba(8, 8, 8, 0.4) 50%,
             transparent 66%);
-      }
-    }
-
-    /* Touch iPads: same absolute layout as MacBook, but keep copy and
-       desk from colliding on Pro 11" portrait (~834px). */
-    @media (min-width: 834px) and (hover: none) {
-      .copy {
-        max-width: min(380px, 44vw);
-        will-change: auto;
-      }
-
-      .hero .eyebrow {
-        font-size: 14px;
-      }
-
-      .subtext {
-        white-space: normal;
-        font-size: 17px;
-      }
-
-      .spline-col {
-        width: 56vw;
-        max-width: 680px;
-        will-change: auto;
-      }
-
-      .hero::before {
-        background: linear-gradient(90deg,
-            var(--bg) 0%,
-            rgba(8, 8, 8, 0.92) 28%,
-            rgba(8, 8, 8, 0.55) 48%,
-            transparent 68%);
       }
     }
 

@@ -63,7 +63,7 @@ import CTA from '../components/lumen/CTA.astro';
       const heroSplineEl = document.querySelector('.hero .spline-col');
       const reduceMotion = false;
       // MacBook dissolve only — never CSS-scale the WebGL parent on iPad.
-      const desktopMQ = window.matchMedia('(min-width: 834px) and (hover: hover) and (pointer: fine)');
+      const desktopMQ = window.matchMedia('(min-width: 1200px) and (hover: hover) and (pointer: fine)');
       const clamp01 = (n) => Math.max(0, Math.min(1, n));
       const smoothstep = (e0, e1, x) => {
         const t = clamp01((x - e0) / (e1 - e0));
