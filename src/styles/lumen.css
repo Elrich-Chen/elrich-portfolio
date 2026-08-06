@@ -524,7 +524,7 @@
       .spline-col {
         order: -1;
         min-height: 0;
-        height: min(58svh, 420px);
+        height: min(52svh, 380px);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -534,10 +534,10 @@
       .spline-wrap {
         width: 100%;
         height: 100%;
-        /* Landscape scene into a tall phone frame: scale up and pin the
-           desk/character toward the visual center instead of top-left crop. */
-        transform: scale(1.28);
-        transform-origin: 50% 42%;
+        /* Scene is framed for desktop (desk sits left in the canvas).
+           Scale up and shift right so Pixel lands in the phone center. */
+        transform: scale(1.65) translate(22%, 6%);
+        transform-origin: center center;
       }
 
       .copy {
@@ -1830,6 +1830,12 @@
     }
 
     @media (max-width: 720px) {
+      .section--experience {
+        min-height: 0;
+        align-items: flex-start;
+        padding-block: 3.25rem 2.5rem;
+      }
+
       .experience-colorbends {
         opacity: 0.18;
       }

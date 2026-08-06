@@ -78,6 +78,17 @@ export function mountScrollExpand(
 
   const props: Props = readOptions(root, overrides);
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Phones shouldn't pay for a multi-viewport expand theater — keep a short
+  // bridge so Experience → Projects doesn't feel like empty black scroll.
+  const compact = window.matchMedia('(max-width: 720px)').matches;
+  if (compact) {
+    props.scrollDistance = Math.min(props.scrollDistance, 0.38);
+    props.holdDistance = Math.min(props.holdDistance, 0.1);
+    props.startWidth = Math.max(props.startWidth, 82);
+    props.startHeight = Math.max(props.startHeight, 64);
+    props.mediaZoom = Math.min(props.mediaZoom, 1.1);
+    props.smoothing = Math.min(props.smoothing, 0.06);
+  }
 
   let raf = 0;
   let current = 0;
