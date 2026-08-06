@@ -58,7 +58,7 @@
   const isIOS =
     /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const CAMERA_ZOOM = isPhone ? 0.62 : isTouchUI ? 0.48 : 0.52;
+  const CAMERA_ZOOM = isPhone ? 0.62 : 0.52;
   const MAX_ATTEMPTS = 4;
 
   type HeroWin = Window & {
