@@ -591,13 +591,14 @@
        Use top/left only; transforms on a WebGL ancestor can blank iOS Safari. */
     @media (min-width: 430px) and (max-width: 430px) {
       .spline-col {
+        height: 360px;
         overflow: visible;
       }
 
       .spline-wrap {
         top: -5rem;
         bottom: auto;
-        left: -8%;
+        left: 18%;
         width: 180%;
       }
     }
