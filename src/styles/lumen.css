@@ -602,19 +602,20 @@
 
       .hero-grid {
         display: grid;
-        grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+        grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
         grid-template-rows: auto;
         align-items: center;
         align-content: center;
         justify-content: stretch;
-        gap: clamp(1rem, 2.5vw, 2rem);
+        gap: clamp(0.75rem, 2vw, 1.75rem);
         width: 100%;
         height: 100%;
+        min-width: 0;
         pointer-events: auto;
       }
 
       .copy {
-        --ipad-hero-side: clamp(300px, 42svh, 400px);
+        --ipad-hero-side: clamp(280px, 40svh, 380px);
         max-width: none;
         position: relative;
         z-index: 3;
@@ -626,6 +627,7 @@
         height: var(--ipad-hero-side);
         min-height: var(--ipad-hero-side);
         max-height: var(--ipad-hero-side);
+        min-width: 0;
       }
 
       .hero .eyebrow {
@@ -635,7 +637,7 @@
       }
 
       h1 {
-        font-size: clamp(48px, 6.2vw, 72px);
+        font-size: clamp(44px, 5.8vw, 68px);
       }
 
       .subtext {
@@ -651,7 +653,7 @@
       }
 
       .spline-col {
-        --ipad-hero-side: clamp(300px, 42svh, 400px);
+        --ipad-hero-side: clamp(280px, 40svh, 380px);
         position: relative;
         top: auto;
         right: auto;
@@ -664,10 +666,12 @@
         min-height: var(--ipad-hero-side);
         max-height: var(--ipad-hero-side);
         margin: 0;
-        overflow: hidden;
+        /* visible so the circular base isn't chopped by the column box */
+        overflow: visible;
         will-change: auto;
         transform: none;
         z-index: 1;
+        min-width: 0;
       }
 
       .spline-wrap {
@@ -675,6 +679,7 @@
         width: 100%;
         height: 100%;
         transform: none;
+        overflow: visible;
       }
 
       #spline-canvas,
@@ -689,6 +694,47 @@
       .hero::before,
       .hero::after {
         display: none;
+      }
+    }
+
+    /* Narrower mid widths (~iPad portrait / small laptop windows):
+       desk was getting clipped under ~1087px — shrink both sides further
+       and give Spline a bit more of the row. */
+    @media (min-width: 768px) and (max-width: 1100px) {
+      .hero {
+        padding: 1rem var(--pad-x) 1.25rem;
+      }
+
+      .hero-grid {
+        grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+        gap: 0.75rem;
+      }
+
+      .copy,
+      .spline-col {
+        --ipad-hero-side: clamp(240px, 34svh, 320px);
+      }
+
+      h1 {
+        font-size: clamp(40px, 5.2vw, 56px);
+      }
+
+      .hero .eyebrow {
+        font-size: 12px;
+      }
+
+      .subtext {
+        font-size: 15px;
+      }
+
+      .hero .btn {
+        height: 40px;
+        padding: 0 18px;
+        font-size: 14px;
+      }
+
+      .ctas {
+        gap: 8px;
       }
     }
 
@@ -3914,6 +3960,23 @@
             rgba(8, 8, 8, 0.85) 32%,
             rgba(8, 8, 8, 0.4) 50%,
             transparent 66%);
+      }
+    }
+
+    /* Compact absolute desktop windows — keep the desk fully in frame
+       when the MacBook layout is active but the window isn't huge. */
+    @media (min-width: 1200px) and (max-width: 1365px) {
+      .copy {
+        max-width: 480px;
+      }
+
+      .spline-col {
+        width: 50vw;
+        max-width: 700px;
+      }
+
+      h1 {
+        font-size: clamp(64px, 7vw, 96px);
       }
     }
 

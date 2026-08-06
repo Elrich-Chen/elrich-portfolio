@@ -55,10 +55,13 @@
   // mild pull-back so the desk isn't oversized; phones crop via CSS.
   const isPhone = window.matchMedia('(max-width: 720px)').matches;
   const isTouchUI = window.matchMedia('(hover: none)').matches;
+  const isMidWidth = window.matchMedia('(min-width: 768px) and (max-width: 1199px)').matches;
   const isIOS =
     /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const CAMERA_ZOOM = isPhone ? 0.62 : 0.52;
+  // Mid widths (iPad / narrow laptop windows) need a stronger pull-back so
+  // the desk isn't clipped by the smaller column.
+  const CAMERA_ZOOM = isPhone ? 0.62 : isMidWidth ? 0.4 : 0.52;
   const MAX_ATTEMPTS = 4;
 
   // Laptop/desktop only gets keyboard click audio. Phones/iPads stay muted
