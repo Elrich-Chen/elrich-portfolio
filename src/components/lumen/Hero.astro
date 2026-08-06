@@ -51,12 +51,16 @@
   import { Application } from '@splinetool/runtime';
 
   const SCENE_URL = 'https://prod.spline.design/jQxUG3hwx263Jw5Z/scene.splinecode';
-  // Same pull-back for laptop + iPad. Phones only nudge slightly tighter —
-  // framing on ≤720px is done by the CSS crop, not a bigger camera zoom
-  // (that made tablet/desktop look blown up).
+  // MacBook / fine-pointer desktop stays at 0.52. Phones crop via CSS.
+  // iPad (incl. Pro at ≥1024) needs a stronger pull-back — it was picking
+  // up the desktop layout and looking huge.
   const isPhone = window.matchMedia('(max-width: 720px)').matches;
-  const CAMERA_ZOOM = isPhone ? 0.62 : 0.52;
-  const MAX_ATTEMPTS = 3;
+  const isTouchUI = window.matchMedia('(hover: none)').matches;
+  const isIOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const CAMERA_ZOOM = isPhone ? 0.62 : isTouchUI ? 0.4 : 0.52;
+  const MAX_ATTEMPTS = 4;
 
   type HeroWin = Window & {
     __lumenHeroAbort?: AbortController;
@@ -165,9 +169,10 @@
       const scene = (app as any)?._scene || (app as any)?.scene;
       if (scene) scene.background = null;
       const renderer = (app as any)?._renderer || (app as any)?.renderer;
-      // iOS Safari is happier with a capped DPR on heavy scenes.
-      const isCoarse = window.matchMedia('(pointer: coarse)').matches;
-      const dpr = Math.min(window.devicePixelRatio || 1, isCoarse ? 1.5 : 2);
+      // iPhone 14/Pro Safari is much happier at DPR 1 on this scene;
+      // 1.5–3x backing stores often lose the WebGL context mid-load.
+      const dprCap = isIOS ? 1 : isTouchUI ? 1.25 : 2;
+      const dpr = Math.min(window.devicePixelRatio || 1, dprCap);
       renderer?.setPixelRatio?.(dpr);
       renderer?.setClearColor?.(0x000000, 0);
       canvas.style.background = 'transparent';
@@ -202,6 +207,11 @@
         tuneCamera(app);
         clearBackground(app, canvas);
         silenceSplineAudio();
+        // Force a resize after layout settles — iPhone 14 often mounts
+        // before the absolute crop wrap has its final box.
+        (app as any).resize?.();
+        await frame(signal);
+        (app as any).resize?.();
 
         if (poster && document.contains(poster)) {
           poster.style.opacity = '0';
@@ -215,7 +225,7 @@
         lastError = err;
         if (signal.aborted) throw err;
         disposeHeroApp();
-        if (attempt < MAX_ATTEMPTS) await wait(400 * attempt, signal);
+        if (attempt < MAX_ATTEMPTS) await wait(450 * attempt, signal);
       }
     }
 
@@ -226,7 +236,11 @@
     const heroEl = document.querySelector('.hero');
     if (!(heroEl instanceof HTMLElement)) return;
 
+    let liveApp: InstanceType<typeof Application> = app;
     let splineActive = true;
+    let remounts = 0;
+    let remounting = false;
+
     const forwardPointer = (e: PointerEvent) => {
       if (!splineActive || signal.aborted) return;
       canvas.dispatchEvent(
@@ -242,21 +256,19 @@
     // pointermove covers mouse + touch-drag on iOS/iPadOS.
     heroEl.addEventListener('pointermove', forwardPointer, { passive: true, signal });
 
-    if (!('IntersectionObserver' in window)) return;
-
-    let active = true;
     const tryPause = () => {
       try {
-        if (typeof (app as any).stop === 'function') {
-          (app as any).stop();
+        const a = liveApp as any;
+        if (typeof a.stop === 'function') {
+          a.stop();
           return true;
         }
-        if (typeof (app as any).pause === 'function') {
-          (app as any).pause();
+        if (typeof a.pause === 'function') {
+          a.pause();
           return true;
         }
-        if ((app as any)._renderer?.setAnimationLoop) {
-          (app as any)._renderer.setAnimationLoop(null);
+        if (a._renderer?.setAnimationLoop) {
+          a._renderer.setAnimationLoop(null);
           return true;
         }
       } catch {
@@ -266,16 +278,17 @@
     };
     const tryResume = () => {
       try {
-        if (typeof (app as any).play === 'function') {
-          (app as any).play();
+        const a = liveApp as any;
+        if (typeof a.play === 'function') {
+          a.play();
           return true;
         }
-        if (typeof (app as any).start === 'function') {
-          (app as any).start();
+        if (typeof a.start === 'function') {
+          a.start();
           return true;
         }
-        if (typeof (app as any).resume === 'function') {
-          (app as any).resume();
+        if (typeof a.resume === 'function') {
+          a.resume();
           return true;
         }
       } catch {
@@ -284,6 +297,36 @@
       return false;
     };
 
+    // Remount if Safari drops the context (seen on iPhone 14 under memory pressure).
+    const onContextLost = (e: Event) => {
+      e.preventDefault();
+      if (signal.aborted || remounting || remounts >= 2) return;
+      remounting = true;
+      remounts += 1;
+      console.warn('Spline WebGL context lost — remounting');
+      disposeHeroApp();
+      window.setTimeout(() => {
+        if (signal.aborted || !document.contains(canvas)) {
+          remounting = false;
+          return;
+        }
+        mountSpline(canvas, null, signal)
+          .then((next) => {
+            liveApp = next;
+            remounting = false;
+            if (splineActive) tryResume();
+            else tryPause();
+          })
+          .catch(() => {
+            remounting = false;
+          });
+      }, 350);
+    };
+    canvas.addEventListener('webglcontextlost', onContextLost, { signal });
+
+    if (!('IntersectionObserver' in window)) return;
+
+    let active = true;
     const splineIO = new IntersectionObserver(
       (entries) => {
         if (signal.aborted) return;
@@ -291,13 +334,16 @@
         if (inView === active) return;
         active = inView;
         splineActive = inView;
-        // Don't use visibility:hidden on iOS — it can drop the WebGL context.
-        canvas.style.opacity = inView ? '1' : '0';
+        // Never opacity-hide the canvas on iOS — that can drop the context.
+        // Pause the loop instead; leave the last frame visible.
+        if (!isIOS) {
+          canvas.style.opacity = inView ? '1' : '0';
+        }
         canvas.style.pointerEvents = inView ? '' : 'none';
         if (inView) tryResume();
         else tryPause();
       },
-      { rootMargin: '-10% 0px 0px 0px' },
+      { rootMargin: '0px', threshold: 0.01 },
     );
     splineIO.observe(heroEl);
     signal.addEventListener('abort', () => splineIO.disconnect());

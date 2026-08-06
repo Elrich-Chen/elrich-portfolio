@@ -62,7 +62,9 @@ import CTA from '../components/lumen/CTA.astro';
       const heroCtasEl = document.querySelector('.hero .ctas');
       const heroSplineEl = document.querySelector('.hero .spline-col');
       const reduceMotion = false;
-      const desktopMQ = window.matchMedia('(min-width: 1024px)');
+      // Hover + fine pointer keeps MacBook dissolve; excludes iPad Pro
+      // (which can be ≥1024 CSS px) so we never CSS-scale the WebGL parent.
+      const desktopMQ = window.matchMedia('(min-width: 1024px) and (hover: hover) and (pointer: fine)');
       const clamp01 = (n) => Math.max(0, Math.min(1, n));
       const smoothstep = (e0, e1, x) => {
         const t = clamp01((x - e0) / (e1 - e0));

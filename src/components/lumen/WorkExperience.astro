@@ -317,10 +317,11 @@ const toProps = (item: (typeof experiences)[number]) => {
       return;
     }
 
-    // Skip on phones: Spline already ships its own Three.js, and a second
-    // copy (this effect) triggers "Multiple instances of Three.js" + burns
-    // mobile GPU for a soft background wash.
+    // Skip on phones + iPad: Spline already ships its own Three.js, and a
+    // second copy triggers "Multiple instances of Three.js" + can steal /
+    // drop the hero WebGL context (seen on iPhone 14 / iPad Pro).
     if (
+      window.matchMedia('(hover: none)').matches ||
       window.matchMedia('(max-width: 720px)').matches ||
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
     ) {
