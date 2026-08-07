@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from 'astro:transitions';
 import PostHog from '../components/posthog.astro';
+import AmbientAudio from '../components/lumen/AmbientAudio.astro';
 import '../styles/lumen.css';
 
 const { title = 'Elrich — Portfolio', robots } = Astro.props;
@@ -77,6 +78,8 @@ const sheet = {
     </header>
 
     <slot />
+
+    <AmbientAudio />
 
     <PostHog />
 

@@ -4299,3 +4299,125 @@
   font-size: 13px;
   color: #f87171;
 }
+
+/* ============================================================
+   Ambient background audio toggle
+   ============================================================ */
+
+.ambient-audio {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.ambient-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: rgba(17, 17, 17, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.ambient-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition:
+    color 200ms var(--ease),
+    background 200ms var(--ease);
+}
+
+.ambient-btn:hover,
+.ambient-btn:focus-visible {
+  color: var(--fg);
+  background: rgba(250, 250, 250, 0.08);
+}
+
+.ambient-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.ambient-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ambient-btn-prev svg,
+.ambient-btn-next svg {
+  width: 14px;
+  height: 14px;
+}
+
+.ambient-btn-play {
+  width: 38px;
+  height: 38px;
+}
+
+.ambient-icon-pause {
+  display: none;
+}
+
+.ambient-audio--on .ambient-btn-play {
+  color: var(--accent);
+}
+
+.ambient-audio--on .ambient-icon-play {
+  display: none;
+}
+
+.ambient-audio--on .ambient-icon-pause {
+  display: block;
+}
+
+.ambient-title {
+  margin: 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(17, 17, 17, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: var(--fg-muted);
+  font-size: 11px;
+  letter-spacing: 0.01em;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition:
+    opacity 200ms var(--ease),
+    transform 200ms var(--ease);
+}
+
+.ambient-audio--on .ambient-title {
+  opacity: 1;
+  transform: none;
+}
+
+@media (max-width: 640px) {
+  .ambient-audio {
+    right: 14px;
+    bottom: 14px;
+  }
+
+  .ambient-title {
+    display: none;
+  }
+}

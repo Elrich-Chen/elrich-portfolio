@@ -1,0 +1,225 @@
+---
+const TRACKS = [
+  { title: 'Soft Weightless Hours', src: '/audio/ambient-loop.mp3' },
+  { title: 'Sea Glass Evening', src: '/audio/sea-glass-evening.mp3' },
+  { title: 'Drifting Through Fog', src: '/audio/drifting-through-fog.mp3' },
+  { title: 'Moonlit Moss', src: '/audio/moonlit-moss.mp3' },
+  { title: 'Warm Constellations', src: '/audio/warm-constellations.mp3' },
+];
+---
+
+<div class="ambient-audio" data-ambient transition:persist="ambient-audio">
+  <audio id="ambient-track" preload="none"></audio>
+
+  <div class="ambient-controls">
+    <button type="button" class="ambient-btn ambient-btn-prev" data-ambient-prev aria-label="Previous track">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M8 6v12M18 6l-9 6 9 6V6z" fill="currentColor" />
+      </svg>
+    </button>
+
+    <button
+      type="button"
+      class="ambient-btn ambient-btn-play"
+      data-ambient-toggle
+      aria-pressed="false"
+      aria-label="Play ambient background music"
+    >
+      <svg class="ambient-icon ambient-icon-play" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M8 5.5v13l11-6.5-11-6.5z" fill="currentColor" />
+      </svg>
+      <svg class="ambient-icon ambient-icon-pause" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M7 5.5h4v13H7v-13zM13 5.5h4v13h-4v-13z" fill="currentColor" />
+      </svg>
+    </button>
+
+    <button type="button" class="ambient-btn ambient-btn-next" data-ambient-next aria-label="Next track">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M16 6v12M6 6l9 6-9 6V6z" fill="currentColor" />
+      </svg>
+    </button>
+  </div>
+
+  <p class="ambient-title" data-ambient-title aria-live="polite"></p>
+</div>
+
+<script>
+  const TRACKS = [
+    { title: 'Soft Weightless Hours', src: '/audio/ambient-loop.mp3' },
+    { title: 'Sea Glass Evening', src: '/audio/sea-glass-evening.mp3' },
+    { title: 'Drifting Through Fog', src: '/audio/drifting-through-fog.mp3' },
+    { title: 'Moonlit Moss', src: '/audio/moonlit-moss.mp3' },
+    { title: 'Warm Constellations', src: '/audio/warm-constellations.mp3' },
+  ];
+
+  const STORAGE_PLAYING = 'lumen-ambient';
+  const STORAGE_TRACK = 'lumen-ambient-track';
+  const FADE_IN = 1.2;
+  const FADE_OUT = 0.5;
+  const TARGET_VOLUME = 0.35;
+
+  type AmbientWin = Window & {
+    __lumenAmbientBound?: boolean;
+    __lumenAmbientCtx?: AudioContext;
+    __lumenAmbientGain?: GainNode;
+    __lumenAmbientSource?: MediaElementAudioSourceNode;
+    __lumenAmbientPlaying?: boolean;
+    __lumenAmbientIndex?: number;
+  };
+
+  function initAmbientAudio() {
+    const root = document.querySelector('[data-ambient]');
+    const audio = document.getElementById('ambient-track');
+    const toggle = document.querySelector('[data-ambient-toggle]');
+    const prevBtn = document.querySelector('[data-ambient-prev]');
+    const nextBtn = document.querySelector('[data-ambient-next]');
+    const titleEl = document.querySelector('[data-ambient-title]');
+    if (
+      !(root instanceof HTMLElement) ||
+      !(audio instanceof HTMLAudioElement) ||
+      !(toggle instanceof HTMLButtonElement) ||
+      !(prevBtn instanceof HTMLButtonElement) ||
+      !(nextBtn instanceof HTMLButtonElement) ||
+      !(titleEl instanceof HTMLElement)
+    ) {
+      return;
+    }
+    // The wrapper survives soft-nav via transition:persist, so once the
+    // controls are wired up they stay wired — skip re-binding on re-init.
+    if (toggle.dataset.bound === '1') return;
+    toggle.dataset.bound = '1';
+
+    // TS doesn't retain narrowing across closures, so re-bind as typed locals.
+    const rootEl = root;
+    const audioEl = audio;
+    const toggleBtn = toggle;
+    const titleText = titleEl;
+
+    const w = window as AmbientWin;
+    if (typeof w.__lumenAmbientIndex !== 'number') {
+      const stored = Number(localStorage.getItem(STORAGE_TRACK));
+      w.__lumenAmbientIndex = Number.isInteger(stored) && stored >= 0 && stored < TRACKS.length ? stored : 0;
+    }
+
+    function ensureGraph() {
+      if (w.__lumenAmbientCtx && w.__lumenAmbientGain) {
+        return { ctx: w.__lumenAmbientCtx, gain: w.__lumenAmbientGain };
+      }
+      const AudioCtxCtor = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx: AudioContext = new AudioCtxCtor();
+      const gain = ctx.createGain();
+      gain.gain.value = 0;
+      const source = ctx.createMediaElementSource(audioEl);
+      source.connect(gain).connect(ctx.destination);
+      w.__lumenAmbientCtx = ctx;
+      w.__lumenAmbientGain = gain;
+      w.__lumenAmbientSource = source;
+      return { ctx, gain };
+    }
+
+    function renderTitle() {
+      titleText.textContent = TRACKS[w.__lumenAmbientIndex ?? 0].title;
+    }
+
+    function setPressed(on: boolean) {
+      toggleBtn.setAttribute('aria-pressed', String(on));
+      toggleBtn.setAttribute('aria-label', on ? 'Pause ambient background music' : 'Play ambient background music');
+      rootEl.classList.toggle('ambient-audio--on', on);
+    }
+
+    function loadCurrentTrack() {
+      const track = TRACKS[w.__lumenAmbientIndex ?? 0];
+      audioEl.src = track.src;
+      renderTitle();
+      localStorage.setItem(STORAGE_TRACK, String(w.__lumenAmbientIndex ?? 0));
+    }
+
+    async function play() {
+      const { ctx, gain } = ensureGraph();
+      if (!audioEl.src) loadCurrentTrack();
+      if (ctx.state === 'suspended') await ctx.resume().catch(() => {});
+      try {
+        await audioEl.play();
+      } catch {
+        return;
+      }
+      const now = ctx.currentTime;
+      gain.gain.cancelScheduledValues(now);
+      gain.gain.setValueAtTime(gain.gain.value, now);
+      gain.gain.linearRampToValueAtTime(TARGET_VOLUME, now + FADE_IN);
+      w.__lumenAmbientPlaying = true;
+      setPressed(true);
+      localStorage.setItem(STORAGE_PLAYING, '1');
+    }
+
+    function stop() {
+      const { ctx, gain } = ensureGraph();
+      const now = ctx.currentTime;
+      gain.gain.cancelScheduledValues(now);
+      gain.gain.setValueAtTime(gain.gain.value, now);
+      gain.gain.linearRampToValueAtTime(0, now + FADE_OUT);
+      window.setTimeout(() => {
+        if (!w.__lumenAmbientPlaying) audioEl.pause();
+      }, FADE_OUT * 1000 + 60);
+      w.__lumenAmbientPlaying = false;
+      setPressed(false);
+      localStorage.setItem(STORAGE_PLAYING, '0');
+    }
+
+    // Cut any in-flight fade and snap gain to silence before a track swap —
+    // a bare `.value =` set doesn't cancel an already-scheduled ramp, so a
+    // rapid next/prev click during a fade-in could leave the old ramp's
+    // target value winning a moment later and glitch the volume.
+    function silence() {
+      const { ctx, gain } = ensureGraph();
+      gain.gain.cancelScheduledValues(ctx.currentTime);
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+    }
+
+    function switchTrack(delta: number) {
+      const wasPlaying = !!w.__lumenAmbientPlaying;
+      w.__lumenAmbientIndex = ((w.__lumenAmbientIndex ?? 0) + delta + TRACKS.length) % TRACKS.length;
+      loadCurrentTrack();
+      if (wasPlaying) {
+        // Cut instantly rather than fading — track changes should feel snappy.
+        silence();
+        play();
+      }
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      if (w.__lumenAmbientPlaying) stop();
+      else play();
+    });
+    prevBtn.addEventListener('click', () => switchTrack(-1));
+    nextBtn.addEventListener('click', () => switchTrack(1));
+
+    audioEl.addEventListener('ended', () => {
+      w.__lumenAmbientIndex = ((w.__lumenAmbientIndex ?? 0) + 1) % TRACKS.length;
+      loadCurrentTrack();
+      silence();
+      play();
+    });
+
+    renderTitle();
+
+    // A prior session had music on — resume on the first gesture of this
+    // one rather than autoplaying (browsers block it, and unsolicited
+    // audio is exactly what we don't want).
+    if (localStorage.getItem(STORAGE_PLAYING) === '1' && !w.__lumenAmbientPlaying) {
+      const resumeOnce = () => {
+        play();
+        window.removeEventListener('pointerdown', resumeOnce);
+        window.removeEventListener('keydown', resumeOnce);
+      };
+      window.addEventListener('pointerdown', resumeOnce, { once: true, passive: true });
+      window.addEventListener('keydown', resumeOnce, { once: true });
+    }
+  }
+
+  initAmbientAudio();
+  if (!(window as AmbientWin).__lumenAmbientBound) {
+    (window as AmbientWin).__lumenAmbientBound = true;
+    document.addEventListener('astro:page-load', initAmbientAudio);
+  }
+</script>
