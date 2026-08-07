@@ -1346,6 +1346,7 @@
        plain background. JS drives top/height/width/left as the selection
        changes; see [data-hobby-connector] in the script below. */
     .hobby-connector {
+      --fillet: 26px;
       position: absolute;
       top: 0;
       left: 0;
@@ -1353,12 +1354,41 @@
       height: 0;
       border-radius: 16px 0 0 16px;
       background: var(--selection-tint);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-right: none;
+      border: none;
       opacity: 0;
       pointer-events: none;
       z-index: 1;
       transition: top 320ms var(--ease), height 320ms var(--ease), width 320ms var(--ease);
+    }
+
+    /* Quarter-pipe scoops: cut a circle out of a square via radial-gradient.
+       Circle centered at top-left; inside = transparent (page shows through),
+       outside = solid fill. Gray L runs along the bottom + right of the
+       square (flush with bar + mat); the concave arc faces the page. Bottom
+       pellet is that same paint, flipped vertically so the right edge stays
+       against the mat and the ramp slopes the other way. */
+    .hobby-connector::before,
+    .hobby-connector::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      width: var(--fillet);
+      height: var(--fillet);
+      pointer-events: none;
+      background: radial-gradient(
+        circle at 0 0,
+        transparent var(--fillet),
+        var(--selection-tint) var(--fillet)
+      );
+    }
+
+    .hobby-connector::before {
+      bottom: 100%;
+    }
+
+    .hobby-connector::after {
+      top: 100%;
+      transform: scaleY(-1);
     }
 
     .hobby-connector--ready {
@@ -1386,12 +1416,15 @@
     @media (max-width: 768px) {
       .hobby-connector {
         border-radius: 16px;
-        border-right: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .hobby-connector::before,
+      .hobby-connector::after {
+        display: none;
       }
 
       .hobby-tab--active {
         border-radius: 16px;
-        border-right-color: rgba(255, 255, 255, 0.1);
       }
     }
 
@@ -1403,7 +1436,7 @@
       flex-direction: column;
       gap: 0.65rem;
       align-self: start;
-      margin-top: 2rem;
+      margin-top: 3.5rem;
     }
 
     .hobby-tab {
@@ -1432,8 +1465,7 @@
     }
 
     .hobby-tab--active {
-      border-color: rgba(255, 255, 255, 0.1);
-      border-right-color: transparent;
+      border-color: transparent;
       border-radius: 16px 0 0 16px;
     }
 
