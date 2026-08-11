@@ -446,8 +446,8 @@
     }
 
     #spline-poster {
-      background: transparent;
-      transition: opacity 400ms var(--ease);
+      background: var(--bg);
+      transition: opacity 420ms var(--ease);
       pointer-events: none;
       z-index: 1;
       display: flex;
@@ -455,19 +455,31 @@
       justify-content: center;
     }
 
-    /* Tiny shimmer hint so the poster doesn't feel inert pre-load */
-    .poster-hint {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      border: 1.5px solid rgba(250, 250, 250, 0.08);
-      border-top-color: rgba(250, 250, 250, 0.32);
-      animation: spin 900ms linear infinite;
+    /* Distinct load state: solid black + ticking percentage. */
+    .poster-pct {
+      font-family: var(--font-display);
+      font-size: clamp(42px, 6vw, 72px);
+      font-weight: 400;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: rgba(250, 250, 250, 0.88);
+      user-select: none;
     }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
+    .poster-pct::after {
+      content: '%';
+      margin-left: 0.04em;
+      font-size: 0.55em;
+      letter-spacing: 0;
+      color: rgba(250, 250, 250, 0.45);
+      vertical-align: 0.22em;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .poster-pct {
+        font-size: clamp(28px, 4vw, 40px);
+        color: rgba(250, 250, 250, 0.55);
       }
     }
 
@@ -488,15 +500,6 @@
       }
     }
 
-    /* Touch: keep the loading spinner subtle; canvas still loads. */
-    @media (hover: none) {
-      .poster-hint {
-        border-color: rgba(250, 250, 250, 0.06);
-        border-top-color: rgba(250, 250, 250, 0.22);
-      }
-    }
-
-    /* Reduced motion: still load, but no spinner */
     /* Subtle viewport edge fade so the bleed looks intentional */
     .hero::after {
       content: '';
@@ -510,30 +513,21 @@
       mix-blend-mode: normal;
     }
 
-    /* Narrow only: stack Spline above copy. */
+    /* Phones: no Spline desk — copy-only hero. iPads (768+) keep it. */
     @media (max-width: 767px) {
       .hero {
-        padding-top: 1rem;
+        padding-top: calc(2.75rem + env(safe-area-inset-top, 0px));
       }
 
       .hero-grid {
-        grid-template-rows: min(58svh, 420px) auto;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto;
         grid-auto-flow: row;
-        align-items: stretch;
+        align-items: center;
       }
 
       .spline-col {
-        order: -1;
-        min-height: 0;
-        height: min(52svh, 400px);
-        position: relative;
-        overflow: hidden;
-      }
-
-      .spline-wrap {
-        width: 100%;
-        height: 100%;
-        transform: none;
+        display: none;
       }
 
       .copy {
@@ -542,65 +536,6 @@
 
       .hero::after {
         display: none;
-      }
-    }
-
-    /* Phone only: landscape scene into a short portrait frame.
-       Widen + offset with LEFT only — no transform/scale on an ancestor
-       of the WebGL canvas (that blanks Spline on some iPhone 14 Safari builds). */
-    @media (max-width: 720px) {
-      .hero {
-        /* Extra top air on iPhone 12/14 so logo + Spline clear the notch /
-           Dynamic Island — iPad/MacBook keep their own padding. */
-        padding-top: calc(2.75rem + env(safe-area-inset-top, 0px));
-      }
-
-      .hero-grid {
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: min(48svh, 340px) auto;
-      }
-
-      .spline-col {
-        order: -1;
-        height: min(46svh, 320px);
-        min-height: 0;
-      }
-
-      .spline-wrap {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: -17%;
-        width: 145%;
-        height: 100%;
-        transform: none;
-      }
-
-      #spline-canvas,
-      #spline-poster {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        transform: none;
-      }
-    }
-
-    /* Larger iPhone portrait range (390–430px): the Spline scene's
-       internal camera target sits low-left, so position its crop in the
-       intended hero frame. Use top/left only; transforms on a WebGL ancestor
-       can blank iOS Safari. */
-    @media (min-width: 390px) and (max-width: 430px) {
-      .spline-col {
-        height: 360px;
-        overflow: visible;
-      }
-
-      .spline-wrap {
-        top: -5rem;
-        bottom: auto;
-        left: 18%;
-        width: 180%;
       }
     }
 

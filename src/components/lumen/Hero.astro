@@ -32,7 +32,7 @@
       <div class="spline-col">
         <div class="spline-wrap">
           <div id="spline-poster" aria-hidden="true">
-            <div class="poster-hint" aria-hidden="true"></div>
+            <span class="poster-pct" data-poster-pct>0</span>
           </div>
           <canvas id="spline-canvas" aria-hidden="true"></canvas>
           <div class="pc-chat" data-pc-chat role="status" aria-live="polite">
@@ -111,6 +111,138 @@
       _audioUnlocked?: boolean;
     };
   };
+
+  // Vanilla port of React Bits CountUp (motion spring) — no React in this
+  // Astro island. Drives the black Spline poster number while the scene loads.
+  type PosterCount = {
+    setTarget: (n: number) => void;
+    finish: () => Promise<void>;
+    stop: () => void;
+  };
+
+  function startPosterCountUp(
+    el: HTMLElement | null,
+    signal: AbortSignal,
+    { from = 0, to = 92, duration = 2.4 }: { from?: number; to?: number; duration?: number } = {},
+  ): PosterCount {
+    if (!el) {
+      return { setTarget: () => {}, finish: async () => {}, stop: () => {} };
+    }
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let current = from;
+    let target = to;
+    let raf = 0;
+    let velocity = 0;
+    let resolveFinish: (() => void) | null = null;
+    let finished = false;
+
+    el.textContent = String(Math.round(from));
+
+    if (reduceMotion) {
+      return {
+        setTarget: (n) => {
+          target = n;
+          current = n;
+          el.textContent = String(Math.round(n));
+        },
+        finish: async () => {
+          current = 100;
+          target = 100;
+          el.textContent = '100';
+        },
+        stop: () => {},
+      };
+    }
+
+    // Match CountUp spring tuning: damping/stiffness scale with duration.
+    const damping = 20 + 40 * (1 / duration);
+    const stiffness = 100 * (1 / duration);
+    // Convert motion-style spring into a simple critically-ish damped step.
+    const dt = 1 / 60;
+
+    const tick = () => {
+      if (signal.aborted || finished) return;
+      const force = (target - current) * stiffness;
+      // Approximate viscous damping similar to motion's spring.
+      velocity += force * dt;
+      velocity *= Math.exp((-damping * dt) / 2);
+      current += velocity * dt;
+
+      if (Math.abs(target - current) < 0.15 && Math.abs(velocity) < 0.2) {
+        current = target;
+        velocity = 0;
+      }
+
+      el.textContent = String(Math.max(0, Math.min(100, Math.round(current))));
+
+      if (current === 100 && target === 100) {
+        finished = true;
+        resolveFinish?.();
+        resolveFinish = null;
+        return;
+      }
+
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    signal.addEventListener(
+      'abort',
+      () => {
+        cancelAnimationFrame(raf);
+        finished = true;
+        resolveFinish?.();
+        resolveFinish = null;
+      },
+      { once: true },
+    );
+
+    return {
+      setTarget: (n) => {
+        target = Math.max(0, Math.min(100, n));
+      },
+      finish: () =>
+        new Promise<void>((resolve) => {
+          if (finished || current >= 99.5) {
+            current = 100;
+            target = 100;
+            el.textContent = '100';
+            finished = true;
+            resolve();
+            return;
+          }
+          target = 100;
+          resolveFinish = resolve;
+          // Failsafe: don't hang the fade if spring overshoots forever.
+          window.setTimeout(() => {
+            if (finished) return;
+            current = 100;
+            target = 100;
+            el.textContent = '100';
+            finished = true;
+            resolveFinish?.();
+            resolveFinish = null;
+          }, 900);
+        }),
+      stop: () => {
+        cancelAnimationFrame(raf);
+        finished = true;
+        resolveFinish?.();
+        resolveFinish = null;
+      },
+    };
+  }
+
+  async function dismissPoster(poster: HTMLElement | null, count: PosterCount | null, signal: AbortSignal) {
+    if (!poster || !document.contains(poster)) return;
+    if (count) await count.finish();
+    if (signal.aborted || !poster.isConnected) return;
+    poster.style.opacity = '0';
+    window.setTimeout(() => {
+      if (!signal.aborted && poster.isConnected) poster.remove();
+    }, 420);
+  }
 
   function silenceSplineAudio() {
     if (allowSplineAudio) return;
@@ -249,6 +381,7 @@
     canvas: HTMLCanvasElement,
     poster: HTMLElement | null,
     signal: AbortSignal,
+    count: PosterCount | null = null,
   ) {
     await waitForCanvasSize(canvas, signal);
 
@@ -279,12 +412,7 @@
         await frame(signal);
         (app as any).resize?.();
 
-        if (poster && document.contains(poster)) {
-          poster.style.opacity = '0';
-          window.setTimeout(() => {
-            if (!signal.aborted && poster.isConnected) poster.remove();
-          }, 400);
-        }
+        await dismissPoster(poster, count, signal);
 
         return app;
       } catch (err) {
@@ -415,7 +543,7 @@
     signal.addEventListener('abort', () => splineIO.disconnect());
   }
 
-  function initHeroChat() {
+  function initHeroChat(): (() => void) | undefined {
     const isTouch = window.matchMedia('(hover: none)').matches;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const chat = document.querySelector('[data-pc-chat]');
@@ -424,13 +552,22 @@
     if (rest instanceof HTMLElement && isTouch) {
       rest.textContent = 'Drag to look around';
     }
-    if (isTouch) return;
-    const revealChat = () => chat.classList.add('pc-chat--in');
-    if (reduceMotion) revealChat();
-    else window.setTimeout(revealChat, 520);
+    // Don't reveal yet — wait until Spline finishes loading so the toast
+    // doesn't float over the black count-up poster.
+    return () => {
+      if (reduceMotion) chat.classList.add('pc-chat--in');
+      else window.setTimeout(() => chat.classList.add('pc-chat--in'), 280);
+    };
   }
 
   function initHero() {
+    // Phones: skip the Spline desk entirely (copy-only hero).
+    // iPads + laptops keep the scene.
+    if (window.matchMedia('(max-width: 767px)').matches) {
+      disposeHeroApp();
+      return;
+    }
+
     const canvas = document.getElementById('spline-canvas');
     const poster = document.getElementById('spline-poster');
     if (!(canvas instanceof HTMLCanvasElement)) {
@@ -451,10 +588,19 @@
     const { signal } = ac;
     signal.addEventListener('abort', disposeHeroApp);
 
-    initHeroChat();
+    const revealChat = initHeroChat();
     unlockSplineAudioOnGesture(signal);
 
-    mountSpline(canvas, poster instanceof HTMLElement ? poster : null, signal)
+    const pctEl = poster instanceof HTMLElement
+      ? poster.querySelector('[data-poster-pct]')
+      : null;
+    const count = startPosterCountUp(
+      pctEl instanceof HTMLElement ? pctEl : null,
+      signal,
+      { from: 0, to: 92, duration: 2.4 },
+    );
+
+    mountSpline(canvas, poster instanceof HTMLElement ? poster : null, signal, count)
       .then((app) => {
         if (signal.aborted || !document.contains(canvas)) {
           disposeHeroApp();
@@ -462,10 +608,12 @@
         }
         enableSplineAudio();
         wireVisibility(app, canvas, signal);
+        revealChat?.();
       })
       .catch((err) => {
         if (signal.aborted) return;
         console.error('Spline failed to load:', err);
+        count.stop();
         // Keep the poster visible so the hero never looks empty.
         if (poster instanceof HTMLElement) poster.style.opacity = '1';
       });
