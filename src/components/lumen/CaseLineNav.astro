@@ -80,15 +80,30 @@
       });
     };
 
-    const onScroll = () => {
-      const marker = window.scrollY + window.innerHeight * 0.28;
-      let next = 0;
+    const tops = links.map(() => 0);
+    const refreshTops = () => {
       links.forEach((item, i) => {
-        if (item.heading.getBoundingClientRect().top + window.scrollY <= marker) next = i;
+        tops[i] = item.heading.getBoundingClientRect().top + window.scrollY;
       });
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      if (window.scrollY >= maxScroll - 2) next = links.length - 1;
-      if (next !== active) setActive(next);
+    };
+    refreshTops();
+    window.addEventListener('resize', refreshTops, { passive: true, signal });
+
+    let scrollTick = false;
+    const onScroll = () => {
+      if (scrollTick) return;
+      scrollTick = true;
+      requestAnimationFrame(() => {
+        scrollTick = false;
+        const marker = window.scrollY + window.innerHeight * 0.28;
+        let next = 0;
+        for (let i = 0; i < tops.length; i++) {
+          if (tops[i] <= marker) next = i;
+        }
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        if (window.scrollY >= maxScroll - 2) next = links.length - 1;
+        if (next !== active) setActive(next);
+      });
     };
 
     const onPointerMove = (event) => {

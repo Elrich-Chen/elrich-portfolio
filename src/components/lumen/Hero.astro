@@ -613,8 +613,13 @@
       return;
     }
 
-    // Already live on this canvas after a duplicate page-load.
-    if ((window as HeroWin).__lumenHeroApp && document.contains(canvas)) {
+    const existing = (window as HeroWin).__lumenHeroApp;
+    // Soft-nav / HMR can recreate the poster while the app is still live.
+    // If the canvas is already owned, just clear any leftover poster and exit.
+    if (existing && document.contains(canvas)) {
+      if (poster instanceof HTMLElement) {
+        void dismissPoster(poster, null, new AbortController().signal);
+      }
       return;
     }
 
@@ -638,8 +643,18 @@
       { from: 0, to: 92, duration: 2.4 },
     );
 
+    // Never leave the desk stuck behind a 92% poster if the network stalls.
+    const loadWatchdog = window.setTimeout(() => {
+      if (signal.aborted) return;
+      if (poster instanceof HTMLElement && document.contains(poster)) {
+        void dismissPoster(poster, count, signal);
+      }
+    }, 12000);
+    signal.addEventListener('abort', () => window.clearTimeout(loadWatchdog), { once: true });
+
     mountSpline(canvas, poster instanceof HTMLElement ? poster : null, signal, count)
       .then((app) => {
+        window.clearTimeout(loadWatchdog);
         if (signal.aborted || !document.contains(canvas)) {
           disposeHeroApp();
           return;
@@ -649,11 +664,14 @@
         revealChat?.();
       })
       .catch((err) => {
+        window.clearTimeout(loadWatchdog);
         if (signal.aborted) return;
         console.error('Spline failed to load:', err);
         count.stop();
-        // Keep the poster visible so the hero never looks empty.
-        if (poster instanceof HTMLElement) poster.style.opacity = '1';
+        // Prefer an empty transparent canvas over a forever-stuck 92%.
+        if (poster instanceof HTMLElement) {
+          void dismissPoster(poster, null, signal);
+        }
       });
   }
 

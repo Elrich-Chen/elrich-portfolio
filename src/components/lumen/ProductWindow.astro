@@ -1,6 +1,5 @@
 ---
 import { Image } from 'astro:assets';
-import '../../styles/border-glow.css';
 import ramenPhoto from '../../assets/hobbies/ramen.jpeg';
 import ravingPhoto from '../../assets/hobbies/raving.jpeg';
 
@@ -24,17 +23,10 @@ import brunoMarsVideo2Poster from '../../assets/hobbies/music/bruno-mars-video-2
 import martinGarrix1 from '../../assets/hobbies/music/martin-garrix-1.jpg';
 import martinGarrix2 from '../../assets/hobbies/music/martin-garrix-2.jpg';
 
-// Each hobby now carries a `media` list instead of a single image — the
-// first item is shown by default, the rest surface as a thumbnail strip
-// in the corner of the frame (see .hobby-thumbs). Images use the same
-// blurred-backdrop + contained-foreground pair as before; videos reuse
-// the poster as the blurred backdrop and autoplay (muted) once selected.
 const hobbies = [
   {
     id: 'eating',
     label: 'Cooking',
-    title: 'On my <a class="hobby-inline-link" href="https://www.outsideonline.com/health/wellness/bryan-johnson-diagnosis-longevity/" target="_blank" rel="noopener noreferrer">Brian Johnson</a> arc to eat good every day.',
-    note: 'Still figuring it out. At least I’m trying.',
     media: [
       { type: 'image', src: cooking1, alt: 'Shakshuka', caption: 'Shakshuka' },
       { type: 'image', src: cooking2, alt: 'Steak', caption: 'Steak' },
@@ -44,8 +36,6 @@ const hobbies = [
   {
     id: 'sports',
     label: 'Sports',
-    title: 'Move so I can eat. Also <a class="hobby-inline-link" href="https://www.chinahighlights.com/travelguide/special-report/chinese-new-year/new-year-lion-dance.htm" target="_blank" rel="noopener noreferrer">Chinese lion dance</a> when the season hits.',
-    note: 'Mostly places I run regularly.',
     media: [
       { type: 'image', src: sports1, alt: 'Downtown Markham run', caption: 'Downtown Markham' },
       { type: 'image', src: sports2, alt: 'The Arborfront run', caption: 'The Arborfront' },
@@ -56,10 +46,8 @@ const hobbies = [
   {
     id: 'gardening',
     label: 'Gardening',
-    title: 'Fun fact: <a class="hobby-inline-link" href="https://www.almanac.com/plant/blueberries" target="_blank" rel="noopener noreferrer">blueberry bushes</a> need acidic soil (pH 4.5–5.5) to take up nutrients. Get that wrong and nothing else matters.',
-    note: 'The others are plants I’m making space for. Slow growth. Water, wait, repeat.',
     media: [
-      { type: 'image', src: gardening4, alt: 'Blueberry plant', caption: 'My blueberry plant' },
+      { type: 'image', src: gardening4, alt: 'Blueberry plant', caption: 'Blueberry plant' },
       { type: 'image', src: gardening1, alt: 'Chili plant', caption: 'Chili plant' },
       { type: 'image', src: gardening2, alt: 'Dandelions', caption: 'Dandelions' },
       { type: 'image', src: gardening3, alt: 'Strawflowers', caption: 'Strawflowers' },
@@ -68,8 +56,6 @@ const hobbies = [
   {
     id: 'music',
     label: 'Music',
-    title: 'Volume up, brain off.',
-    note: 'Bruno Mars, Martin Garrix, and everything loud in between.',
     media: [
       { type: 'image', src: ravingPhoto, alt: 'Broken hand', caption: 'Broken hand' },
       {
@@ -77,7 +63,7 @@ const hobbies = [
         src: '/video/hobbies/bruno-mars-1.mp4',
         poster: brunoMarsVideo1Poster,
         alt: 'Bruno Mars concert clip',
-        caption: 'More Bruno Mars',
+        caption: 'Bruno Mars',
       },
       { type: 'image', src: brunoMars1, alt: 'Bruno Mars concert', caption: 'Bruno Mars' },
       {
@@ -85,7 +71,7 @@ const hobbies = [
         src: '/video/hobbies/bruno-mars-2.mp4',
         poster: brunoMarsVideo2Poster,
         alt: 'Bruno Mars concert clip',
-        caption: 'More Bruno Mars',
+        caption: 'Bruno Mars',
       },
       { type: 'image', src: brunoMars2, alt: 'Bruno Mars concert', caption: 'Bruno Mars' },
       { type: 'image', src: martinGarrix1, alt: 'Martin Garrix concert', caption: 'Martin Garrix' },
@@ -103,219 +89,108 @@ const hobbies = [
           <p class="eyebrow">— Off the clock</p>
           <h2 id="product-heading" class="product-h2">Hobbies.</h2>
         </div>
-        <p class="product-caption">Hover a tab. The photo flips to that hobby.</p>
+        <p class="product-caption">A few things outside of work.</p>
       </div>
 
-      <div class="window-chrome" data-reveal data-hobby-window>
-        <div class="window-body window-body--hobbies" data-hobby-body>
-          <span class="hobby-connector" data-hobby-connector aria-hidden="true"></span>
-          <div class="hobby-tabbar" data-hobby-tabbar>
-            {hobbies.map((hobby, i) => (
-              <button
-                type="button"
-                class:list={['hobby-tab', { 'hobby-tab--active': i === 0 }]}
-                data-hobby-btn
-                data-hobby={hobby.id}
-                aria-pressed={i === 0 ? 'true' : 'false'}
-                id={hobby.id === 'eating' ? 'eat' : hobby.id}
-              >
-                <span class="hobby-tab-title">{hobby.label}</span>
-                <span class="hobby-tab-desc-wrap">
-                  <span class="hobby-tab-desc">{hobby.note}</span>
-                </span>
-              </button>
-            ))}
-          </div>
+      <div class="hobbies" data-hobby-window>
+        <div class="hobbies-tabs" role="tablist" aria-label="Hobbies" data-reveal>
+          {hobbies.map((hobby, i) => (
+            <button
+              type="button"
+              class:list={['hobbies-tab', { 'hobbies-tab--active': i === 0 }]}
+              role="tab"
+              data-hobby-btn
+              data-hobby={hobby.id}
+              aria-selected={i === 0 ? 'true' : 'false'}
+              id={hobby.id === 'eating' ? 'eat' : hobby.id}
+            >
+              {hobby.label}
+            </button>
+          ))}
+        </div>
 
-          <!--
-            Right column: a plain flex stack (.hobby-media-col). The photo
-            lives in .hobby-card-stage; .hobby-caption-stage below it shows
-            this is where to add more content (text, links, stats…) — just
-            append another block here, same crossfade pattern, no border
-            needed since it all sits directly on the page background.
-          -->
-          <div class="hobby-media-col">
-            <!-- BorderGlow wraps the photo stage only (not tabs/connector). -->
-            <div class="hobby-border-glow" data-hobby-border-glow>
-              <div class="edge-light" aria-hidden="true"></div>
-              <div class="border-glow-inner">
-                <div class="hobby-card-stage" data-hobby-media>
-                  <div class="hobby-card-mat" aria-hidden="true"></div>
-                  {hobbies.map((hobby, i) => (
-                <article
-                  class:list={['hobby-card', { 'hobby-card--active': i === 0 }]}
-                  data-hobby-pane={hobby.id}
-                  aria-hidden={i === 0 ? 'false' : 'true'}
+        <div class="hobbies-frame" data-hobby-media>
+          {hobbies.map((hobby, i) => (
+            <article
+              class:list={['hobbies-pane', { 'hobbies-pane--active': i === 0 }]}
+              data-hobby-pane={hobby.id}
+              aria-hidden={i === 0 ? 'false' : 'true'}
+            >
+              {hobby.media.length > 0 ? (
+                <div
+                  class="hobbies-scroller"
+                  data-media-scroller
+                  tabindex="0"
+                  aria-label={`${hobby.label} photos`}
                 >
-                  <div class="hobby-card-media">
-                    {hobby.media.length > 0 ? (
-                      <div
-                        class="hobby-media-scroller"
-                        data-media-scroller
-                        tabindex="0"
-                        aria-label={`${hobby.label} photos`}
-                      >
-                        {hobby.media.map((item, mi) => (
-                          <div
-                            class:list={['hobby-media-item', { 'hobby-media-item--active': mi === 0 }]}
-                            data-media-item
-                            data-media-index={mi}
-                          >
-                            {item.type === 'image' ? (
-                              <>
-                                {/* Blurred backdrop: blur(32px) destroys detail anyway,
-                                    so a small source is enough and far cheaper to decode. */}
-                                <Image
-                                  src={item.src}
-                                  alt=""
-                                  aria-hidden="true"
-                                  class="hobby-card-img hobby-card-img--bg"
-                                  loading={i === 0 && mi === 0 ? 'eager' : 'lazy'}
-                                  decoding="async"
-                                  width={480}
-                                  format="webp"
-                                  quality={55}
-                                  draggable="false"
-                                />
-                                <Image
-                                  src={item.src}
-                                  alt={item.alt}
-                                  class="hobby-card-img hobby-card-img--fg"
-                                  loading={i === 0 && mi === 0 ? 'eager' : 'lazy'}
-                                  fetchpriority={i === 0 && mi === 0 ? 'high' : 'auto'}
-                                  decoding="async"
-                                  width={1400}
-                                  widths={[480, 900, 1400]}
-                                  sizes="(max-width: 768px) 92vw, 55vw"
-                                  format="webp"
-                                  quality={78}
-                                  draggable="false"
-                                />
-                              </>
-                            ) : (
-                              <>
-                                <Image
-                                  src={item.poster}
-                                  alt=""
-                                  aria-hidden="true"
-                                  class="hobby-card-img hobby-card-img--bg"
-                                  loading="lazy"
-                                  decoding="async"
-                                  width={480}
-                                  format="webp"
-                                  quality={55}
-                                  draggable="false"
-                                />
-                                <video
-                                  class="hobby-card-video"
-                                  data-hobby-video
-                                  src={item.src}
-                                  poster={item.poster.src}
-                                  muted
-                                  loop
-                                  playsinline
-                                  preload="metadata"
-                                  controls
-                                  draggable="false"
-                                  aria-label={item.alt}
-                                />
-                              </>
-                            )}
-                            {'caption' in item && item.caption && (
-                              <span class="hobby-media-caption">{item.caption}</span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div class="hobby-card-empty" aria-hidden="true">
-                        <span class="hobby-card-empty-mark">◆</span>
-                        <span>Drop a photo here</span>
-                      </div>
-                    )}
-
-                    {hobby.media.length > 1 && (
-                      <>
-                        <button
-                          type="button"
-                          class="hobby-media-nav hobby-media-nav--prev"
-                          data-media-prev
-                          aria-label="Previous photo"
-                        >
-                          <svg class="hobby-media-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                          </svg>
-                        </button>
-                        <button
-                          type="button"
-                          class="hobby-media-nav hobby-media-nav--next"
-                          data-media-next
-                          aria-label="Next photo"
-                        >
-                          <svg class="hobby-media-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path d="M9.5 5.5 16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                          </svg>
-                        </button>
-                      </>
-                    )}
-                  </div>
-
-                  {hobby.media.length > 1 && (
-                    <div class="hobby-thumbs" data-hobby-thumbs role="tablist" aria-label={`${hobby.label} photos`}>
-                      {hobby.media.map((item, mi) => (
-                        <button
-                          type="button"
-                          class:list={['hobby-thumb', { 'hobby-thumb--active': mi === 0 }]}
-                          data-thumb-index={mi}
-                          role="tab"
-                          aria-selected={mi === 0 ? 'true' : 'false'}
-                          aria-label={`${hobby.label} photo ${mi + 1} of ${hobby.media.length}`}
-                        >
-                          <Image
-                            src={item.type === 'image' ? item.src : item.poster}
-                            alt=""
-                            class="hobby-thumb-img"
-                            loading="lazy"
-                            decoding="async"
-                            width={120}
-                            format="webp"
-                            quality={50}
-                          />
-                          {item.type === 'video' && (
-                            <span class="hobby-thumb-play" aria-hidden="true">▶</span>
-                          )}
-                        </button>
-                      ))}
+                  {hobby.media.map((item, mi) => (
+                    <div
+                      class:list={['hobbies-slide', { 'hobbies-slide--active': mi === 0 }]}
+                      data-media-item
+                      data-media-index={mi}
+                    >
+                      {item.type === 'image' ? (
+                        <Image
+                          src={item.src}
+                          alt={item.alt}
+                          class="hobbies-img"
+                          loading={i === 0 && mi === 0 ? 'eager' : 'lazy'}
+                          fetchpriority={i === 0 && mi === 0 ? 'high' : 'auto'}
+                          decoding="async"
+                          width={1400}
+                          widths={[640, 1000, 1400]}
+                          sizes="(max-width: 768px) 92vw, min(72vw, 920px)"
+                          format="webp"
+                          quality={78}
+                          draggable="false"
+                        />
+                      ) : (
+                        <video
+                          class="hobbies-video"
+                          data-hobby-video
+                          src={item.src}
+                          poster={item.poster.src}
+                          muted
+                          loop
+                          playsinline
+                          preload="metadata"
+                          controls
+                          draggable="false"
+                          aria-label={item.alt}
+                        />
+                      )}
+                      {'caption' in item && item.caption ? (
+                        <div class="hobbies-veil" aria-hidden="true">
+                          <p class="hobbies-veil-caption">{item.caption}</p>
+                        </div>
+                      ) : null}
                     </div>
-                  )}
-                </article>
-              ))}
+                  ))}
                 </div>
-              </div>
-            </div>
+              ) : null}
 
-            <div class="hobby-media-meta">
-              <div class="hobby-caption-stage">
-                {hobbies.map((hobby, i) => (
-                  <p
-                    class:list={['hobby-caption', { 'hobby-caption--active': i === 0 }]}
-                    data-hobby-caption={hobby.id}
-                  >
-                    <Fragment set:html={hobby.title} />
-                  </p>
-                ))}
-              </div>
-
-              <div class="hobby-progress" role="img" aria-label={`Hobby 1 of ${hobbies.length}`} data-hobby-progress>
-                {hobbies.map((hobby, i) => (
-                  <span
-                    class:list={['hobby-progress-dot', { 'hobby-progress-dot--active': i === 0 }]}
-                    data-hobby-dot={hobby.id}
-                  ></span>
-                ))}
-              </div>
-            </div>
-          </div>
+              {hobby.media.length > 1 && (
+                <div class="hobbies-controls">
+                  <button type="button" class="hobbies-nav" data-media-prev aria-label="Previous photo">
+                    ←
+                  </button>
+                  <div class="hobbies-dots" data-hobby-thumbs role="tablist" aria-label={`${hobby.label} photos`}>
+                    {hobby.media.map((_, mi) => (
+                      <button
+                        type="button"
+                        class:list={['hobbies-dot', { 'hobbies-dot--active': mi === 0 }]}
+                        data-thumb-index={mi}
+                        aria-label={`${hobby.label} photo ${mi + 1}`}
+                      />
+                    ))}
+                  </div>
+                  <button type="button" class="hobbies-nav" data-media-next aria-label="Next photo">
+                    →
+                  </button>
+                </div>
+              )}
+            </article>
+          ))}
         </div>
       </div>
     </div>
@@ -327,36 +202,60 @@ const hobbies = [
     const root = document.querySelector('[data-hobby-window]');
     if (!root) return;
 
-    // ClientRouter soft-nav re-runs this script; abort the previous run's
-    // listeners/observer/timers so they don't stack on repeat navigation.
     if (window.__lumenHobbiesAbort) window.__lumenHobbiesAbort.abort();
     const ac = new AbortController();
     window.__lumenHobbiesAbort = ac;
     const { signal } = ac;
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
+    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     const hobbyIds = ['eating', 'sports', 'gardening', 'music'];
-    const body = root.querySelector('[data-hobby-body]');
     const btns = root.querySelectorAll('[data-hobby-btn]');
     const panes = root.querySelectorAll('[data-hobby-pane]');
-    const captions = root.querySelectorAll('[data-hobby-caption]');
-    const dots = root.querySelectorAll('[data-hobby-dot]');
-    const progress = root.querySelector('[data-hobby-progress]');
-    const connector = root.querySelector('[data-hobby-connector]');
-    const media = root.querySelector('[data-hobby-media]');
 
-    // Pause every video inside a pane — used when its tab loses focus so
-    // nothing keeps playing (silently, since they're muted) off-screen.
     const pauseVideosIn = (pane) => {
       pane.querySelectorAll('[data-hobby-video]').forEach((v) => v.pause());
     };
 
-    // Per-pane media index: thumbs, arrows, and native horizontal scroll
-    // all share selectMedia so the active photo / video / thumb stay in sync.
+    const clearCaptions = (scope) => {
+      (scope || root).querySelectorAll('.hobbies-slide.is-captioned').forEach((el) => {
+        el.classList.remove('is-captioned');
+      });
+    };
+
+    // Hover shows the veil via CSS. On touch, tap toggles a pinned caption.
+    if (!canHover) {
+      root.querySelectorAll('[data-media-item]').forEach((slide) => {
+        if (!slide.querySelector('.hobbies-veil')) return;
+        slide.addEventListener('click', (e) => {
+          if (e.target.closest('video, .hobbies-nav, .hobbies-dot, a, button')) return;
+          const on = !slide.classList.contains('is-captioned');
+          clearCaptions(slide.closest('[data-hobby-pane]') || root);
+          slide.classList.toggle('is-captioned', on);
+        }, { signal });
+      });
+    } else {
+      // Belt-and-suspenders: never leave a pinned dimmer on desktop.
+      clearCaptions(root);
+    }
+
+    // Soften framing for very wide shots; 4:3 landscape already matches the frame.
+    const tagOrient = (img) => {
+      if (!(img instanceof HTMLImageElement)) return;
+      const apply = () => {
+        if (!img.naturalWidth || !img.naturalHeight) return;
+        const ratio = img.naturalWidth / img.naturalHeight;
+        img.classList.toggle('hobbies-img--ultrawide', ratio >= 1.7);
+        img.classList.remove('hobbies-img--wide');
+      };
+      if (img.complete) apply();
+      else img.addEventListener('load', apply, { once: true, signal });
+    };
+    root.querySelectorAll('.hobbies-img').forEach(tagOrient);
+
     panes.forEach((pane) => {
       const items = Array.from(pane.querySelectorAll('[data-media-item]'));
-      const thumbs = Array.from(pane.querySelectorAll('[data-hobby-thumbs] .hobby-thumb'));
+      const dots = Array.from(pane.querySelectorAll('[data-thumb-index]'));
       const scroller = pane.querySelector('[data-media-scroller]');
       const prevBtn = pane.querySelector('[data-media-prev]');
       const nextBtn = pane.querySelector('[data-media-next]');
@@ -368,14 +267,14 @@ const hobbies = [
 
       const applyActive = (next) => {
         activeIndex = next;
-        thumbs.forEach((t) => {
-          const on = Number(t.getAttribute('data-thumb-index')) === next;
-          t.classList.toggle('hobby-thumb--active', on);
-          t.setAttribute('aria-selected', on ? 'true' : 'false');
+        clearCaptions(pane);
+        dots.forEach((d) => {
+          const on = Number(d.getAttribute('data-thumb-index')) === next;
+          d.classList.toggle('hobbies-dot--active', on);
         });
         items.forEach((item) => {
           const on = Number(item.getAttribute('data-media-index')) === next;
-          item.classList.toggle('hobby-media-item--active', on);
+          item.classList.toggle('hobbies-slide--active', on);
           const video = item.querySelector('[data-hobby-video]');
           if (video) {
             if (on) video.play().catch(() => {});
@@ -388,8 +287,10 @@ const hobbies = [
         const next = ((idx % count) + count) % count;
         applyActive(next);
         syncingFromSelect = true;
-        const left = next * scroller.clientWidth;
-        scroller.scrollTo({ left, behavior: smooth && !reduceMotion ? 'smooth' : 'auto' });
+        scroller.scrollTo({
+          left: next * scroller.clientWidth,
+          behavior: smooth && !reduceMotion ? 'smooth' : 'auto',
+        });
         const clear = () => { syncingFromSelect = false; };
         if ('onscrollend' in scroller) {
           scroller.addEventListener('scrollend', clear, { once: true, signal });
@@ -409,9 +310,9 @@ const hobbies = [
         if (next !== activeIndex) applyActive(next);
       }, { signal, passive: true });
 
-      thumbs.forEach((thumb) => {
-        thumb.addEventListener('click', () => {
-          selectMedia(Number(thumb.getAttribute('data-thumb-index')));
+      dots.forEach((dot) => {
+        dot.addEventListener('click', () => {
+          selectMedia(Number(dot.getAttribute('data-thumb-index')));
         }, { signal });
       });
 
@@ -428,7 +329,6 @@ const hobbies = [
         }, { signal });
       }
 
-      // Keyboard when scroller is focused.
       scroller.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft') {
           e.preventDefault();
@@ -438,155 +338,28 @@ const hobbies = [
           selectMedia(activeIndex + 1);
         }
       }, { signal });
-
-      // Mouse click-drag pans the strip (trackpad two-finger uses native overflow).
-      let dragPointer = null;
-      let dragStartX = 0;
-      let dragStartScroll = 0;
-      let dragMoved = false;
-
-      scroller.addEventListener('pointerdown', (e) => {
-        if (e.pointerType !== 'mouse' || (e.button != null && e.button !== 0)) return;
-        if (e.target.closest('[data-media-prev], [data-media-next], .hobby-thumbs, video')) return;
-        dragPointer = e.pointerId;
-        dragStartX = e.clientX;
-        dragStartScroll = scroller.scrollLeft;
-        dragMoved = false;
-        syncingFromSelect = true;
-        try { scroller.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
-      }, { signal });
-
-      scroller.addEventListener('pointermove', (e) => {
-        if (dragPointer == null || e.pointerId !== dragPointer) return;
-        const dx = e.clientX - dragStartX;
-        if (Math.abs(dx) > 4) dragMoved = true;
-        scroller.scrollLeft = dragStartScroll - dx;
-      }, { signal });
-
-      const endDrag = (e) => {
-        if (dragPointer == null || (e.pointerId != null && e.pointerId !== dragPointer)) return;
-        dragPointer = null;
-        syncingFromSelect = false;
-        const next = indexFromScroll();
-        applyActive(next);
-        // Snap to nearest slide after a drag.
-        selectMedia(next, { smooth: true });
-      };
-
-      scroller.addEventListener('pointerup', endDrag, { signal });
-      scroller.addEventListener('pointercancel', () => {
-        dragPointer = null;
-        syncingFromSelect = false;
-      }, { signal });
-
-      scroller.addEventListener('dragstart', (e) => e.preventDefault(), { signal });
-      scroller.addEventListener('click', (e) => {
-        // Suppress click-through after a drag.
-        if (dragMoved) {
-          e.preventDefault();
-          e.stopPropagation();
-          dragMoved = false;
-        }
-      }, { signal, capture: true });
     });
 
-    // Stretch the connector from the active tab's own box all the way to
-    // the photo's mat, so the two touch with zero gap and read as one
-    // continuous shape instead of two separate highlighted boxes.
-    // On stacked (mobile) layout the photo sits below, so we just wrap
-    // the active tab itself.
-    const moveConnector = (btn, { animate = true } = {}) => {
-      if (!connector || !btn || !body || !media) return;
-      const bodyRect = body.getBoundingClientRect();
-      const btnRect = btn.getBoundingClientRect();
-      const mediaRect = media.getBoundingClientRect();
-      const stacked = mediaRect.top >= btnRect.bottom - 1;
-      const left = btnRect.left - bodyRect.left;
-      // Overlap the mat by 2px so same-color seams don't show a hairline gap
-      // at the T-junction (the concave fillets sit in that overlapped region).
-      // Stretch to the mat edge without overshooting into the photo frame.
-      const width = stacked
-        ? btnRect.width
-        : Math.max(0, mediaRect.left - btnRect.left);
-      // Inset 1px top/bottom so the bar doesn't peek past the tab corners.
-      const top = btnRect.top - bodyRect.top + 1;
-      const height = Math.max(0, btnRect.height - 2);
-
-      connector.classList.toggle('hobby-connector--no-transition', !animate);
-      connector.style.left = left + 'px';
-      connector.style.top = top + 'px';
-      connector.style.width = width + 'px';
-      connector.style.height = height + 'px';
-      if (!animate) {
-        void connector.offsetHeight; // flush before re-enabling transition
-        connector.classList.remove('hobby-connector--no-transition');
-      }
-    };
-
-    const select = (id, { animate = true } = {}) => {
+    const select = (id) => {
       if (!hobbyIds.includes(id)) return;
-      let activeBtn = null;
 
       btns.forEach((btn) => {
         const on = btn.getAttribute('data-hobby') === id;
-        btn.classList.toggle('hobby-tab--active', on);
-        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-        if (on) activeBtn = btn;
+        btn.classList.toggle('hobbies-tab--active', on);
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
       });
-
-      if (connector && activeBtn) {
-        const shouldAnimate = animate && !reduceMotion;
-        // Read layout (getBoundingClientRect) on the next frame instead of
-        // right here — the classList.toggle() calls above just invalidated
-        // layout (grid-template-rows), so reading geometry immediately would
-        // force a synchronous, whole-page reflow on every click/hover/focus.
-        requestAnimationFrame(() => {
-          if (signal.aborted) return;
-          moveConnector(activeBtn, { animate: shouldAnimate });
-          connector.classList.add('hobby-connector--ready');
-          // After the tab description expands (320ms), snap the connector to
-          // the final size so it doesn't end mid-transition at the wrong height.
-          if (shouldAnimate) {
-            window.setTimeout(() => {
-              if (signal.aborted) return;
-              moveConnector(activeBtn, { animate: false });
-            }, 340);
-          }
-        });
-      }
 
       panes.forEach((pane) => {
         const on = pane.getAttribute('data-hobby-pane') === id;
-        pane.classList.toggle('hobby-card--active', on);
+        pane.classList.toggle('hobbies-pane--active', on);
         pane.setAttribute('aria-hidden', on ? 'false' : 'true');
-        if (!on) pauseVideosIn(pane);
+        if (!on) {
+          pauseVideosIn(pane);
+          clearCaptions(pane);
+        }
       });
-
-      captions.forEach((caption) => {
-        caption.classList.toggle('hobby-caption--active', caption.getAttribute('data-hobby-caption') === id);
-      });
-
-      let activeIndex = 0;
-      dots.forEach((dot, i) => {
-        const on = dot.getAttribute('data-hobby-dot') === id;
-        dot.classList.toggle('hobby-progress-dot--active', on);
-        if (on) activeIndex = i;
-      });
-      if (progress) progress.setAttribute('aria-label', `Hobby ${activeIndex + 1} of ${dots.length}`);
     };
 
-    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-
-    const activate = (btn) => {
-      const id = btn.getAttribute('data-hobby');
-      select(id);
-      if (history.replaceState) {
-        history.replaceState(null, '', '#' + (id === 'eating' ? 'eat' : id));
-      }
-    };
-
-    // Hover-intent delay: a mouse just passing over the tab list on its way
-    // elsewhere shouldn't fire a full switch for every row it crosses.
     let hoverTimer = null;
     const clearHoverTimer = () => {
       if (hoverTimer !== null) {
@@ -595,6 +368,14 @@ const hobbies = [
       }
     };
     signal.addEventListener('abort', clearHoverTimer);
+
+    const activate = (btn) => {
+      const id = btn.getAttribute('data-hobby');
+      select(id);
+      if (history.replaceState) {
+        history.replaceState(null, '', '#' + (id === 'eating' ? 'eat' : id));
+      }
+    };
 
     btns.forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -611,36 +392,15 @@ const hobbies = [
           hoverTimer = window.setTimeout(() => {
             hoverTimer = null;
             activate(btn);
-          }, 60);
+          }, 80);
         }, { signal });
         btn.addEventListener('mouseleave', clearHoverTimer, { signal });
       }
     });
 
-    // Place the connector instantly on load/resize, no glide-in from origin.
-    const activeBtn = root.querySelector('.hobby-tab--active[data-hobby-btn]');
-    if (activeBtn) select(activeBtn.getAttribute('data-hobby'), { animate: false });
-    window.addEventListener('resize', () => {
-      const current = root.querySelector('.hobby-tab--active[data-hobby-btn]');
-      if (current) moveConnector(current, { animate: false });
-    }, { signal, passive: true });
+    const activeBtn = root.querySelector('.hobbies-tab--active[data-hobby-btn]');
+    if (activeBtn) select(activeBtn.getAttribute('data-hobby'));
 
-    // Keep the connector glued to the active tab while its description
-    // expands/collapses (grid-template-rows transition), not just on click.
-    // No CSS transition here — we'd fight the expand animation otherwise.
-    if ('ResizeObserver' in window) {
-      const ro = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          if (entry.target.classList.contains('hobby-tab--active')) {
-            moveConnector(entry.target, { animate: false });
-          }
-        }
-      });
-      btns.forEach((btn) => ro.observe(btn));
-      signal.addEventListener('abort', () => ro.disconnect());
-    }
-
-    // Hero links: #eat / #sports / #gardening / #music
     const fromHash = () => {
       const raw = (location.hash || '').replace(/^#/, '');
       if (!raw) return;
@@ -649,63 +409,4 @@ const hobbies = [
     fromHash();
     window.addEventListener('hashchange', fromHash, { signal });
   })();
-</script>
-
-<script>
-  import { mountBorderGlow } from '../../lib/borderGlow';
-
-  type GlowHandle = { destroy: () => void };
-  type GlowWin = Window & {
-    __lumenHobbyBorderGlow?: GlowHandle;
-    __lumenHobbyBorderGlowBound?: boolean;
-  };
-
-  function teardownHobbyGlow() {
-    const w = window as GlowWin;
-    w.__lumenHobbyBorderGlow?.destroy();
-    w.__lumenHobbyBorderGlow = undefined;
-  }
-
-  function initHobbyGlow() {
-    const el = document.querySelector('[data-hobby-border-glow]');
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-
-    if (!(el instanceof HTMLElement) || reduceMotion || !canHover) {
-      teardownHobbyGlow();
-      return;
-    }
-
-    // Already live on this node after a soft-nav remount race.
-    if (el.querySelector('canvas') && (window as GlowWin).__lumenHobbyBorderGlow) {
-      return;
-    }
-
-    teardownHobbyGlow();
-
-    const trackRoot = document.querySelector('[data-hobby-body]');
-    const handle = mountBorderGlow(el, {
-      className: 'hobby-border-glow',
-      edgeSensitivity: 8,
-      // Base bloom is orange; blue is layered in CSS so both stay visible.
-      glowColor: '24 95 55',
-      backgroundColor: '#0a0a0a',
-      borderRadius: 26,
-      glowRadius: 120,
-      glowIntensity: 1.7,
-      coneSpread: 42,
-      animated: false,
-      colors: ['#f97316', '#38bdf8', '#fb923c', '#7dd3fc'],
-      fillOpacity: 0.75,
-      trackRoot: trackRoot instanceof HTMLElement ? trackRoot : null,
-    });
-    (window as GlowWin).__lumenHobbyBorderGlow = handle;
-  }
-
-  initHobbyGlow();
-  if (!(window as GlowWin).__lumenHobbyBorderGlowBound) {
-    (window as GlowWin).__lumenHobbyBorderGlowBound = true;
-    document.addEventListener('astro:page-load', initHobbyGlow);
-    document.addEventListener('astro:before-swap', teardownHobbyGlow);
-  }
 </script>

@@ -92,10 +92,12 @@ const toProps = (item: (typeof experiences)[number]) => {
         </div>
       </div>
     )}
+  </div>
 
-    <div class="project-preview" data-exp-preview aria-hidden="true">
-      <img class="project-preview-img" data-exp-preview-img alt="" decoding="async" />
-    </div>
+  {/* Outside [data-reveal]: any transform on that ancestor would retarget
+      position:fixed, so cursor clientX/Y would place the preview far away. */}
+  <div class="project-preview" data-exp-preview aria-hidden="true">
+    <img class="project-preview-img" data-exp-preview-img alt="" decoding="async" />
   </div>
 </section>
 

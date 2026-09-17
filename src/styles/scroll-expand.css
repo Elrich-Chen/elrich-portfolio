@@ -28,13 +28,26 @@
   overflow: hidden;
   --se-title-size: 4rem;
   background: #0a0a0a;
+  /* Isolate sticky paint from the rest of the page while scrubbing. */
+  isolation: isolate;
 }
 
 .scroll-expand__frame {
   position: absolute;
   inset: 0;
-  clip-path: inset(21% 29% 21% 29% round 24px);
-  will-change: clip-path;
+  overflow: hidden;
+  border-radius: 24px;
+  transform: translate3d(0, 0, 0) scale(0.42, 0.58);
+  transform-origin: center center;
+  backface-visibility: hidden;
+}
+
+.scroll-expand.is-scrubbing .scroll-expand__frame,
+.scroll-expand.is-scrubbing .scroll-expand__media,
+.scroll-expand.is-scrubbing .scroll-expand__title,
+.scroll-expand.is-scrubbing .scroll-expand__hint,
+.scroll-expand.is-scrubbing .scroll-expand__overlay {
+  will-change: transform, opacity;
 }
 
 .scroll-expand__media {
@@ -43,10 +56,12 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  will-change: transform;
+  transform: translate3d(0, 0, 0) scale(1);
   transform-origin: center;
+  backface-visibility: hidden;
   user-select: none;
   -webkit-user-drag: none;
+  pointer-events: none;
 }
 
 .scroll-expand__scrim {
@@ -73,8 +88,8 @@
   padding: 6%;
   opacity: 0;
   pointer-events: none;
-  will-change: opacity, transform;
   color: #fff;
+  transform: translate3d(0, 18px, 0);
 }
 
 .scroll-expand__overlay h2 {
@@ -111,7 +126,7 @@
   color: #fff;
   text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
   pointer-events: none;
-  will-change: opacity, transform;
+  transform: translate3d(0, 0, 0);
 }
 
 .scroll-expand__hint {
@@ -125,7 +140,7 @@
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.55);
   pointer-events: none;
-  will-change: opacity, transform;
+  transform: translate3d(0, 0, 0);
 }
 
 /* Idea-section bridge (Statement → Projects) */
@@ -186,5 +201,15 @@
     max-width: 18ch;
     font-size: clamp(1.35rem, 6.5vw, 1.85rem);
     line-height: 1.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-expand.is-scrubbing .scroll-expand__frame,
+  .scroll-expand.is-scrubbing .scroll-expand__media,
+  .scroll-expand.is-scrubbing .scroll-expand__title,
+  .scroll-expand.is-scrubbing .scroll-expand__hint,
+  .scroll-expand.is-scrubbing .scroll-expand__overlay {
+    will-change: auto;
   }
 }

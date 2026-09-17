@@ -50,6 +50,10 @@ import CTA from '../components/lumen/CTA.astro';
         els.forEach(reveal);
       }
 
+      // Clear any leftover inline opacity from older dissolve code.
+      const splineCol = document.querySelector('.hero .spline-col');
+      if (splineCol) splineCol.style.removeProperty('opacity');
+
       // Fixed nav + scroll-progress chrome.
       const nav = document.querySelector('[data-nav]');
       const hero = document.querySelector('.hero');
@@ -60,9 +64,8 @@ import CTA from '../components/lumen/CTA.astro';
       const heroCopyEl = document.querySelector('.hero .copy');
       const heroSubtextEl = document.querySelector('.hero .subtext');
       const heroCtasEl = document.querySelector('.hero .ctas');
-      const heroSplineEl = document.querySelector('.hero .spline-col');
       const reduceMotion = false;
-      // MacBook dissolve only — never CSS-scale the WebGL parent on iPad.
+      // MacBook dissolve only — never touch the WebGL parent on iPad.
       const desktopMQ = window.matchMedia('(min-width: 1200px) and (hover: hover) and (pointer: fine)');
       const clamp01 = (n) => Math.max(0, Math.min(1, n));
       const smoothstep = (e0, e1, x) => {
@@ -103,17 +106,18 @@ import CTA from '../components/lumen/CTA.astro';
         const p = clamp01((window.scrollY - positions.heroTop) / positions.heroHeight);
         const exitA = smoothstep(0.10, 0.45, p);
         const exitB = smoothstep(0.20, 0.75, p);
-        const exitC = smoothstep(0.30, 0.90, p);
-        if (heroSubtextEl) heroSubtextEl.style.transform = 'translateY(' + (exitA * 18) + 'px)';
-        if (heroCtasEl) heroCtasEl.style.transform = 'translateY(' + (exitA * 24) + 'px)';
+        if (heroSubtextEl) {
+          heroSubtextEl.style.transform = 'translate3d(0, ' + (exitA * 18) + 'px, 0)';
+        }
+        if (heroCtasEl) {
+          heroCtasEl.style.transform = 'translate3d(0, ' + (exitA * 24) + 'px, 0)';
+        }
         if (heroCopyEl) {
-          heroCopyEl.style.opacity = 1 - exitB;
-          heroCopyEl.style.transform = 'translateY(' + (-exitB * 22) + 'px)';
+          heroCopyEl.style.opacity = String(1 - exitB);
+          heroCopyEl.style.transform = 'translate3d(0, ' + (-exitB * 22) + 'px, 0)';
         }
-        if (heroSplineEl) {
-          heroSplineEl.style.opacity = 1 - exitC;
-          heroSplineEl.style.transform = 'scale(' + (1 - 0.06 * exitC) + ')';
-        }
+        // Intentionally do not fade .spline-col — opacity on the WebGL parent
+        // was getting stuck at 0 and leaving the desk/poster invisible.
       };
 
       const updatePrinciplesPin = () => {
@@ -121,10 +125,11 @@ import CTA from '../components/lumen/CTA.astro';
         const range = positions.prinHeight - positions.vpH;
         if (range <= 0) return;
         const p = clamp01((window.scrollY - positions.prinTop) / range);
-        principlesTrack.style.transform = 'translateX(' + (-p * 200).toFixed(2) + 'vw)';
+        principlesTrack.style.transform = 'translate3d(' + (-p * 200).toFixed(2) + 'vw, 0, 0)';
       };
 
       let ticking = false;
+      let navVisible = false;
       const onScroll = () => {
         if (ticking) return;
         ticking = true;
@@ -136,7 +141,11 @@ import CTA from '../components/lumen/CTA.astro';
             thread.style.transform = 'scaleY(' + Math.min(1, Math.max(0, pct)) + ')';
           }
           if (nav && hero) {
-            nav.classList.toggle('is-visible', window.scrollY > positions.heroEnd * 0.85);
+            const show = window.scrollY > positions.heroEnd * 0.85;
+            if (show !== navVisible) {
+              navVisible = show;
+              nav.classList.toggle('is-visible', show);
+            }
           }
           ticking = false;
         });
